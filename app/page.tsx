@@ -82,14 +82,17 @@ export default function HomePage() {
     }
   }
 
-  const formatEventDate = (dateString: string) =>
-    new Date(dateString).toLocaleDateString("pt-BR", {
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+  const getEventDay = (dateString: string) =>
+    new Date(dateString).toLocaleDateString("pt-BR", { day: "2-digit" });
+
+  const getEventMonth = (dateString: string) =>
+    new Date(dateString).toLocaleDateString("pt-BR", { month: "short" }).replace(".", "").toUpperCase();
+
+  const getEventTime = (dateString: string) =>
+    new Date(dateString).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+
+  const getEventWeekday = (dateString: string) =>
+    new Date(dateString).toLocaleDateString("pt-BR", { weekday: "long" });
 
 
   return (
@@ -189,76 +192,129 @@ export default function HomePage() {
       </section>
 
       {/* Próximos Eventos */}
-      <section id="eventos" className="py-16 bg-parish-surface">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between mb-8">
+      <section id="eventos" className="py-20 bg-parish-surface relative overflow-hidden">
+        {/* Decorative blobs */}
+        <div className="absolute top-0 right-0 w-80 h-80 bg-parish-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-parish-sky/5 rounded-full translate-y-1/2 -translate-x-1/2 pointer-events-none" />
+
+        <div className="container mx-auto px-4 relative">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12">
             <div>
-              <h2 className="text-3xl font-bold text-parish-text">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="h-px w-8 bg-parish-gold" />
+                <span className="text-xs font-bold uppercase tracking-widest text-parish-gold">
+                  Agenda da Paróquia
+                </span>
+              </div>
+              <h2 className="text-4xl font-bold text-parish-text leading-tight">
                 Próximos Eventos
               </h2>
-              <p className="text-parish-text-light mt-2">
-                Participe das atividades da nossa paróquia
+              <p className="text-parish-text-light mt-2 text-base">
+                Participe das celebrações e atividades da nossa comunidade
               </p>
             </div>
             <Link
               href="/eventos"
-              className="text-parish-gold hover:text-parish-gold-dark flex items-center space-x-2 font-medium"
+              className="group inline-flex items-center gap-2 px-5 py-2.5 border border-parish-gold text-parish-gold rounded-xl text-sm font-semibold hover:bg-parish-gold hover:text-white transition-all duration-200 flex-shrink-0"
             >
-              <span>Ver todos</span>
-              <ArrowRight className="w-4 h-4" />
+              Ver todos os eventos
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </Link>
           </div>
 
           {loadingEventos ? (
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-parish-gold mx-auto" />
+            <div className="flex justify-center py-20">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-parish-gold" />
             </div>
           ) : eventos.length === 0 ? (
-            <div className="text-center py-12 bg-parish-surface rounded-lg">
-              <Calendar className="w-16 h-16 text-parish-secondary mx-auto mb-4" />
-              <p className="text-parish-text-light">
-                Nenhum evento próximo no momento
-              </p>
+            <div className="text-center py-20 bg-parish-background rounded-3xl border border-parish-border">
+              <div className="w-16 h-16 rounded-2xl bg-parish-gold/10 flex items-center justify-center mx-auto mb-4">
+                <Calendar className="w-8 h-8 text-parish-gold" />
+              </div>
+              <p className="font-semibold text-parish-text mb-1">Nenhum evento próximo</p>
+              <p className="text-sm text-parish-text-light">Em breve novas atividades serão divulgadas</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {eventos.map((evento) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {eventos.map((evento, index) => (
                 <Link
                   key={evento.id}
                   href={`/eventos/${evento.id}`}
-                  className="bg-parish-surface rounded-lg overflow-hidden shadow-sm hover:shadow-md transition"
+                  className="group relative flex flex-col bg-white rounded-2xl overflow-hidden border border-parish-border/60 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300"
                 >
-                  {evento.image ? (
-                    <div className="h-48 bg-parish-primary">
+                  {/* Image */}
+                  <div className="relative h-52 overflow-hidden flex-shrink-0">
+                    {evento.image ? (
                       <img
                         src={evento.image}
                         alt={evento.title}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
-                    </div>
-                  ) : (
-                    <div className="h-48 bg-gradient-to-br from-parish-sky to-parish-gold flex items-center justify-center">
-                      <Calendar className="w-16 h-16 text-white opacity-50" />
-                    </div>
-                  )}
-
-                  <div className="p-6">
-                    <div className="flex items-center text-sm text-parish-sky-dark mb-2">
-                      <Clock className="w-4 h-4 mr-1" />
-                      <span>{formatEventDate(evento.date)}</span>
-                    </div>
-                    <h3 className="text-xl font-bold text-parish-text mb-2 line-clamp-2">
-                      {evento.title}
-                    </h3>
-                    <p className="text-parish-text-light text-sm mb-4 line-clamp-2">
-                      {evento.description}
-                    </p>
-                    {evento.location && (
-                      <div className="flex items-center text-sm text-parish-secondary">
-                        <MapPin className="w-4 h-4 mr-1" />
-                        <span className="line-clamp-1">{evento.location}</span>
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-parish-sky to-parish-gold flex items-center justify-center">
+                        <Calendar className="w-16 h-16 text-white/50" />
                       </div>
                     )}
+
+                    {/* Gradient overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
+
+                    {/* Date badge */}
+                    <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm rounded-xl px-3 py-2 text-center shadow-lg min-w-[52px]">
+                      <span className="block text-xl font-bold text-parish-gold leading-none">
+                        {getEventDay(evento.date)}
+                      </span>
+                      <span className="block text-[10px] font-bold uppercase tracking-wide text-parish-text-light mt-0.5">
+                        {getEventMonth(evento.date)}
+                      </span>
+                    </div>
+
+                    {/* "Próximo" badge only on first */}
+                    {index === 0 && (
+                      <div className="absolute top-4 right-4 bg-parish-gold text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow">
+                        Próximo
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Content */}
+                  <div className="flex-1 flex flex-col p-6">
+                    <h3 className="text-lg font-bold text-parish-text group-hover:text-parish-gold transition-colors duration-200 line-clamp-2 mb-2 leading-snug">
+                      {evento.title}
+                    </h3>
+
+                    <p className="text-sm text-parish-text-light line-clamp-2 mb-4 leading-relaxed">
+                      {evento.description}
+                    </p>
+
+                    <div className="space-y-2 mt-auto">
+                      <div className="flex items-center gap-2 text-xs text-parish-text-light">
+                        <div className="w-6 h-6 rounded-md bg-parish-gold/10 flex items-center justify-center flex-shrink-0">
+                          <Clock className="w-3.5 h-3.5 text-parish-gold" />
+                        </div>
+                        <span className="capitalize">{getEventWeekday(evento.date)}, {getEventTime(evento.date)}</span>
+                      </div>
+                      {evento.location && (
+                        <div className="flex items-center gap-2 text-xs text-parish-text-light">
+                          <div className="w-6 h-6 rounded-md bg-parish-gold/10 flex items-center justify-center flex-shrink-0">
+                            <MapPin className="w-3.5 h-3.5 text-parish-gold" />
+                          </div>
+                          <span className="line-clamp-1">{evento.location}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* CTA */}
+                    <div className="mt-5 pt-4 border-t border-parish-border flex items-center justify-between">
+                      <span className="text-sm font-semibold text-parish-gold flex items-center gap-1.5 group-hover:gap-2.5 transition-all duration-200">
+                        Saiba mais
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </span>
+                      <span className="text-xs text-parish-secondary bg-parish-background px-2.5 py-1 rounded-full">
+                        {getEventMonth(evento.date)}
+                      </span>
+                    </div>
                   </div>
                 </Link>
               ))}
