@@ -1,0 +1,174 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  password      String
+  role          Role      @default(USER)
+  image         String?
+  emailVerified DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  posts  Post[]
+  events Event[]
+}
+
+enum Role {
+  USER
+  EDITOR
+  ADMIN
+}
+
+model Post {
+  id          String    @id @default(cuid())
+  title       String
+  slug        String    @unique
+  content     String    @db.Text
+  excerpt     String?
+  coverImage  String?
+  published   Boolean   @default(false)
+  category    String?
+  tags        String[]
+  views       Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  publishedAt DateTime?
+
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([slug])
+  @@index([published])
+}
+
+model Event {
+  id          String    @id @default(cuid())
+  title       String
+  description String    @db.Text
+  date        DateTime
+  endDate     DateTime?
+  location    String?
+  image       String?
+  published   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  createdById String
+  createdBy   User   @relation(fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@index([date])
+  @@index([published])
+}
+
+model Community {
+  id           String   @id @default(cuid())
+  name         String
+  slug         String   @unique
+  description  String?  @db.Text
+  address      String?
+  neighborhood String?
+  city         String?  @default("Cuiabá")
+  state        String?  @default("MT")
+  zipCode      String?
+  phone        String?
+  email        String?
+  image        String?
+  mapUrl       String?
+  active       Boolean  @default(true)
+  order        Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  masses Mass[]
+
+  @@index([slug])
+  @@index([active])
+  @@map("communities")
+}
+
+model Mass {
+  id           String  @id @default(cuid())
+  dayOfWeek    String
+  time         String
+  type         String
+  observations String? @db.Text
+  active       Boolean @default(true)
+
+  communityId String
+  community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([dayOfWeek])
+  @@index([communityId])
+  @@index([active])
+  @@index([dayOfWeek, active])
+  @@map("Mass")
+}
+
+model Sacrament {
+  id        String    @id @default(cuid())
+  type      String // Batismo, Casamento, Primeira Comunhão, etc.
+  name      String
+  email     String?
+  phone     String?
+  date      DateTime?
+  status    String    @default("PENDENTE") // PENDENTE, APROVADO, REALIZADO
+  notes     String?   @db.Text
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([type])
+  @@index([status])
+  @@index([date])
+}
+
+model Donation {
+  id        String   @id @default(cuid())
+  donorName String?
+  email     String?
+  amount    Decimal  @db.Decimal(10, 2)
+  type      String // Dízimo, Oferta, Campanha, etc.
+  method    String // PIX, Dinheiro, Cartão
+  notes     String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([type])
+}
+
+model Gallery {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  images      String[] // URLs das imagens
+  eventId     String?
+  published   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([published])
+}
+
+model Newsletter {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@index([active])
+}
