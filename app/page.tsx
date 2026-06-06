@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Calendar,
   Clock,
@@ -100,7 +101,9 @@ export default function HomePage() {
                 <h1 className="font-bold text-2xl text-parish-text-dark">
                   Paróquia São Sebastião
                 </h1>
-                <p className="text-sm text-parish-text-light">Três Barras, Cuiabá-MT</p>
+                <p className="text-sm text-parish-text-light">
+                  Três Barras, Cuiabá-MT
+                </p>
               </div>
             </div>
 
@@ -154,29 +157,43 @@ export default function HomePage() {
       </header>
 
       {/* Welcome Section */}
-      <section className="relative bg-gradient-to-br from-parish-text-dark via-parish-text to-parish-text-dark text-white py-24">
-        <div className="absolute inset-0 bg-black opacity-20"></div>
+      <section className="relative text-white overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-parish-text-dark via-parish-text to-parish-gold-dark"></div>
+        <div className="absolute inset-0 bg-black opacity-10"></div>
         <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-3xl">
-            <h2 className="text-5xl font-bold mb-6">
-              Bem-vindo à Paróquia São Sebastião
-            </h2>
-            <p className="text-xl mb-8 text-parish-primary">
-              Uma comunidade de fé e amor no coração de Três Barras, Cuiabá-MT
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <Link
-                href="#missas"
-                className="bg-parish-surface text-parish-gold px-8 py-3 rounded-lg font-semibold hover:bg-parish-background transition"
-              >
-                Ver Horários de Missas
-              </Link>
-              <Link
-                href="/contato"
-                className="bg-transparent border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-parish-gold transition"
-              >
-                Entre em Contato
-              </Link>
+          <div className="flex flex-col md:flex-row items-stretch gap-8">
+            <div className="flex-1 max-w-2xl py-24">
+              <h2 className="text-5xl font-bold mb-6">
+                Bem-vindo à Paróquia São Sebastião
+              </h2>
+              <p className="text-xl mb-8 text-parish-primary">
+                Uma comunidade de fé e amor no coração de Três Barras, Cuiabá-MT
+              </p>
+              <div className="flex flex-wrap gap-4">
+                <Link
+                  href="#missas"
+                  className="bg-parish-surface text-parish-gold px-8 py-3 rounded-lg font-semibold hover:bg-parish-background transition"
+                >
+                  Ver Horários de Missas
+                </Link>
+                <Link
+                  href="/contato"
+                  className="bg-transparent border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-parish-gold transition"
+                >
+                  Entre em Contato
+                </Link>
+              </div>
+            </div>
+            <div className="flex-shrink-0 w-full md:w-[42%] py-8">
+              <div className="relative w-full h-64 md:h-full overflow-hidden shadow-2xl rounded-lg">
+                <Image
+                  src="/foto-paroquia.jpeg"
+                  alt="Paróquia São Sebastião"
+                  fill
+                  className="object-cover"
+                  priority
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -237,7 +254,9 @@ export default function HomePage() {
           ) : eventos.length === 0 ? (
             <div className="text-center py-12 bg-parish-surface rounded-lg">
               <Calendar className="w-16 h-16 text-parish-secondary mx-auto mb-4" />
-              <p className="text-parish-text-light">Nenhum evento próximo no momento</p>
+              <p className="text-parish-text-light">
+                Nenhum evento próximo no momento
+              </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
