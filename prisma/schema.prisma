@@ -199,3 +199,31 @@ model HomeHero {
 
   @@map("home_hero")
 }
+
+model SocialProject {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String   @db.Text
+  objective   String?  @db.Text
+  schedules   String[]
+  location    String?
+  audience    String?
+  responsible String?
+  phone       String?
+  whatsapp    String?
+  email       String?
+  image       String?  @db.Text
+  gallery     String[]
+  mapUrl      String?
+  published   Boolean  @default(false)
+  active      Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([slug])
+  @@index([published])
+  @@index([active])
+  @@map("social_projects")
+}

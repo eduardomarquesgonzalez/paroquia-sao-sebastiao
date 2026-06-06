@@ -123,21 +123,20 @@ export default function HomePage() {
               <Link href="/" className="text-parish-text-light hover:text-parish-gold transition font-medium">
                 Início
               </Link>
-              <Link href="/posts" className="text-parish-text-light hover:text-parish-gold transition">
-                Notícias
-              </Link>
+              
               <Link href="/eventos" className="text-parish-text-light hover:text-parish-gold transition">
                 Eventos
               </Link>
               <Link href="/comunidades" className="text-parish-text-light hover:text-parish-gold transition">
                 Comunidades
               </Link>
+              <Link href="/projetos-sociais" className="text-parish-text-light hover:text-parish-gold transition">
+                Projetos Sociais
+              </Link>
               <Link href="/missas" className="text-parish-text-light hover:text-parish-gold transition">
                 Missas
               </Link>
-              <Link href="/sobre" className="text-parish-text-light hover:text-parish-gold transition">
-                Sobre
-              </Link>
+             
               <Link href="/contato" className="text-parish-text-light hover:text-parish-gold transition">
                 Contato
               </Link>
