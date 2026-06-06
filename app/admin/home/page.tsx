@@ -66,7 +66,10 @@ export default function AdminHomePage() {
         const data = await slidesRes.json();
         setSlides(Array.isArray(data) ? data : []);
       }
-      if (heroRes.ok) setHero(await heroRes.json());
+      if (heroRes.ok) {
+        const data = await heroRes.json();
+        if (data) setHero(data);
+      }
     } catch {
       toast.error("Erro ao carregar dados");
     } finally {
@@ -144,8 +147,8 @@ export default function AdminHomePage() {
       toast.error("Arquivo deve ser uma imagem");
       return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("Imagem deve ter no máximo 5MB");
+    if (file.size > 15 * 1024 * 1024) {
+      toast.error("Imagem deve ter no máximo 15MB");
       return;
     }
     const reader = new FileReader();
@@ -386,7 +389,7 @@ export default function AdminHomePage() {
                       Clique para selecionar uma imagem
                     </p>
                     <p className="text-xs text-parish-secondary mt-1">
-                      PNG, JPG até 5MB
+                      PNG, JPG até 15MB
                     </p>
                   </>
                 )}

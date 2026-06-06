@@ -63,8 +63,8 @@ export default function NovoPostPage() {
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("A imagem deve ter no máximo 5MB");
+    if (file.size > 15 * 1024 * 1024) {
+      toast.error("A imagem deve ter no máximo 15MB");
       return;
     }
 
@@ -282,7 +282,7 @@ export default function NovoPostPage() {
               >
                 <Upload className="w-8 h-8 text-parish-secondary mx-auto mb-2" />
                 <p className="text-sm text-parish-text-light">Clique para fazer upload</p>
-                <p className="text-xs text-parish-secondary mt-1">PNG, JPG até 5MB</p>
+                <p className="text-xs text-parish-secondary mt-1">PNG, JPG até 15MB</p>
               </div>
             ) : (
               <div className="relative">

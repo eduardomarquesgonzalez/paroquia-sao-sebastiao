@@ -86,7 +86,7 @@ export default function EditarPostPage() {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith("image/")) { toast.error("Por favor, selecione uma imagem válida"); return; }
-    if (file.size > 5 * 1024 * 1024) { toast.error("A imagem deve ter no máximo 5MB"); return; }
+    if (file.size > 15 * 1024 * 1024) { toast.error("A imagem deve ter no máximo 15MB"); return; }
     const reader = new FileReader();
     reader.onloadend = () => {
       const base64String = reader.result as string;
@@ -247,7 +247,7 @@ export default function EditarPostPage() {
               <div onClick={handleImageClick} className="border-2 border-dashed border-parish-border rounded-lg p-6 text-center hover:border-parish-gold transition cursor-pointer">
                 <Upload className="w-8 h-8 text-parish-secondary mx-auto mb-2" />
                 <p className="text-sm text-parish-text-light">Clique para fazer upload</p>
-                <p className="text-xs text-parish-secondary mt-1">PNG, JPG até 5MB</p>
+                <p className="text-xs text-parish-secondary mt-1">PNG, JPG até 15MB</p>
               </div>
             ) : (
               <div className="relative">

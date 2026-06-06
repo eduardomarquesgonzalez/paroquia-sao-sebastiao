@@ -444,14 +444,14 @@ export default function HomePage() {
                 <li>Bairro Três Barras</li>
                 <li>Cuiabá-MT</li>
                 <li>saosebastiaomt@outlook.com.br</li>
-                <li>(65) 0000-0000</li>
+                <li>(65) 9 9277-1705</li>
               </ul>
             </div>
           </div>
 
           <div className="border-t border-parish-text pt-8 text-center text-parish-secondary text-sm">
             <p>
-              &copy; 2025 Paróquia São Sebastião. Todos os direitos reservados.
+              &copy; 2026 Paróquia São Sebastião. Todos os direitos reservados.
             </p>
           </div>
         </div>
