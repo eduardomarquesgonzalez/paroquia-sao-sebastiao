@@ -47,7 +47,7 @@ export default function HomePage() {
       const response = await fetch("/api/posts/public");
       if (response.ok) {
         const data = await response.json();
-        setPosts(data.slice(0, 6)); // Mostrar apenas os 6 mais recentes
+        setPosts(data.slice(0, 6));
       }
     } catch (error) {
       console.error("Erro ao carregar posts:", error);
@@ -61,7 +61,7 @@ export default function HomePage() {
       const response = await fetch("/api/eventos/public");
       if (response.ok) {
         const data = await response.json();
-        setEventos(data.slice(0, 3)); // Mostrar apenas os 3 próximos
+        setEventos(data.slice(0, 3));
       }
     } catch (error) {
       console.error("Erro ao carregar eventos:", error);
@@ -89,55 +89,55 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-parish-background">
       {/* Header/Navbar */}
-      <header className="bg-white shadow-sm sticky top-0 z-50">
+      <header className="bg-parish-surface shadow-sm sticky top-0 z-50">
         <nav className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className=" flex items-center space-x-2 ">
-              <Church className="w-10 h-10 text-parish-blue" />
+            <div className="flex items-center space-x-2">
+              <Church className="w-10 h-10 text-parish-gold" />
               <div>
-                <h1 className="font-bold text-2xl text-blue-900">
+                <h1 className="font-bold text-2xl text-parish-text-dark">
                   Paróquia São Sebastião
                 </h1>
-                <p className="text-sm text-gray-600">Três Barras, Cuiabá-MT</p>
+                <p className="text-sm text-parish-text-light">Três Barras, Cuiabá-MT</p>
               </div>
             </div>
 
             <div className="hidden md:flex space-x-6">
               <Link
                 href="/"
-                className="text-gray-700 hover:text-blue-600 transition font-medium"
+                className="text-parish-text-light hover:text-parish-gold transition font-medium"
               >
                 Início
               </Link>
               <Link
                 href="/posts"
-                className="text-gray-700 hover:text-blue-600 transition"
+                className="text-parish-text-light hover:text-parish-gold transition"
               >
                 Notícias
               </Link>
               <Link
                 href="/eventos"
-                className="text-gray-700 hover:text-blue-600 transition"
+                className="text-parish-text-light hover:text-parish-gold transition"
               >
                 Eventos
               </Link>
               <Link
                 href="/missas"
-                className="text-gray-700 hover:text-blue-600 transition"
+                className="text-parish-text-light hover:text-parish-gold transition"
               >
                 Missas
               </Link>
               <Link
                 href="/sobre"
-                className="text-gray-700 hover:text-blue-600 transition"
+                className="text-parish-text-light hover:text-parish-gold transition"
               >
                 Sobre
               </Link>
               <Link
                 href="/contato"
-                className="text-gray-700 hover:text-blue-600 transition"
+                className="text-parish-text-light hover:text-parish-gold transition"
               >
                 Contato
               </Link>
@@ -145,7 +145,7 @@ export default function HomePage() {
 
             <Link
               href="/auth/login"
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium"
+              className="px-4 py-2 bg-parish-gold text-white rounded-lg hover:bg-parish-gold-dark transition text-sm font-medium"
             >
               Admin
             </Link>
@@ -154,26 +154,26 @@ export default function HomePage() {
       </header>
 
       {/* Welcome Section */}
-      <section className="relative bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 text-white py-24">
+      <section className="relative bg-gradient-to-br from-parish-text-dark via-parish-text to-parish-text-dark text-white py-24">
         <div className="absolute inset-0 bg-black opacity-20"></div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl">
             <h2 className="text-5xl font-bold mb-6">
               Bem-vindo à Paróquia São Sebastião
             </h2>
-            <p className="text-xl mb-8 text-blue-100">
+            <p className="text-xl mb-8 text-parish-primary">
               Uma comunidade de fé e amor no coração de Três Barras, Cuiabá-MT
             </p>
             <div className="flex flex-wrap gap-4">
               <Link
                 href="#missas"
-                className="bg-white text-parish-blue px-8 py-3 rounded-lg font-semibold hover:bg-blue-50 transition"
+                className="bg-parish-surface text-parish-gold px-8 py-3 rounded-lg font-semibold hover:bg-parish-background transition"
               >
                 Ver Horários de Missas
               </Link>
               <Link
                 href="/contato"
-                className="bg-transparent border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-parish-blue transition"
+                className="bg-transparent border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-parish-gold transition"
               >
                 Entre em Contato
               </Link>
@@ -182,28 +182,27 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Horários de Missa - COMPONENTE DINÂMICO */}
-      <section id="missas" className="py-16 bg-white">
+      {/* Horários de Missa */}
+      <section id="missas" className="py-16 bg-parish-surface">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-3xl font-bold text-gray-900">
+              <h2 className="text-3xl font-bold text-parish-text">
                 Horários de Missas
               </h2>
-              <p className="text-gray-600 mt-2">
+              <p className="text-parish-text-light mt-2">
                 Confira os horários das nossas celebrações
               </p>
             </div>
             <Link
               href="/missas"
-              className="text-blue-600 hover:text-blue-800 flex items-center space-x-2 font-medium"
+              className="text-parish-gold hover:text-parish-gold-dark flex items-center space-x-2 font-medium"
             >
               <span>Ver detalhes</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
 
-          {/* Componente dinâmico que busca da API */}
           <div className="max-w-4xl mx-auto">
             <HorariosMissasPorDia />
           </div>
@@ -211,20 +210,20 @@ export default function HomePage() {
       </section>
 
       {/* Próximos Eventos */}
-      <section id="eventos" className="py-16 bg-gray-50">
+      <section id="eventos" className="py-16 bg-parish-background">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-3xl font-bold text-gray-900">
+              <h2 className="text-3xl font-bold text-parish-text">
                 Próximos Eventos
               </h2>
-              <p className="text-gray-600 mt-2">
+              <p className="text-parish-text-light mt-2">
                 Participe das atividades da nossa paróquia
               </p>
             </div>
             <Link
               href="/eventos"
-              className="text-blue-600 hover:text-blue-800 flex items-center space-x-2 font-medium"
+              className="text-parish-gold hover:text-parish-gold-dark flex items-center space-x-2 font-medium"
             >
               <span>Ver todos</span>
               <ArrowRight className="w-4 h-4" />
@@ -233,12 +232,12 @@ export default function HomePage() {
 
           {loadingEventos ? (
             <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-parish-gold mx-auto"></div>
             </div>
           ) : eventos.length === 0 ? (
-            <div className="text-center py-12 bg-white rounded-lg">
-              <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600">Nenhum evento próximo no momento</p>
+            <div className="text-center py-12 bg-parish-surface rounded-lg">
+              <Calendar className="w-16 h-16 text-parish-secondary mx-auto mb-4" />
+              <p className="text-parish-text-light">Nenhum evento próximo no momento</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -246,10 +245,10 @@ export default function HomePage() {
                 <Link
                   key={evento.id}
                   href={`/eventos/${evento.id}`}
-                  className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition"
+                  className="bg-parish-surface rounded-lg overflow-hidden shadow-sm hover:shadow-md transition"
                 >
                   {evento.image ? (
-                    <div className="h-48 bg-gray-200">
+                    <div className="h-48 bg-parish-primary">
                       <img
                         src={evento.image}
                         alt={evento.title}
@@ -257,27 +256,27 @@ export default function HomePage() {
                       />
                     </div>
                   ) : (
-                    <div className="h-48 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                    <div className="h-48 bg-gradient-to-br from-parish-sky to-parish-gold flex items-center justify-center">
                       <Calendar className="w-16 h-16 text-white opacity-50" />
                     </div>
                   )}
 
                   <div className="p-6">
-                    <div className="flex items-center text-sm text-blue-600 mb-2">
+                    <div className="flex items-center text-sm text-parish-sky-dark mb-2">
                       <Clock className="w-4 h-4 mr-1" />
                       <span>{formatEventDate(evento.date)}</span>
                     </div>
 
-                    <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2">
+                    <h3 className="text-xl font-bold text-parish-text mb-2 line-clamp-2">
                       {evento.title}
                     </h3>
 
-                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                    <p className="text-parish-text-light text-sm mb-4 line-clamp-2">
                       {evento.description}
                     </p>
 
                     {evento.location && (
-                      <div className="flex items-center text-sm text-gray-500">
+                      <div className="flex items-center text-sm text-parish-secondary">
                         <MapPin className="w-4 h-4 mr-1" />
                         <span className="line-clamp-1">{evento.location}</span>
                       </div>
@@ -291,20 +290,20 @@ export default function HomePage() {
       </section>
 
       {/* Posts/Notícias */}
-      <section id="posts" className="py-16 bg-white">
+      <section id="posts" className="py-16 bg-parish-surface">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-3xl font-bold text-gray-900">
+              <h2 className="text-3xl font-bold text-parish-text">
                 Notícias e Avisos
               </h2>
-              <p className="text-gray-600 mt-2">
+              <p className="text-parish-text-light mt-2">
                 Fique por dentro das novidades da paróquia
               </p>
             </div>
             <Link
               href="/posts"
-              className="text-blue-600 hover:text-blue-800 flex items-center space-x-2 font-medium"
+              className="text-parish-gold hover:text-parish-gold-dark flex items-center space-x-2 font-medium"
             >
               <span>Ver todos</span>
               <ArrowRight className="w-4 h-4" />
@@ -313,12 +312,12 @@ export default function HomePage() {
 
           {loadingPosts ? (
             <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-parish-gold mx-auto"></div>
             </div>
           ) : posts.length === 0 ? (
-            <div className="text-center py-12 bg-gray-50 rounded-lg">
-              <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600">
+            <div className="text-center py-12 bg-parish-background rounded-lg">
+              <BookOpen className="w-16 h-16 text-parish-secondary mx-auto mb-4" />
+              <p className="text-parish-text-light">
                 Nenhuma notícia disponível no momento
               </p>
             </div>
@@ -328,10 +327,10 @@ export default function HomePage() {
                 <Link
                   key={post.id}
                   href={`/posts/${post.id}`}
-                  className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition"
+                  className="bg-parish-surface border border-parish-border rounded-lg overflow-hidden hover:shadow-lg transition"
                 >
                   {post.coverImage ? (
-                    <div className="h-48 bg-gray-200">
+                    <div className="h-48 bg-parish-primary">
                       <img
                         src={post.coverImage}
                         alt={post.title}
@@ -339,7 +338,7 @@ export default function HomePage() {
                       />
                     </div>
                   ) : (
-                    <div className="h-48 bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+                    <div className="h-48 bg-gradient-to-br from-parish-sky-light to-parish-sky-dark flex items-center justify-center">
                       <BookOpen className="w-16 h-16 text-white opacity-50" />
                     </div>
                   )}
@@ -347,21 +346,21 @@ export default function HomePage() {
                   <div className="p-6">
                     <div className="flex items-center justify-between mb-3">
                       {post.category && (
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-parish-sky-light text-parish-sky-dark">
                           <Tag className="w-3 h-3 mr-1" />
                           {post.category}
                         </span>
                       )}
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-parish-secondary">
                         {formatDate(post.createdAt)}
                       </span>
                     </div>
 
-                    <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2">
+                    <h3 className="text-lg font-bold text-parish-text mb-2 line-clamp-2">
                       {post.title}
                     </h3>
 
-                    <p className="text-gray-600 text-sm line-clamp-3">
+                    <p className="text-parish-text-light text-sm line-clamp-3">
                       {post.excerpt}
                     </p>
                   </div>
@@ -373,19 +372,19 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
+      <footer className="bg-parish-text-dark text-white py-12">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             <div>
               <h3 className="font-bold text-lg mb-4">Paróquia São Sebastião</h3>
-              <p className="text-gray-400 text-sm">
+              <p className="text-parish-secondary text-sm">
                 Uma comunidade católica dedicada à fé, esperança e caridade.
               </p>
             </div>
 
             <div>
               <h3 className="font-bold text-lg mb-4">Links Rápidos</h3>
-              <ul className="text-gray-400 text-sm space-y-2">
+              <ul className="text-parish-secondary text-sm space-y-2">
                 <li>
                   <Link href="/missas" className="hover:text-white transition">
                     Horários de Missas
@@ -411,7 +410,7 @@ export default function HomePage() {
 
             <div>
               <h3 className="font-bold text-lg mb-4">Contato</h3>
-              <ul className="text-gray-400 text-sm space-y-2">
+              <ul className="text-parish-secondary text-sm space-y-2">
                 <li>Bairro Três Barras</li>
                 <li>Cuiabá-MT</li>
                 <li>saosebastiaomt@outlook.com.br</li>
@@ -420,7 +419,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="border-t border-gray-800 pt-8 text-center text-gray-400 text-sm">
+          <div className="border-t border-parish-text pt-8 text-center text-parish-secondary text-sm">
             <p>
               &copy; 2025 Paróquia São Sebastião. Todos os direitos reservados.
             </p>

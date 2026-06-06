@@ -46,7 +46,6 @@ export default function EditarPostPage() {
     try {
       setIsLoading(true);
       const response = await fetch(`/api/posts/${postId}`);
-
       if (!response.ok) throw new Error("Post não encontrado");
 
       const data = await response.json();
@@ -61,9 +60,7 @@ export default function EditarPostPage() {
         published: data.published,
       });
 
-      if (data.coverImage) {
-        setImagePreview(data.coverImage);
-      }
+      if (data.coverImage) setImagePreview(data.coverImage);
     } catch (error) {
       console.error("Erro ao carregar post:", error);
       toast.error("Erro ao carregar post");
@@ -73,13 +70,8 @@ export default function EditarPostPage() {
     }
   }
 
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-
     if (type === "checkbox") {
       const target = e.target as HTMLInputElement;
       setFormData((prev) => ({ ...prev, [name]: target.checked }));
@@ -88,27 +80,13 @@ export default function EditarPostPage() {
     }
   };
 
-  const handleImageClick = () => {
-    fileInputRef.current?.click();
-  };
+  const handleImageClick = () => fileInputRef.current?.click();
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    // Validar tipo de arquivo
-    if (!file.type.startsWith("image/")) {
-      toast.error("Por favor, selecione uma imagem válida");
-      return;
-    }
-
-    // Validar tamanho (5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("A imagem deve ter no máximo 5MB");
-      return;
-    }
-
-    // Converter para base64 e criar preview
+    if (!file.type.startsWith("image/")) { toast.error("Por favor, selecione uma imagem válida"); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error("A imagem deve ter no máximo 5MB"); return; }
     const reader = new FileReader();
     reader.onloadend = () => {
       const base64String = reader.result as string;
@@ -121,55 +99,32 @@ export default function EditarPostPage() {
   const handleRemoveImage = () => {
     setImagePreview("");
     setFormData((prev) => ({ ...prev, coverImage: "" }));
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleAddTag = () => {
     if (tagInput.trim() && !formData.tags.includes(tagInput.trim())) {
-      setFormData((prev) => ({
-        ...prev,
-        tags: [...prev.tags, tagInput.trim()],
-      }));
+      setFormData((prev) => ({ ...prev, tags: [...prev.tags, tagInput.trim()] }));
       setTagInput("");
     }
   };
 
   const handleRemoveTag = (tag: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      tags: prev.tags.filter((t) => t !== tag),
-    }));
+    setFormData((prev) => ({ ...prev, tags: prev.tags.filter((t) => t !== tag) }));
   };
 
   const handleSubmit = async (e: React.FormEvent, shouldPublish: boolean) => {
     e.preventDefault();
-
-    if (!formData.title || !formData.content) {
-      toast.error("Preencha os campos obrigatórios");
-      return;
-    }
-
+    if (!formData.title || !formData.content) { toast.error("Preencha os campos obrigatórios"); return; }
     setIsSubmitting(true);
-
     try {
       const response = await fetch(`/api/posts/${postId}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...formData,
-          published: shouldPublish,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...formData, published: shouldPublish }),
       });
-
       if (!response.ok) throw new Error("Erro ao atualizar");
-
-      toast.success(
-        shouldPublish ? "Post publicado com sucesso!" : "Post atualizado!"
-      );
+      toast.success(shouldPublish ? "Post publicado com sucesso!" : "Post atualizado!");
       router.push("/admin/posts");
     } catch (error) {
       console.error("Erro ao atualizar post:", error);
@@ -180,21 +135,10 @@ export default function EditarPostPage() {
   };
 
   const handleDelete = async () => {
-    if (
-      !confirm(
-        "Tem certeza que deseja excluir este post? Esta ação não pode ser desfeita."
-      )
-    ) {
-      return;
-    }
-
+    if (!confirm("Tem certeza que deseja excluir este post? Esta ação não pode ser desfeita.")) return;
     try {
-      const response = await fetch(`/api/posts?id=${postId}`, {
-        method: "DELETE",
-      });
-
+      const response = await fetch(`/api/posts?id=${postId}`, { method: "DELETE" });
       if (!response.ok) throw new Error("Erro ao excluir");
-
       toast.success("Post excluído com sucesso!");
       router.push("/admin/posts");
     } catch (error) {
@@ -206,50 +150,33 @@ export default function EditarPostPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-parish-gold"></div>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          <Link
-            href="/admin/posts"
-            className="text-gray-600 hover:text-gray-900 transition"
-          >
+          <Link href="/admin/posts" className="text-parish-text-light hover:text-parish-text transition">
             <ArrowLeft className="w-6 h-6" />
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Editar Post</h1>
-            <p className="text-gray-600 mt-1">
-              Atualize as informações do post
-            </p>
+            <h1 className="text-3xl font-bold text-parish-text">Editar Post</h1>
+            <p className="text-parish-text-light mt-1">Atualize as informações do post</p>
           </div>
         </div>
         <div className="flex space-x-3">
-          <button
-            onClick={handleDelete}
-            className="px-4 py-2 border border-red-300 rounded-lg text-red-700 hover:bg-red-50 transition flex items-center space-x-2"
-          >
+          <button onClick={handleDelete} className="px-4 py-2 border border-red-300 rounded-lg text-red-700 hover:bg-red-50 transition flex items-center space-x-2">
             <Trash2 className="w-4 h-4" />
             <span>Excluir</span>
           </button>
-          <button
-            onClick={(e) => handleSubmit(e, false)}
-            disabled={isSubmitting}
-            className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition disabled:opacity-50 flex items-center space-x-2"
-          >
+          <button onClick={(e) => handleSubmit(e, false)} disabled={isSubmitting} className="px-4 py-2 border border-parish-border rounded-lg text-parish-text-light hover:bg-parish-background transition disabled:opacity-50 flex items-center space-x-2">
             <Save className="w-4 h-4" />
             <span>Salvar</span>
           </button>
-          <button
-            onClick={(e) => handleSubmit(e, true)}
-            disabled={isSubmitting}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 flex items-center space-x-2"
-          >
+          <button onClick={(e) => handleSubmit(e, true)} disabled={isSubmitting} className="px-4 py-2 bg-parish-gold text-white rounded-lg hover:bg-parish-gold-dark transition disabled:opacity-50 flex items-center space-x-2">
             <Eye className="w-4 h-4" />
             <span>{isSubmitting ? "Salvando..." : "Publicar"}</span>
           </button>
@@ -257,93 +184,36 @@ export default function EditarPostPage() {
       </div>
 
       <form className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Title */}
-          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Título *
-            </label>
-            <input
-              type="text"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              placeholder="Digite o título do post"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-lg"
-              required
-            />
+          <div className="bg-parish-surface rounded-lg shadow-sm p-6 border border-parish-primary">
+            <label className="block text-sm font-medium text-parish-text-light mb-2">Título *</label>
+            <input type="text" name="title" value={formData.title} onChange={handleChange} placeholder="Digite o título do post" className="w-full px-4 py-3 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold focus:border-transparent outline-none text-lg" required />
           </div>
 
-          {/* Slug */}
-          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              URL (Slug)
-            </label>
+          <div className="bg-parish-surface rounded-lg shadow-sm p-6 border border-parish-primary">
+            <label className="block text-sm font-medium text-parish-text-light mb-2">URL (Slug)</label>
             <div className="flex items-center space-x-2">
-              <span className="text-gray-500 text-sm">
-                paroquiasaosebastiao.com.br/posts/
-              </span>
-              <input
-                type="text"
-                name="slug"
-                value={formData.slug}
-                onChange={handleChange}
-                placeholder="titulo-do-post"
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-              />
+              <span className="text-parish-secondary text-sm">paroquiasaosebastiao.com.br/posts/</span>
+              <input type="text" name="slug" value={formData.slug} onChange={handleChange} placeholder="titulo-do-post" className="flex-1 px-4 py-2 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold focus:border-transparent outline-none" />
             </div>
           </div>
 
-          {/* Excerpt */}
-          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Resumo
-            </label>
-            <textarea
-              name="excerpt"
-              value={formData.excerpt}
-              onChange={handleChange}
-              placeholder="Breve descrição do post (aparece nas listagens)"
-              rows={3}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none"
-            />
+          <div className="bg-parish-surface rounded-lg shadow-sm p-6 border border-parish-primary">
+            <label className="block text-sm font-medium text-parish-text-light mb-2">Resumo</label>
+            <textarea name="excerpt" value={formData.excerpt} onChange={handleChange} placeholder="Breve descrição do post" rows={3} className="w-full px-4 py-3 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold focus:border-transparent outline-none resize-none" />
           </div>
 
-          {/* Content */}
-          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Conteúdo *
-            </label>
-            <textarea
-              name="content"
-              value={formData.content}
-              onChange={handleChange}
-              placeholder="Digite o conteúdo do post... (Suporte para Markdown)"
-              rows={15}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none font-mono text-sm"
-              required
-            />
-            <p className="text-xs text-gray-500 mt-2">
-              Você pode usar Markdown para formatação: **negrito**, *itálico*, #
-              títulos, etc.
-            </p>
+          <div className="bg-parish-surface rounded-lg shadow-sm p-6 border border-parish-primary">
+            <label className="block text-sm font-medium text-parish-text-light mb-2">Conteúdo *</label>
+            <textarea name="content" value={formData.content} onChange={handleChange} placeholder="Digite o conteúdo do post... (Suporte para Markdown)" rows={15} className="w-full px-4 py-3 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold focus:border-transparent outline-none resize-none font-mono text-sm" required />
+            <p className="text-xs text-parish-secondary mt-2">Você pode usar Markdown para formatação: **negrito**, *itálico*, # títulos, etc.</p>
           </div>
         </div>
 
-        {/* Sidebar */}
         <div className="space-y-6">
-          {/* Category */}
-          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Categoria
-            </label>
-            <select
-              name="category"
-              value={formData.category}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-            >
+          <div className="bg-parish-surface rounded-lg shadow-sm p-6 border border-parish-primary">
+            <label className="block text-sm font-medium text-parish-text-light mb-2">Categoria</label>
+            <select name="category" value={formData.category} onChange={handleChange} className="w-full px-4 py-2 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold focus:border-transparent outline-none">
               <option value="">Selecione uma categoria</option>
               <option value="Avisos">Avisos</option>
               <option value="Eventos">Eventos</option>
@@ -354,105 +224,45 @@ export default function EditarPostPage() {
             </select>
           </div>
 
-          {/* Tags */}
-          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Tags
-            </label>
+          <div className="bg-parish-surface rounded-lg shadow-sm p-6 border border-parish-primary">
+            <label className="block text-sm font-medium text-parish-text-light mb-2">Tags</label>
             <div className="flex space-x-2 mb-3">
-              <input
-                type="text"
-                value={tagInput}
-                onChange={(e) => setTagInput(e.target.value)}
-                onKeyPress={(e) =>
-                  e.key === "Enter" && (e.preventDefault(), handleAddTag())
-                }
-                placeholder="Adicionar tag"
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm"
-              />
-              <button
-                type="button"
-                onClick={handleAddTag}
-                className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm"
-              >
-                +
-              </button>
+              <input type="text" value={tagInput} onChange={(e) => setTagInput(e.target.value)} onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), handleAddTag())} placeholder="Adicionar tag" className="flex-1 px-3 py-2 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold focus:border-transparent outline-none text-sm" />
+              <button type="button" onClick={handleAddTag} className="px-3 py-2 bg-parish-gold text-white rounded-lg hover:bg-parish-gold-dark transition text-sm">+</button>
             </div>
             <div className="flex flex-wrap gap-2">
               {formData.tags.map((tag, index) => (
-                <span
-                  key={index}
-                  className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800"
-                >
+                <span key={index} className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-parish-sky-light text-parish-sky-dark">
                   {tag}
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveTag(tag)}
-                    className="ml-2 hover:text-blue-600"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
+                  <button type="button" onClick={() => handleRemoveTag(tag)} className="ml-2 hover:text-parish-gold"><X className="w-3 h-3" /></button>
                 </span>
               ))}
             </div>
           </div>
 
-          {/* Cover Image */}
-          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Imagem de Capa
-            </label>
-
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              className="hidden"
-            />
-
+          <div className="bg-parish-surface rounded-lg shadow-sm p-6 border border-parish-primary">
+            <label className="block text-sm font-medium text-parish-text-light mb-2">Imagem de Capa</label>
+            <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
             {!imagePreview ? (
-              <div
-                onClick={handleImageClick}
-                className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-500 transition cursor-pointer"
-              >
-                <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                <p className="text-sm text-gray-600">
-                  Clique para fazer upload
-                </p>
-                <p className="text-xs text-gray-400 mt-1">PNG, JPG até 5MB</p>
+              <div onClick={handleImageClick} className="border-2 border-dashed border-parish-border rounded-lg p-6 text-center hover:border-parish-gold transition cursor-pointer">
+                <Upload className="w-8 h-8 text-parish-secondary mx-auto mb-2" />
+                <p className="text-sm text-parish-text-light">Clique para fazer upload</p>
+                <p className="text-xs text-parish-secondary mt-1">PNG, JPG até 5MB</p>
               </div>
             ) : (
               <div className="relative">
-                <img
-                  src={imagePreview}
-                  alt="Preview"
-                  className="w-full rounded-lg"
-                />
-                <button
-                  type="button"
-                  onClick={handleRemoveImage}
-                  className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+                <img src={imagePreview} alt="Preview" className="w-full rounded-lg" />
+                <button type="button" onClick={handleRemoveImage} className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition"><X className="w-4 h-4" /></button>
               </div>
             )}
           </div>
 
-          {/* Publish Status */}
-          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
+          <div className="bg-parish-surface rounded-lg shadow-sm p-6 border border-parish-primary">
             <label className="flex items-center space-x-3 cursor-pointer">
-              <input
-                type="checkbox"
-                name="published"
-                checked={formData.published}
-                onChange={handleChange}
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-              />
+              <input type="checkbox" name="published" checked={formData.published} onChange={handleChange} className="w-4 h-4 text-parish-gold border-parish-border rounded focus:ring-parish-gold" />
               <div>
-                <p className="text-sm font-medium text-gray-700">Publicado</p>
-                <p className="text-xs text-gray-500">Post visível no site</p>
+                <p className="text-sm font-medium text-parish-text-light">Publicado</p>
+                <p className="text-xs text-parish-secondary">Post visível no site</p>
               </div>
             </label>
           </div>

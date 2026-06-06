@@ -220,10 +220,3 @@ Todos os provedores (Vercel, Railway, Render) fornecem SSL gratuito automaticame
 
 ---
 
-**🎉 Parabéns! Seu site está no ar!**
-
-Próximos passos:
-1. Configure seu domínio personalizado
-2. Personalize cores e conteúdo
-3. Adicione fotos e informações da paróquia
-4. Divulgue para a comunidade!

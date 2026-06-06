@@ -89,7 +89,7 @@ export default function EventosPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-parish-gold"></div>
       </div>
     );
   }
@@ -115,12 +115,12 @@ export default function EventosPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Eventos</h1>
-          <p className="text-gray-600 mt-1">Gerencie os eventos da paróquia</p>
+          <h1 className="text-3xl font-bold text-parish-text">Eventos</h1>
+          <p className="text-parish-text-light mt-1">Gerencie os eventos da paróquia</p>
         </div>
         <Link
           href="/admin/eventos/novo"
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-blue-700 transition"
+          className="bg-parish-gold text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-parish-gold-dark transition"
         >
           <Plus className="w-5 h-5" />
           <span>Novo Evento</span>
@@ -129,24 +129,24 @@ export default function EventosPage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
-          <p className="text-sm text-gray-600">Total de Eventos</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">
+        <div className="bg-parish-surface rounded-lg shadow-sm p-4 border border-parish-primary">
+          <p className="text-sm text-parish-text-light">Total de Eventos</p>
+          <p className="text-2xl font-bold text-parish-text mt-1">
             {eventos.length}
           </p>
         </div>
-        <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
-          <p className="text-sm text-gray-600">Próximos</p>
+        <div className="bg-parish-surface rounded-lg shadow-sm p-4 border border-parish-primary">
+          <p className="text-sm text-parish-text-light">Próximos</p>
           <p className="text-2xl font-bold text-green-600 mt-1">
             {upcomingEvents}
           </p>
         </div>
-        <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
-          <p className="text-sm text-gray-600">Realizados</p>
-          <p className="text-2xl font-bold text-gray-600 mt-1">{pastEvents}</p>
+        <div className="bg-parish-surface rounded-lg shadow-sm p-4 border border-parish-primary">
+          <p className="text-sm text-parish-text-light">Realizados</p>
+          <p className="text-2xl font-bold text-parish-text-light mt-1">{pastEvents}</p>
         </div>
-        <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
-          <p className="text-sm text-gray-600">Rascunhos</p>
+        <div className="bg-parish-surface rounded-lg shadow-sm p-4 border border-parish-primary">
+          <p className="text-sm text-parish-text-light">Rascunhos</p>
           <p className="text-2xl font-bold text-orange-600 mt-1">
             {eventos.filter((e) => !e.published).length}
           </p>
@@ -154,22 +154,22 @@ export default function EventosPage() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
+      <div className="bg-parish-surface rounded-lg shadow-sm p-4 border border-parish-primary">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-parish-secondary w-5 h-5" />
             <input
               type="text"
               placeholder="Buscar eventos..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+              className="w-full pl-10 pr-4 py-2 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold focus:border-transparent outline-none"
             />
           </div>
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+            className="px-4 py-2 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold focus:border-transparent outline-none"
           >
             <option value="all">Todos os Status</option>
             <option value="published">Publicados</option>
@@ -181,12 +181,12 @@ export default function EventosPage() {
       {/* Events Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredEventos.length === 0 ? (
-          <div className="col-span-full bg-white rounded-lg shadow-sm p-8 text-center border border-gray-100">
-            <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600 mb-2">Nenhum evento encontrado</p>
+          <div className="col-span-full bg-parish-surface rounded-lg shadow-sm p-8 text-center border border-parish-primary">
+            <Calendar className="w-16 h-16 text-parish-secondary mx-auto mb-4" />
+            <p className="text-parish-text-light mb-2">Nenhum evento encontrado</p>
             <Link
               href="/admin/eventos/novo"
-              className="text-blue-600 hover:text-blue-800 text-sm"
+              className="text-parish-gold hover:text-parish-gold-dark text-sm"
             >
               Criar seu primeiro evento
             </Link>
@@ -195,11 +195,11 @@ export default function EventosPage() {
           filteredEventos.map((evento) => (
             <div
               key={evento.id}
-              className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition"
+              className="bg-parish-surface rounded-lg shadow-sm border border-parish-primary overflow-hidden hover:shadow-md transition"
             >
               {/* Image */}
               {evento.image ? (
-                <div className="h-48 bg-gray-200">
+                <div className="h-48 bg-parish-primary">
                   <img
                     src={evento.image}
                     alt={evento.title}
@@ -207,7 +207,7 @@ export default function EventosPage() {
                   />
                 </div>
               ) : (
-                <div className="h-48 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                <div className="h-48 bg-gradient-to-br from-parish-sky to-parish-gold flex items-center justify-center">
                   <Calendar className="w-16 h-16 text-white opacity-50" />
                 </div>
               )}
@@ -226,39 +226,39 @@ export default function EventosPage() {
                     </span>
                   )}
                   {isEventPast(evento.date) && (
-                    <span className="text-xs text-gray-500">Realizado</span>
+                    <span className="text-xs text-parish-secondary">Realizado</span>
                   )}
                 </div>
 
                 {/* Title */}
-                <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2">
+                <h3 className="text-lg font-bold text-parish-text mb-2 line-clamp-2">
                   {evento.title}
                 </h3>
 
                 {/* Description */}
-                <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                <p className="text-sm text-parish-text-light mb-3 line-clamp-2">
                   {evento.description}
                 </p>
 
                 {/* Date */}
-                <div className="flex items-center text-sm text-gray-600 mb-2">
+                <div className="flex items-center text-sm text-parish-text-light mb-2">
                   <Clock className="w-4 h-4 mr-2" />
                   <span>{formatDate(evento.date)}</span>
                 </div>
 
                 {/* Location */}
                 {evento.location && (
-                  <div className="flex items-center text-sm text-gray-600 mb-4">
+                  <div className="flex items-center text-sm text-parish-text-light mb-4">
                     <MapPin className="w-4 h-4 mr-2" />
                     <span className="line-clamp-1">{evento.location}</span>
                   </div>
                 )}
 
                 {/* Actions */}
-                <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                <div className="flex items-center justify-between pt-3 border-t border-parish-primary">
                   <Link
                     href={`/admin/eventos/${evento.id}/editar`}
-                    className="text-blue-600 hover:text-blue-800 transition flex items-center space-x-1"
+                    className="text-parish-gold hover:text-parish-gold-dark transition flex items-center space-x-1"
                   >
                     <Edit className="w-4 h-4" />
                     <span className="text-sm">Editar</span>
@@ -267,7 +267,7 @@ export default function EventosPage() {
                   <div className="flex items-center space-x-3">
                     <Link
                       href={`/eventos/${evento.id}`}
-                      className="text-gray-600 hover:text-gray-800 transition"
+                      className="text-parish-text-light hover:text-parish-text transition"
                       title="Visualizar"
                       target="_blank"
                     >

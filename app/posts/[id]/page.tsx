@@ -32,22 +32,16 @@ export default function PostPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    fetchPost()
-  }, [postId])
+  useEffect(() => { fetchPost() }, [postId])
 
   async function fetchPost() {
     try {
       setLoading(true)
       const response = await fetch(`/api/posts/${postId}/public`)
-      
       if (!response.ok) {
-        if (response.status === 404) {
-          throw new Error('Post não encontrado')
-        }
+        if (response.status === 404) throw new Error('Post não encontrado')
         throw new Error('Erro ao carregar post')
       }
-      
       const data = await response.json()
       setPost(data)
     } catch (error) {
@@ -60,133 +54,100 @@ export default function PostPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-parish-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-parish-gold"></div>
       </div>
     )
   }
 
   if (error || !post) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-parish-background flex items-center justify-center p-4">
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Post não encontrado</h1>
-          <p className="text-gray-600 mb-8">O post que você está procurando não existe ou foi removido.</p>
-          <Link
-            href="/"
-            className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Voltar para o início
+          <h1 className="text-4xl font-bold text-parish-text mb-4">Post não encontrado</h1>
+          <p className="text-parish-text-light mb-8">O post que você está procurando não existe ou foi removido.</p>
+          <Link href="/" className="inline-flex items-center px-6 py-3 bg-parish-gold text-white rounded-lg hover:bg-parish-gold-dark transition">
+            <ArrowLeft className="w-4 h-4 mr-2" />Voltar para o início
           </Link>
         </div>
       </div>
     )
   }
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: 'long',
-      year: 'numeric'
-    })
-  }
+  const formatDate = (dateString: string) =>
+    new Date(dateString).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm sticky top-0 z-50">
+    <div className="min-h-screen bg-parish-background">
+      <header className="bg-parish-surface shadow-sm sticky top-0 z-50">
         <nav className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center space-x-2">
               <div>
-                <h1 className="font-bold text-xl text-blue-900">Paróquia São Sebastião</h1>
-                <p className="text-xs text-gray-600">Três Barras, Cuiabá-MT</p>
+                <h1 className="font-bold text-xl text-parish-text-dark">Paróquia São Sebastião</h1>
+                <p className="text-xs text-parish-text-light">Três Barras, Cuiabá-MT</p>
               </div>
             </Link>
-            
             <div className="flex space-x-4">
-              <Link href="/" className="text-gray-700 hover:text-blue-600 transition">Início</Link>
-              <Link href="/posts" className="text-gray-700 hover:text-blue-600 transition">Posts</Link>
+              <Link href="/" className="text-parish-text-light hover:text-parish-gold transition">Início</Link>
+              <Link href="/posts" className="text-parish-text-light hover:text-parish-gold transition">Posts</Link>
             </div>
           </div>
         </nav>
       </header>
 
-      {/* Cover Image */}
       {post.coverImage && (
-        <div className="w-full h-96 bg-gray-200">
-          <img
-            src={post.coverImage}
-            alt={post.title}
-            className="w-full h-full object-cover"
-          />
+        <div className="w-full h-96 bg-parish-primary">
+          <img src={post.coverImage} alt={post.title} className="w-full h-full object-cover" />
         </div>
       )}
 
-      {/* Content */}
       <article className="container mx-auto px-4 py-12 max-w-4xl">
-        {/* Category Badge */}
         {post.category && (
           <div className="mb-4">
-            <span className="inline-block px-4 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+            <span className="inline-block px-4 py-1 bg-parish-sky-light text-parish-sky-dark rounded-full text-sm font-medium">
               {post.category}
             </span>
           </div>
         )}
 
-        {/* Title */}
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
-          {post.title}
-        </h1>
+        <h1 className="text-4xl md:text-5xl font-bold text-parish-text mb-6 leading-tight">{post.title}</h1>
 
-        {/* Meta Info */}
-        <div className="flex flex-wrap items-center gap-6 text-gray-600 text-sm mb-8 pb-8 border-b border-gray-200">
+        <div className="flex flex-wrap items-center gap-6 text-parish-text-light text-sm mb-8 pb-8 border-b border-parish-border">
           <div className="flex items-center space-x-2">
             <User className="w-4 h-4" />
             <span>{post.author.name || post.author.email}</span>
           </div>
-          
           <div className="flex items-center space-x-2">
             <Calendar className="w-4 h-4" />
             <span>{formatDate(post.publishedAt || post.createdAt)}</span>
           </div>
-          
           <div className="flex items-center space-x-2">
             <Eye className="w-4 h-4" />
             <span>{post.views} visualizações</span>
           </div>
-
-          <button className="flex items-center space-x-2 text-blue-600 hover:text-blue-800 transition">
+          <button className="flex items-center space-x-2 text-parish-gold hover:text-parish-gold-dark transition">
             <Share2 className="w-4 h-4" />
             <span>Compartilhar</span>
           </button>
         </div>
 
-        {/* Excerpt */}
         {post.excerpt && (
-          <div className="bg-blue-50 border-l-4 border-blue-600 p-6 mb-8">
-            <p className="text-lg text-gray-700 italic">{post.excerpt}</p>
+          <div className="bg-parish-sky-light border-l-4 border-parish-gold p-6 mb-8">
+            <p className="text-lg text-parish-text italic">{post.excerpt}</p>
           </div>
         )}
 
-        {/* Content */}
         <div className="prose prose-lg max-w-none">
-          <div className="text-gray-800 leading-relaxed whitespace-pre-wrap">
-            {post.content}
-          </div>
+          <div className="text-parish-text leading-relaxed whitespace-pre-wrap">{post.content}</div>
         </div>
 
-        {/* Tags */}
         {post.tags && post.tags.length > 0 && (
-          <div className="mt-12 pt-8 border-t border-gray-200">
+          <div className="mt-12 pt-8 border-t border-parish-border">
             <div className="flex items-center gap-2 flex-wrap">
-              <Tag className="w-4 h-4 text-gray-600" />
+              <Tag className="w-4 h-4 text-parish-text-light" />
               {post.tags.map((tag, index) => (
-                <span
-                  key={index}
-                  className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-gray-200 transition cursor-pointer"
-                >
+                <span key={index} className="px-3 py-1 bg-parish-primary text-parish-text rounded-full text-sm hover:bg-parish-secondary hover:text-white transition cursor-pointer">
                   {tag}
                 </span>
               ))}
@@ -194,26 +155,18 @@ export default function PostPage() {
           </div>
         )}
 
-        {/* Back Button */}
-        <div className="mt-12 pt-8 border-t border-gray-200">
-          <Link
-            href="/"
-            className="inline-flex items-center text-blue-600 hover:text-blue-800 transition font-medium"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Voltar para o início
+        <div className="mt-12 pt-8 border-t border-parish-border">
+          <Link href="/" className="inline-flex items-center text-parish-gold hover:text-parish-gold-dark transition font-medium">
+            <ArrowLeft className="w-4 h-4 mr-2" />Voltar para o início
           </Link>
         </div>
       </article>
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12 mt-16">
+      <footer className="bg-parish-text-dark text-white py-12 mt-16">
         <div className="container mx-auto px-4 text-center">
           <h3 className="font-bold text-lg mb-2">Paróquia São Sebastião</h3>
-          <p className="text-gray-400 text-sm">Bairro Três Barras, Cuiabá-MT</p>
-          <p className="text-gray-400 text-sm mt-4">
-            &copy; 2025 Paróquia São Sebastião. Todos os direitos reservados.
-          </p>
+          <p className="text-parish-secondary text-sm">Bairro Três Barras, Cuiabá-MT</p>
+          <p className="text-parish-secondary text-sm mt-4">&copy; 2025 Paróquia São Sebastião. Todos os direitos reservados.</p>
         </div>
       </footer>
     </div>

@@ -12,7 +12,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   if (status === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-parish-blue"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-parish-gold"></div>
       </div>
     )
   }
@@ -22,7 +22,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-parish-background">
       <AdminSidebar />
       <div className="lg:pl-64">
         <AdminHeader />

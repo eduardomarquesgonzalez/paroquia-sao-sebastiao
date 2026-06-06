@@ -9,11 +9,11 @@
   }
 
   * {
-    @apply border-gray-200;
+    @apply border-parish-border;
   }
 
   body {
-    @apply bg-white text-gray-900;
+    @apply bg-parish-background text-parish-text;
   }
 }
 

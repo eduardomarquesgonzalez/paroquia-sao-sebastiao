@@ -53,47 +53,47 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-600 mt-1">Bem-vindo ao painel administrativo</p>
+        <h1 className="text-3xl font-bold text-parish-text">Dashboard</h1>
+        <p className="text-parish-text-light mt-1">Bem-vindo ao painel administrativo</p>
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <div className="bg-parish-surface rounded-xl shadow-parish p-6 border border-parish-primary">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 mb-1">Total de Posts</p>
-              <p className="text-3xl font-bold text-gray-900">
+              <p className="text-sm text-parish-text-light mb-1">Total de Posts</p>
+              <p className="text-3xl font-bold text-parish-text">
                 {stats.totalPosts}
               </p>
               <p className="text-sm text-green-600 mt-2">↑ 12% este mês</p>
             </div>
-            <div className="bg-blue-100 p-3 rounded-full">
-              <FileText className="w-8 h-8 text-parish-blue" />
+            <div className="bg-parish-sky-light p-3 rounded-full">
+              <FileText className="w-8 h-8 text-parish-sky-dark" />
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <div className="bg-parish-surface rounded-xl shadow-parish p-6 border border-parish-primary">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 mb-1">Eventos Ativos</p>
-              <p className="text-3xl font-bold text-gray-900">
+              <p className="text-sm text-parish-text-light mb-1">Eventos Ativos</p>
+              <p className="text-3xl font-bold text-parish-text">
                 {stats.totalEvents}
               </p>
               <p className="text-sm text-green-600 mt-2">↑ 8% este mês</p>
             </div>
-            <div className="bg-purple-100 p-3 rounded-full">
-              <Calendar className="w-8 h-8 text-purple-600" />
+            <div className="bg-parish-gold-light/30 p-3 rounded-full">
+              <Calendar className="w-8 h-8 text-parish-gold-dark" />
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <div className="bg-parish-surface rounded-xl shadow-parish p-6 border border-parish-primary">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 mb-1">Doações (mês)</p>
-              <p className="text-3xl font-bold text-gray-900">
+              <p className="text-sm text-parish-text-light mb-1">Doações (mês)</p>
+              <p className="text-3xl font-bold text-parish-text">
                 R$ {stats.totalDonations.toLocaleString()}
               </p>
               <p className="text-sm text-green-600 mt-2">↑ 15% este mês</p>
@@ -104,17 +104,17 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <div className="bg-parish-surface rounded-xl shadow-parish p-6 border border-parish-primary">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 mb-1">Usuários</p>
-              <p className="text-3xl font-bold text-gray-900">
+              <p className="text-sm text-parish-text-light mb-1">Usuários</p>
+              <p className="text-3xl font-bold text-parish-text">
                 {stats.totalUsers}
               </p>
-              <p className="text-sm text-gray-600 mt-2">→ Sem mudanças</p>
+              <p className="text-sm text-parish-text-light mt-2">→ Sem mudanças</p>
             </div>
-            <div className="bg-orange-100 p-3 rounded-full">
-              <Users className="w-8 h-8 text-orange-600" />
+            <div className="bg-parish-primary p-3 rounded-full">
+              <Users className="w-8 h-8 text-parish-text-light" />
             </div>
           </div>
         </div>
@@ -122,8 +122,8 @@ export default function AdminDashboard() {
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">
+        <div className="bg-parish-surface rounded-xl shadow-parish p-6 border border-parish-primary">
+          <h2 className="text-lg font-bold text-parish-text mb-4">
             Visitantes do Site
           </h2>
           <ResponsiveContainer width="100%" height={300}>
@@ -136,7 +136,7 @@ export default function AdminDashboard() {
               <Line
                 type="monotone"
                 dataKey="visitors"
-                stroke="#1e40af"
+                stroke="#6F8FB3"
                 strokeWidth={2}
                 name="Visitantes"
               />
@@ -144,8 +144,8 @@ export default function AdminDashboard() {
           </ResponsiveContainer>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">
+        <div className="bg-parish-surface rounded-xl shadow-parish p-6 border border-parish-primary">
+          <h2 className="text-lg font-bold text-parish-text mb-4">
             Doações Mensais
           </h2>
           <ResponsiveContainer width="100%" height={300}>
@@ -155,15 +155,15 @@ export default function AdminDashboard() {
               <YAxis />
               <Tooltip />
               <Legend />
-              <Bar dataKey="amount" fill="#1e40af" name="Doações (R$)" />
+              <Bar dataKey="amount" fill="#B89A5D" name="Doações (R$)" />
             </BarChart>
           </ResponsiveContainer>
         </div>
       </div>
 
       {/* Recent Activity */}
-      <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-        <h2 className="text-lg font-bold text-gray-900 mb-4">
+      <div className="bg-parish-surface rounded-xl shadow-parish p-6 border border-parish-primary">
+        <h2 className="text-lg font-bold text-parish-text mb-4">
           Atividades Recentes
         </h2>
         <div className="space-y-4">
@@ -196,19 +196,19 @@ export default function AdminDashboard() {
               <div
                 className={`w-2 h-2 rounded-full ${
                   activity.type === "post"
-                    ? "bg-blue-500"
+                    ? "bg-parish-sky"
                     : activity.type === "event"
-                    ? "bg-purple-500"
+                    ? "bg-parish-gold"
                     : activity.type === "donation"
                     ? "bg-green-500"
-                    : "bg-orange-500"
+                    : "bg-parish-secondary"
                 }`}
               ></div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-gray-900">
+                <p className="text-sm font-medium text-parish-text">
                   {activity.title}
                 </p>
-                <p className="text-xs text-gray-500">{activity.time}</p>
+                <p className="text-xs text-parish-secondary">{activity.time}</p>
               </div>
             </div>
           ))}

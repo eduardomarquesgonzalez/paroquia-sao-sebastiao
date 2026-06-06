@@ -45,9 +45,9 @@ const DAY_ORDER = [
 ];
 
 const MASS_TYPES: { [key: string]: { label: string; color: string } } = {
-  DOMINICAL: { label: "Dominical", color: "bg-blue-100 text-blue-800" },
-  SEMANAL: { label: "Semanal", color: "bg-gray-100 text-gray-800" },
-  ESPECIAL: { label: "Especial", color: "bg-purple-100 text-purple-800" },
+  DOMINICAL: { label: "Dominical", color: "bg-parish-sky-light text-parish-sky-dark" },
+  SEMANAL: { label: "Semanal", color: "bg-parish-primary text-parish-text" },
+  ESPECIAL: { label: "Especial", color: "bg-parish-gold-light/40 text-parish-gold-dark" },
 };
 
 export default function HorariosMissasPorDia() {
@@ -73,7 +73,6 @@ export default function HorariosMissasPorDia() {
     }
   }
 
-  // Agrupar missas por dia da semana
   const massesByDay: {
     [key: string]: { community: Community; mass: Mass }[];
   } = {};
@@ -87,20 +86,19 @@ export default function HorariosMissasPorDia() {
     });
   });
 
-  // Ordenar missas dentro de cada dia por horário
   Object.keys(massesByDay).forEach((day) => {
     massesByDay[day].sort((a, b) => a.mass.time.localeCompare(b.mass.time));
   });
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
+      <div className="bg-parish-surface rounded-lg shadow-sm p-6 border border-parish-primary">
         <div className="animate-pulse space-y-4">
-          <div className="h-6 bg-gray-200 rounded w-1/3"></div>
+          <div className="h-6 bg-parish-primary rounded w-1/3"></div>
           <div className="space-y-3">
-            <div className="h-4 bg-gray-200 rounded"></div>
-            <div className="h-4 bg-gray-200 rounded"></div>
-            <div className="h-4 bg-gray-200 rounded"></div>
+            <div className="h-4 bg-parish-primary rounded"></div>
+            <div className="h-4 bg-parish-primary rounded"></div>
+            <div className="h-4 bg-parish-primary rounded"></div>
           </div>
         </div>
       </div>
@@ -109,12 +107,12 @@ export default function HorariosMissasPorDia() {
 
   if (communities.length === 0 || Object.keys(massesByDay).length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow-sm p-12 border border-gray-100 text-center">
-        <Clock className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-        <h3 className="text-xl font-semibold text-gray-900 mb-2">
+      <div className="bg-parish-surface rounded-lg shadow-sm p-12 border border-parish-primary text-center">
+        <Clock className="w-16 h-16 text-parish-secondary mx-auto mb-4" />
+        <h3 className="text-xl font-semibold text-parish-text mb-2">
           Horários em Atualização
         </h3>
-        <p className="text-gray-600">
+        <p className="text-parish-text-light">
           Em breve disponibilizaremos os horários das celebrações.
         </p>
       </div>
@@ -123,9 +121,9 @@ export default function HorariosMissasPorDia() {
 
   return (
     <div className="space-y-6">
-      {/* Filtro por dia (opcional para mobile) */}
-      <div className="lg:hidden bg-white rounded-lg shadow-sm p-4 border border-gray-100">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+      {/* Filtro por dia (mobile) */}
+      <div className="lg:hidden bg-parish-surface rounded-lg shadow-sm p-4 border border-parish-primary">
+        <label className="block text-sm font-medium text-parish-text-light mb-2">
           Filtrar por dia:
         </label>
         <select
@@ -133,7 +131,7 @@ export default function HorariosMissasPorDia() {
           onChange={(e) =>
             setSelectedDay(e.target.value === "all" ? null : e.target.value)
           }
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+          className="w-full px-4 py-2 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold focus:border-transparent outline-none"
         >
           <option value="all">Todos os dias</option>
           {DAY_ORDER.filter((day) => massesByDay[day]).map((day) => (
@@ -150,15 +148,15 @@ export default function HorariosMissasPorDia() {
       ).map((day) => (
         <div
           key={day}
-          className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden"
+          className="bg-parish-surface rounded-lg shadow-sm border border-parish-primary overflow-hidden"
         >
           {/* Header do dia */}
-          <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
+          <div className="bg-gradient-gold px-6 py-4">
             <h3 className="text-2xl font-bold text-white flex items-center">
               <Clock className="w-6 h-6 mr-3" />
               {DAYS_OF_WEEK[day].label}
             </h3>
-            <p className="text-blue-100 text-sm mt-1">
+            <p className="text-parish-background text-sm mt-1">
               {massesByDay[day].length} missa
               {massesByDay[day].length > 1 ? "s" : ""}
             </p>
@@ -170,10 +168,10 @@ export default function HorariosMissasPorDia() {
               {massesByDay[day].map(({ community, mass }, index) => (
                 <div
                   key={`${mass.id}-${index}`}
-                  className="group relative bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg hover:border-blue-300 transition-all duration-300"
+                  className="group relative bg-gradient-to-br from-parish-background to-parish-surface border border-parish-border rounded-lg overflow-hidden hover:shadow-lg hover:border-parish-gold transition-all duration-300"
                 >
                   {/* Imagem da comunidade */}
-                  <div className="relative h-32 bg-gray-200 overflow-hidden">
+                  <div className="relative h-32 bg-parish-primary overflow-hidden">
                     {community.image ? (
                       <img
                         src={community.image}
@@ -181,13 +179,13 @@ export default function HorariosMissasPorDia() {
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                       />
                     ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                      <div className="w-full h-full bg-gradient-to-br from-parish-sky to-parish-gold flex items-center justify-center">
                         <Church className="w-12 h-12 text-white opacity-60" />
                       </div>
                     )}
                     {/* Badge de horário sobreposto */}
                     <div className="absolute top-2 right-2 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg">
-                      <span className="text-xl font-bold text-blue-600">
+                      <span className="text-xl font-bold text-parish-gold">
                         {mass.time}
                       </span>
                     </div>
@@ -200,7 +198,7 @@ export default function HorariosMissasPorDia() {
                       href={`/comunidades/${community.slug}`}
                       className="block group/link"
                     >
-                      <h4 className="font-bold text-gray-900 mb-1 line-clamp-2 group-hover/link:text-blue-600 transition">
+                      <h4 className="font-bold text-parish-text mb-1 line-clamp-2 group-hover/link:text-parish-gold transition">
                         {community.name}
                       </h4>
                     </Link>
@@ -209,7 +207,7 @@ export default function HorariosMissasPorDia() {
                     <span
                       className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mb-3 ${
                         MASS_TYPES[mass.type]?.color ||
-                        "bg-gray-100 text-gray-800"
+                        "bg-parish-primary text-parish-text"
                       }`}
                     >
                       {MASS_TYPES[mass.type]?.label || mass.type}
@@ -217,7 +215,7 @@ export default function HorariosMissasPorDia() {
 
                     {/* Localização */}
                     {community.neighborhood && (
-                      <div className="flex items-start text-sm text-gray-600 mb-2">
+                      <div className="flex items-start text-sm text-parish-text-light mb-2">
                         <MapPin className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" />
                         <span className="line-clamp-1">
                           {community.neighborhood}
@@ -227,7 +225,7 @@ export default function HorariosMissasPorDia() {
 
                     {/* Telefone */}
                     {community.phone && (
-                      <div className="flex items-center text-sm text-gray-600 mb-3">
+                      <div className="flex items-center text-sm text-parish-text-light mb-3">
                         <Phone className="w-4 h-4 mr-2 flex-shrink-0" />
                         <span>{community.phone}</span>
                       </div>
@@ -235,8 +233,8 @@ export default function HorariosMissasPorDia() {
 
                     {/* Observações */}
                     {mass.observations && (
-                      <div className="mt-3 pt-3 border-t border-gray-200">
-                        <div className="flex items-start text-xs text-blue-900 bg-blue-50 rounded-lg p-2">
+                      <div className="mt-3 pt-3 border-t border-parish-border">
+                        <div className="flex items-start text-xs text-parish-text-dark bg-parish-sky-light rounded-lg p-2">
                           <Info className="w-3.5 h-3.5 mr-1.5 flex-shrink-0 mt-0.5" />
                           <span className="line-clamp-2">
                             {mass.observations}
@@ -248,7 +246,7 @@ export default function HorariosMissasPorDia() {
                     {/* Link para página da comunidade */}
                     <Link
                       href={`/comunidades/${community.slug}`}
-                      className="mt-3 text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center group/link"
+                      className="mt-3 text-xs text-parish-gold hover:text-parish-gold-dark font-medium flex items-center group/link"
                     >
                       <span>Ver mais informações</span>
                       <span className="ml-1 group-hover/link:translate-x-1 transition-transform">
@@ -264,14 +262,14 @@ export default function HorariosMissasPorDia() {
       ))}
 
       {/* Footer informativo */}
-      <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6 border border-blue-100">
+      <div className="bg-gradient-to-r from-parish-background to-parish-sky-light rounded-lg p-6 border border-parish-sky-light">
         <div className="flex items-center justify-center space-x-3 text-center">
-          <Church className="w-8 h-8 text-blue-600 flex-shrink-0" />
+          <Church className="w-8 h-8 text-parish-gold flex-shrink-0" />
           <div>
-            <p className="font-semibold text-gray-900 text-lg">
+            <p className="font-semibold text-parish-text text-lg">
               Venha celebrar conosco!
             </p>
-            <p className="text-sm text-gray-600 mt-1">
+            <p className="text-sm text-parish-text-light mt-1">
               Todos são bem-vindos em nossas comunidades
             </p>
           </div>

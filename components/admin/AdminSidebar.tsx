@@ -36,13 +36,13 @@ export default function AdminSidebar() {
     <>
       {/* Desktop Sidebar */}
       <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
-        <div className="flex min-h-0 flex-1 flex-col bg-parish-blue">
+        <div className="flex min-h-0 flex-1 flex-col bg-parish-text-dark">
           <div className="flex flex-1 flex-col overflow-y-auto pt-5 pb-4">
             <div className="flex flex-shrink-0 items-center px-4 mb-6">
-              <Church className="w-8 h-8 text-white" />
+              <Church className="w-8 h-8 text-parish-gold" />
               <div className="ml-3">
                 <h1 className="text-white font-bold text-lg">Admin</h1>
-                <p className="text-blue-200 text-xs">Paróquia São Sebastião</p>
+                <p className="text-parish-secondary text-xs">Paróquia São Sebastião</p>
               </div>
             </div>
             <nav className="mt-5 flex-1 space-y-1 px-2">
@@ -56,14 +56,14 @@ export default function AdminSidebar() {
                       group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition
                       ${
                         isActive
-                          ? "bg-blue-800 text-white"
-                          : "text-blue-100 hover:bg-blue-700 hover:text-white"
+                          ? "bg-parish-text text-white"
+                          : "text-parish-primary hover:bg-parish-text hover:text-white"
                       }
                     `}
                   >
                     <item.icon
                       className={`mr-3 h-5 w-5 flex-shrink-0 ${
-                        isActive ? "text-white" : "text-blue-300"
+                        isActive ? "text-parish-gold" : "text-parish-secondary"
                       }`}
                     />
                     {item.name}

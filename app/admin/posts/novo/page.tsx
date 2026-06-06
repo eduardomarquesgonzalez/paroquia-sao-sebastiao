@@ -36,12 +36,11 @@ export default function NovoPostPage() {
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
 
-      // Auto-gerar slug ao digitar o título
       if (name === "title" && !formData.slug) {
         const slug = value
           .toLowerCase()
           .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "")
+          .replace(/[̀-ͯ]/g, "")
           .replace(/[^\w\s-]/g, "")
           .replace(/\s+/g, "-")
           .replace(/--+/g, "-")
@@ -59,19 +58,16 @@ export default function NovoPostPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validar tipo de arquivo
     if (!file.type.startsWith("image/")) {
       toast.error("Por favor, selecione uma imagem válida");
       return;
     }
 
-    // Validar tamanho (5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast.error("A imagem deve ter no máximo 5MB");
       return;
     }
 
-    // Converter para base64 e criar preview
     const reader = new FileReader();
     reader.onloadend = () => {
       const base64String = reader.result as string;
@@ -119,20 +115,13 @@ export default function NovoPostPage() {
     try {
       const response = await fetch("/api/posts", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...formData,
-          published: shouldPublish,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...formData, published: shouldPublish }),
       });
 
       if (!response.ok) throw new Error("Erro ao criar post");
 
-      toast.success(
-        shouldPublish ? "Post publicado com sucesso!" : "Rascunho salvo!"
-      );
+      toast.success(shouldPublish ? "Post publicado com sucesso!" : "Rascunho salvo!");
       router.push("/admin/posts");
     } catch (error) {
       console.error("Erro ao salvar post:", error);
@@ -144,25 +133,21 @@ export default function NovoPostPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          <Link
-            href="/admin/posts"
-            className="text-gray-600 hover:text-gray-900 transition"
-          >
+          <Link href="/admin/posts" className="text-parish-text-light hover:text-parish-text transition">
             <ArrowLeft className="w-6 h-6" />
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Novo Post</h1>
-            <p className="text-gray-600 mt-1">Crie uma nova publicação</p>
+            <h1 className="text-3xl font-bold text-parish-text">Novo Post</h1>
+            <p className="text-parish-text-light mt-1">Crie uma nova publicação</p>
           </div>
         </div>
         <div className="flex space-x-3">
           <button
             onClick={(e) => handleSubmit(e, false)}
             disabled={isSubmitting}
-            className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition disabled:opacity-50 flex items-center space-x-2"
+            className="px-4 py-2 border border-parish-border rounded-lg text-parish-text-light hover:bg-parish-background transition disabled:opacity-50 flex items-center space-x-2"
           >
             <Save className="w-4 h-4" />
             <span>Salvar Rascunho</span>
@@ -170,7 +155,7 @@ export default function NovoPostPage() {
           <button
             onClick={(e) => handleSubmit(e, true)}
             disabled={isSubmitting}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 flex items-center space-x-2"
+            className="px-4 py-2 bg-parish-gold text-white rounded-lg hover:bg-parish-gold-dark transition disabled:opacity-50 flex items-center space-x-2"
           >
             <Eye className="w-4 h-4" />
             <span>{isSubmitting ? "Publicando..." : "Publicar"}</span>
@@ -179,92 +164,72 @@ export default function NovoPostPage() {
       </div>
 
       <form className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Title */}
-          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Título *
-            </label>
+          <div className="bg-parish-surface rounded-lg shadow-sm p-6 border border-parish-primary">
+            <label className="block text-sm font-medium text-parish-text-light mb-2">Título *</label>
             <input
               type="text"
               name="title"
               value={formData.title}
               onChange={handleChange}
               placeholder="Digite o título do post"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-lg"
+              className="w-full px-4 py-3 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold focus:border-transparent outline-none text-lg"
               required
             />
           </div>
 
-          {/* Slug */}
-          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              URL (Slug)
-            </label>
+          <div className="bg-parish-surface rounded-lg shadow-sm p-6 border border-parish-primary">
+            <label className="block text-sm font-medium text-parish-text-light mb-2">URL (Slug)</label>
             <div className="flex items-center space-x-2">
-              <span className="text-gray-500 text-sm">
-                paroquiasaosebastiao.com.br/posts/
-              </span>
+              <span className="text-parish-secondary text-sm">paroquiasaosebastiao.com.br/posts/</span>
               <input
                 type="text"
                 name="slug"
                 value={formData.slug}
                 onChange={handleChange}
                 placeholder="titulo-do-post"
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                className="flex-1 px-4 py-2 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold focus:border-transparent outline-none"
               />
             </div>
           </div>
 
-          {/* Excerpt */}
-          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Resumo
-            </label>
+          <div className="bg-parish-surface rounded-lg shadow-sm p-6 border border-parish-primary">
+            <label className="block text-sm font-medium text-parish-text-light mb-2">Resumo</label>
             <textarea
               name="excerpt"
               value={formData.excerpt}
               onChange={handleChange}
               placeholder="Breve descrição do post (aparece nas listagens)"
               rows={3}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none"
+              className="w-full px-4 py-3 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold focus:border-transparent outline-none resize-none"
             />
           </div>
 
-          {/* Content */}
-          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Conteúdo *
-            </label>
+          <div className="bg-parish-surface rounded-lg shadow-sm p-6 border border-parish-primary">
+            <label className="block text-sm font-medium text-parish-text-light mb-2">Conteúdo *</label>
             <textarea
               name="content"
               value={formData.content}
               onChange={handleChange}
               placeholder="Digite o conteúdo do post... (Suporte para Markdown)"
               rows={15}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none font-mono text-sm"
+              className="w-full px-4 py-3 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold focus:border-transparent outline-none resize-none font-mono text-sm"
               required
             />
-            <p className="text-xs text-gray-500 mt-2">
-              Você pode usar Markdown para formatação: **negrito**, *itálico*, #
-              títulos, etc.
+            <p className="text-xs text-parish-secondary mt-2">
+              Você pode usar Markdown para formatação: **negrito**, *itálico*, # títulos, etc.
             </p>
           </div>
         </div>
 
-        {/* Sidebar */}
         <div className="space-y-6">
-          {/* Category */}
-          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Categoria
-            </label>
+          <div className="bg-parish-surface rounded-lg shadow-sm p-6 border border-parish-primary">
+            <label className="block text-sm font-medium text-parish-text-light mb-2">Categoria</label>
             <select
               name="category"
               value={formData.category}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+              className="w-full px-4 py-2 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold focus:border-transparent outline-none"
             >
               <option value="">Selecione uma categoria</option>
               <option value="Avisos">Avisos</option>
@@ -276,42 +241,30 @@ export default function NovoPostPage() {
             </select>
           </div>
 
-          {/* Tags */}
-          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Tags
-            </label>
+          <div className="bg-parish-surface rounded-lg shadow-sm p-6 border border-parish-primary">
+            <label className="block text-sm font-medium text-parish-text-light mb-2">Tags</label>
             <div className="flex space-x-2 mb-3">
               <input
                 type="text"
                 value={tagInput}
                 onChange={(e) => setTagInput(e.target.value)}
-                onKeyPress={(e) =>
-                  e.key === "Enter" && (e.preventDefault(), handleAddTag())
-                }
+                onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), handleAddTag())}
                 placeholder="Adicionar tag"
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm"
+                className="flex-1 px-3 py-2 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold focus:border-transparent outline-none text-sm"
               />
               <button
                 type="button"
                 onClick={handleAddTag}
-                className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm"
+                className="px-3 py-2 bg-parish-gold text-white rounded-lg hover:bg-parish-gold-dark transition text-sm"
               >
                 +
               </button>
             </div>
             <div className="flex flex-wrap gap-2">
               {formData.tags.map((tag, index) => (
-                <span
-                  key={index}
-                  className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800"
-                >
+                <span key={index} className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-parish-sky-light text-parish-sky-dark">
                   {tag}
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveTag(tag)}
-                    className="ml-2 hover:text-blue-600"
-                  >
+                  <button type="button" onClick={() => handleRemoveTag(tag)} className="ml-2 hover:text-parish-gold">
                     <X className="w-3 h-3" />
                   </button>
                 </span>
@@ -319,38 +272,21 @@ export default function NovoPostPage() {
             </div>
           </div>
 
-          {/* Cover Image */}
-          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Imagem de Capa
-            </label>
-
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              className="hidden"
-            />
-
+          <div className="bg-parish-surface rounded-lg shadow-sm p-6 border border-parish-primary">
+            <label className="block text-sm font-medium text-parish-text-light mb-2">Imagem de Capa</label>
+            <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
             {!imagePreview ? (
               <div
                 onClick={handleImageClick}
-                className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-500 transition cursor-pointer"
+                className="border-2 border-dashed border-parish-border rounded-lg p-6 text-center hover:border-parish-gold transition cursor-pointer"
               >
-                <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                <p className="text-sm text-gray-600">
-                  Clique para fazer upload
-                </p>
-                <p className="text-xs text-gray-400 mt-1">PNG, JPG até 5MB</p>
+                <Upload className="w-8 h-8 text-parish-secondary mx-auto mb-2" />
+                <p className="text-sm text-parish-text-light">Clique para fazer upload</p>
+                <p className="text-xs text-parish-secondary mt-1">PNG, JPG até 5MB</p>
               </div>
             ) : (
               <div className="relative">
-                <img
-                  src={imagePreview}
-                  alt="Preview"
-                  className="w-full rounded-lg"
-                />
+                <img src={imagePreview} alt="Preview" className="w-full rounded-lg" />
                 <button
                   type="button"
                   onClick={handleRemoveImage}
@@ -362,23 +298,18 @@ export default function NovoPostPage() {
             )}
           </div>
 
-          {/* Publish Status */}
-          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
+          <div className="bg-parish-surface rounded-lg shadow-sm p-6 border border-parish-primary">
             <label className="flex items-center space-x-3 cursor-pointer">
               <input
                 type="checkbox"
                 name="published"
                 checked={formData.published}
                 onChange={handleChange}
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                className="w-4 h-4 text-parish-gold border-parish-border rounded focus:ring-parish-gold"
               />
               <div>
-                <p className="text-sm font-medium text-gray-700">
-                  Publicar imediatamente
-                </p>
-                <p className="text-xs text-gray-500">
-                  Tornar o post visível no site
-                </p>
+                <p className="text-sm font-medium text-parish-text-light">Publicar imediatamente</p>
+                <p className="text-xs text-parish-secondary">Tornar o post visível no site</p>
               </div>
             </label>
           </div>

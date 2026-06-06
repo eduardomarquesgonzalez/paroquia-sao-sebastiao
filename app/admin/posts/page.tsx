@@ -32,12 +32,12 @@ export default function PostsPage() {
     try {
       setLoading(true);
       setError(null);
-      
+
       console.log('Buscando posts...');
       const response = await fetch("/api/posts");
-      
+
       console.log('Status da resposta:', response.status);
-      
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         console.error('Erro da API:', errorData);
@@ -46,7 +46,7 @@ export default function PostsPage() {
 
       const data = await response.json();
       console.log('Posts recebidos:', data);
-      
+
       setPosts(data);
     } catch (error) {
       console.error("Erro ao carregar posts:", error);
@@ -61,8 +61,8 @@ export default function PostsPage() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-        <p className="text-gray-600">Carregando posts...</p>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-parish-gold mb-4"></div>
+        <p className="text-parish-text-light">Carregando posts...</p>
       </div>
     );
   }
@@ -71,9 +71,9 @@ export default function PostsPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-8">
         <AlertCircle className="w-16 h-16 text-red-500 mb-4" />
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Erro ao carregar posts</h2>
-        <p className="text-gray-600 mb-4 text-center">{error}</p>
-        <div className="space-y-2 text-sm text-gray-500 bg-gray-50 p-4 rounded-lg mb-4">
+        <h2 className="text-2xl font-bold text-parish-text mb-2">Erro ao carregar posts</h2>
+        <p className="text-parish-text-light mb-4 text-center">{error}</p>
+        <div className="space-y-2 text-sm text-parish-secondary bg-parish-background p-4 rounded-lg mb-4">
           <p><strong>Possíveis causas:</strong></p>
           <ul className="list-disc list-inside space-y-1">
             <li>A API route não foi criada em <code>app/api/posts/route.ts</code></li>
@@ -84,13 +84,13 @@ export default function PostsPage() {
         <div className="flex space-x-3">
           <button
             onClick={fetchPosts}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+            className="px-4 py-2 bg-parish-gold text-white rounded-lg hover:bg-parish-gold-dark transition"
           >
             Tentar Novamente
           </button>
           <Link
             href="/admin"
-            className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition"
+            className="px-4 py-2 border border-parish-border rounded-lg text-parish-text-light hover:bg-parish-background transition"
           >
             Voltar ao Dashboard
           </Link>
@@ -133,12 +133,12 @@ export default function PostsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Posts</h1>
-          <p className="text-gray-600 mt-1">Gerencie as publicações do site</p>
+          <h1 className="text-3xl font-bold text-parish-text">Posts</h1>
+          <p className="text-parish-text-light mt-1">Gerencie as publicações do site</p>
         </div>
         <Link
           href="/admin/posts/novo"
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-blue-700 transition"
+          className="bg-parish-gold text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-parish-gold-dark transition"
         >
           <Plus className="w-5 h-5" />
           <span>Novo Post</span>
@@ -147,49 +147,49 @@ export default function PostsPage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
-          <p className="text-sm text-gray-600">Total de Posts</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">
+        <div className="bg-parish-surface rounded-lg shadow-sm p-4 border border-parish-primary">
+          <p className="text-sm text-parish-text-light">Total de Posts</p>
+          <p className="text-2xl font-bold text-parish-text mt-1">
             {posts.length}
           </p>
         </div>
-        <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
-          <p className="text-sm text-gray-600">Publicados</p>
+        <div className="bg-parish-surface rounded-lg shadow-sm p-4 border border-parish-primary">
+          <p className="text-sm text-parish-text-light">Publicados</p>
           <p className="text-2xl font-bold text-green-600 mt-1">
             {posts.filter((p) => p.status === "published").length}
           </p>
         </div>
-        <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
-          <p className="text-sm text-gray-600">Rascunhos</p>
+        <div className="bg-parish-surface rounded-lg shadow-sm p-4 border border-parish-primary">
+          <p className="text-sm text-parish-text-light">Rascunhos</p>
           <p className="text-2xl font-bold text-orange-600 mt-1">
             {posts.filter((p) => p.status === "draft").length}
           </p>
         </div>
-        <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
-          <p className="text-sm text-gray-600">Total de Visualizações</p>
-          <p className="text-2xl font-bold text-blue-600 mt-1">
+        <div className="bg-parish-surface rounded-lg shadow-sm p-4 border border-parish-primary">
+          <p className="text-sm text-parish-text-light">Total de Visualizações</p>
+          <p className="text-2xl font-bold text-parish-sky-dark mt-1">
             {posts.reduce((acc, p) => acc + p.views, 0)}
           </p>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
+      <div className="bg-parish-surface rounded-lg shadow-sm p-4 border border-parish-primary">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-parish-secondary w-5 h-5" />
             <input
               type="text"
               placeholder="Buscar posts..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+              className="w-full pl-10 pr-4 py-2 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold focus:border-transparent outline-none"
             />
           </div>
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+            className="px-4 py-2 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold focus:border-transparent outline-none"
           >
             <option value="all">Todos os Status</option>
             <option value="published">Publicados</option>
@@ -199,32 +199,32 @@ export default function PostsPage() {
       </div>
 
       {/* Posts Table */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-parish-surface rounded-lg shadow-sm border border-parish-primary overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
+            <thead className="bg-parish-background border-b border-parish-border">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-parish-secondary uppercase tracking-wider">
                   Post
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-parish-secondary uppercase tracking-wider">
                   Categoria
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-parish-secondary uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-parish-secondary uppercase tracking-wider">
                   Visualizações
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-parish-secondary uppercase tracking-wider">
                   Data
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-right text-xs font-medium text-parish-secondary uppercase tracking-wider">
                   Ações
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-parish-surface divide-y divide-parish-border">
               {filteredPosts.length === 0 ? (
                 <tr>
                   <td
@@ -232,10 +232,10 @@ export default function PostsPage() {
                     className="px-6 py-8 text-center"
                   >
                     <div className="flex flex-col items-center">
-                      <p className="text-gray-500 mb-2">Nenhum post encontrado</p>
+                      <p className="text-parish-secondary mb-2">Nenhum post encontrado</p>
                       <Link
                         href="/admin/posts/novo"
-                        className="text-blue-600 hover:text-blue-800 text-sm"
+                        className="text-parish-gold hover:text-parish-gold-dark text-sm"
                       >
                         Criar seu primeiro post
                       </Link>
@@ -244,22 +244,22 @@ export default function PostsPage() {
                 </tr>
               ) : (
                 filteredPosts.map((post) => (
-                  <tr key={post.id} className="hover:bg-gray-50 transition">
+                  <tr key={post.id} className="hover:bg-parish-background transition">
                     <td className="px-6 py-4">
                       <div className="flex flex-col">
-                        <p className="text-sm font-medium text-gray-900">
+                        <p className="text-sm font-medium text-parish-text">
                           {post.title}
                         </p>
-                        <p className="text-xs text-gray-500 mt-1 line-clamp-1">
+                        <p className="text-xs text-parish-secondary mt-1 line-clamp-1">
                           {post.excerpt}
                         </p>
-                        <p className="text-xs text-gray-400 mt-1">
+                        <p className="text-xs text-parish-secondary mt-1">
                           Por: {post.author}
                         </p>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-parish-sky-light text-parish-sky-dark">
                         {post.category}
                       </span>
                     </td>
@@ -275,19 +275,19 @@ export default function PostsPage() {
                       )}
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex items-center text-sm text-gray-600">
+                      <div className="flex items-center text-sm text-parish-text-light">
                         <Eye className="w-4 h-4 mr-1" />
                         {post.views}
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
+                    <td className="px-6 py-4 text-sm text-parish-text-light">
                       {new Date(post.createdAt).toLocaleDateString("pt-BR")}
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end space-x-2">
                         <Link
                           href={`/admin/posts/${post.id}/editar`}
-                          className="text-blue-600 hover:text-blue-800 transition"
+                          className="text-parish-gold hover:text-parish-gold-dark transition"
                           title="Editar"
                         >
                           <Edit className="w-4 h-4" />
@@ -301,7 +301,7 @@ export default function PostsPage() {
                         </button>
                         <Link
                           href={`/posts/${post.id}`}
-                          className="text-gray-600 hover:text-gray-800 transition"
+                          className="text-parish-text-light hover:text-parish-text transition"
                           title="Visualizar"
                           target="_blank"
                         >
@@ -318,22 +318,22 @@ export default function PostsPage() {
       </div>
 
       {/* Pagination */}
-      <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
+      <div className="bg-parish-surface rounded-lg shadow-sm p-4 border border-parish-primary">
         <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-parish-text-light">
             Mostrando {filteredPosts.length} de {posts.length} posts
           </p>
           <div className="flex space-x-2">
-            <button className="px-3 py-1 border border-gray-300 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed">
+            <button className="px-3 py-1 border border-parish-border rounded-lg text-sm text-parish-text-light hover:bg-parish-background transition disabled:opacity-50 disabled:cursor-not-allowed">
               Anterior
             </button>
-            <button className="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition">
+            <button className="px-3 py-1 bg-parish-gold text-white rounded-lg text-sm hover:bg-parish-gold-dark transition">
               1
             </button>
-            <button className="px-3 py-1 border border-gray-300 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition">
+            <button className="px-3 py-1 border border-parish-border rounded-lg text-sm text-parish-text-light hover:bg-parish-background transition">
               2
             </button>
-            <button className="px-3 py-1 border border-gray-300 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition">
+            <button className="px-3 py-1 border border-parish-border rounded-lg text-sm text-parish-text-light hover:bg-parish-background transition">
               Próximo
             </button>
           </div>
