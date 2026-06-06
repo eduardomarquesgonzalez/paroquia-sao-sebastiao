@@ -111,8 +111,7 @@ export default function HomePage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               {/* <Church className="w-10 h-10 text-parish-gold" /> */}
-            
-              
+
               <div>
                 <h1 className="font-bold text-2xl text-parish-text-dark">
                   Paróquia São Sebastião
@@ -175,66 +174,45 @@ export default function HomePage() {
       {/* Welcome Section */}
       <section className="text-white">
         <CarouselFaixas>
-          {hero && (hero.heading || hero.subtitle || hero.btn1Text || hero.btn2Text) && (
-            <div className="container mx-auto px-4 py-24">
-              <div className="max-w-2xl">
-                {hero.heading && (
-                  <h2 className="text-5xl font-bold mb-6">{hero.heading}</h2>
-                )}
-                {hero.subtitle && (
-                  <p className="text-xl mb-8 text-white/90">{hero.subtitle}</p>
-                )}
-                {(hero.btn1Text || hero.btn2Text) && (
-                  <div className="flex flex-wrap gap-4">
-                    {hero.btn1Text && hero.btn1Link && (
-                      <Link
-                        href={hero.btn1Link}
-                        className="bg-parish-surface text-parish-gold px-8 py-3 rounded-lg font-semibold hover:bg-parish-background transition"
-                      >
-                        {hero.btn1Text}
-                      </Link>
-                    )}
-                    {hero.btn2Text && hero.btn2Link && (
-                      <Link
-                        href={hero.btn2Link}
-                        className="bg-transparent border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-parish-gold transition"
-                      >
-                        {hero.btn2Text}
-                      </Link>
-                    )}
-                  </div>
-                )}
+          {hero &&
+            (hero.heading ||
+              hero.subtitle ||
+              hero.btn1Text ||
+              hero.btn2Text) && (
+              <div className="container mx-auto px-4 py-24">
+                <div className="max-w-2xl">
+                  {hero.heading && (
+                    <h2 className="text-5xl font-bold mb-6">{hero.heading}</h2>
+                  )}
+                  {hero.subtitle && (
+                    <p className="text-xl mb-8 text-white/90">
+                      {hero.subtitle}
+                    </p>
+                  )}
+                  {(hero.btn1Text || hero.btn2Text) && (
+                    <div className="flex flex-wrap gap-4">
+                      {hero.btn1Text && hero.btn1Link && (
+                        <Link
+                          href={hero.btn1Link}
+                          className="bg-parish-surface text-parish-gold px-8 py-3 rounded-lg font-semibold hover:bg-parish-background transition"
+                        >
+                          {hero.btn1Text}
+                        </Link>
+                      )}
+                      {hero.btn2Text && hero.btn2Link && (
+                        <Link
+                          href={hero.btn2Link}
+                          className="bg-transparent border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-parish-gold transition"
+                        >
+                          {hero.btn2Text}
+                        </Link>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          )}
+            )}
         </CarouselFaixas>
-      </section>
-
-      {/* Horários de Missa */}
-      <section id="missas" className="py-16 bg-parish-surface">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-3xl font-bold text-parish-text">
-                Horários de Missas
-              </h2>
-              <p className="text-parish-text-light mt-2">
-                Confira os horários das nossas celebrações
-              </p>
-            </div>
-            <Link
-              href="/missas"
-              className="text-parish-gold hover:text-parish-gold-dark flex items-center space-x-2 font-medium"
-            >
-              <span>Ver detalhes</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-
-          <div className="max-w-4xl mx-auto">
-            <HorariosMissasPorDia />
-          </div>
-        </div>
       </section>
 
       {/* Próximos Eventos */}
@@ -316,6 +294,115 @@ export default function HomePage() {
               ))}
             </div>
           )}
+        </div>
+      </section>
+
+      {/* Posts/Notícias */}
+      <section id="posts" className="py-16 bg-parish-surface">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-3xl font-bold text-parish-text">
+                Notícias e Avisos
+              </h2>
+              <p className="text-parish-text-light mt-2">
+                Fique por dentro das novidades da paróquia
+              </p>
+            </div>
+            <Link
+              href="/posts"
+              className="text-parish-gold hover:text-parish-gold-dark flex items-center space-x-2 font-medium"
+            >
+              <span>Ver todos</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+
+          {loadingPosts ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-parish-gold mx-auto"></div>
+            </div>
+          ) : posts.length === 0 ? (
+            <div className="text-center py-12 bg-parish-background rounded-lg">
+              <BookOpen className="w-16 h-16 text-parish-secondary mx-auto mb-4" />
+              <p className="text-parish-text-light">
+                Nenhuma notícia disponível no momento
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {posts.map((post) => (
+                <Link
+                  key={post.id}
+                  href={`/posts/${post.id}`}
+                  className="bg-parish-surface border border-parish-border rounded-lg overflow-hidden hover:shadow-lg transition"
+                >
+                  {post.coverImage ? (
+                    <div className="h-48 bg-parish-primary">
+                      <img
+                        src={post.coverImage}
+                        alt={post.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="h-48 bg-gradient-to-br from-parish-sky-light to-parish-sky-dark flex items-center justify-center">
+                      <BookOpen className="w-16 h-16 text-white opacity-50" />
+                    </div>
+                  )}
+
+                  <div className="p-6">
+                    <div className="flex items-center justify-between mb-3">
+                      {post.category && (
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-parish-sky-light text-parish-sky-dark">
+                          <Tag className="w-3 h-3 mr-1" />
+                          {post.category}
+                        </span>
+                      )}
+                      <span className="text-xs text-parish-secondary">
+                        {formatDate(post.createdAt)}
+                      </span>
+                    </div>
+
+                    <h3 className="text-lg font-bold text-parish-text mb-2 line-clamp-2">
+                      {post.title}
+                    </h3>
+
+                    <p className="text-parish-text-light text-sm line-clamp-3">
+                      {post.excerpt}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Horários de Missa */}
+      <section id="missas" className="py-16 bg-parish-surface">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-3xl font-bold text-parish-text">
+                Horários de Missas
+              </h2>
+              <p className="text-parish-text-light mt-2">
+                Confira os horários das nossas celebrações
+              </p>
+            </div>
+            <Link
+              href="/missas"
+              className="text-parish-gold hover:text-parish-gold-dark flex items-center space-x-2 font-medium"
+            >
+              <span>Ver detalhes</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+
+          <div className="max-w-4xl mx-auto">
+            <HorariosMissasPorDia />
+          </div>
         </div>
       </section>
 
