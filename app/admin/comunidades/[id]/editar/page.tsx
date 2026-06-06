@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Save, Church, MapPin, Phone, Mail, Image as ImageIcon, FileText, Globe, Trash2 } from "lucide-react";
+import { ArrowLeft, Save, Church, MapPin, Phone, Mail, Image as ImageIcon, FileText, Globe, Trash2, X } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 
@@ -14,6 +14,7 @@ export default function EditarComunidadePage({ params }: EditarComunidadePagePro
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -60,6 +61,22 @@ export default function EditarComunidadePage({ params }: EditarComunidadePagePro
       setLoadingData(false);
     }
   }
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Selecione um arquivo de imagem válido");
+      return;
+    }
+    if (file.size > 15 * 1024 * 1024) {
+      toast.error("Imagem deve ter no máximo 15MB");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => setFormData((prev) => ({ ...prev, image: reader.result as string }));
+    reader.readAsDataURL(file);
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
@@ -230,14 +247,51 @@ export default function EditarComunidadePage({ params }: EditarComunidadePagePro
           <h2 className="text-lg font-semibold text-parish-text mb-4 flex items-center">
             <ImageIcon className="w-5 h-5 mr-2" />Imagem
           </h2>
-          <div>
-            <label className="block text-sm font-medium text-parish-text-light mb-2">URL da Imagem</label>
-            <input type="url" name="image" value={formData.image} onChange={handleChange} className="w-full px-4 py-2 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold focus:border-transparent outline-none" />
-          </div>
-          {formData.image && (
-            <div className="mt-4">
-              <p className="text-sm font-medium text-parish-text-light mb-2">Preview:</p>
-              <img src={formData.image} alt="Preview" className="w-full max-w-md h-48 object-cover rounded-lg" onError={(e) => { (e.target as HTMLImageElement).src = ""; }} />
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/png,image/jpeg,image/jpg,image/webp"
+            onChange={handleImageUpload}
+            className="hidden"
+          />
+
+          {formData.image ? (
+            <div className="relative w-full max-w-md">
+              <img
+                src={formData.image}
+                alt="Preview"
+                className="w-full h-56 object-cover rounded-lg border border-parish-border"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  setFormData((prev) => ({ ...prev, image: "" }));
+                  if (fileInputRef.current) fileInputRef.current.value = "";
+                }}
+                className="absolute top-2 right-2 p-1.5 bg-red-500 hover:bg-red-600 text-white rounded-full transition"
+                title="Remover imagem"
+              >
+                <X className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="mt-3 text-sm text-parish-gold hover:text-parish-gold-dark font-medium transition"
+              >
+                Trocar imagem
+              </button>
+            </div>
+          ) : (
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              className="border-2 border-dashed border-parish-border rounded-lg p-10 text-center cursor-pointer hover:border-parish-gold transition group"
+            >
+              <ImageIcon className="w-10 h-10 text-parish-secondary mx-auto mb-3 group-hover:text-parish-gold transition" />
+              <p className="text-sm text-parish-text-light font-medium">
+                Clique para selecionar uma imagem
+              </p>
+              <p className="text-xs text-parish-secondary mt-1">PNG, JPG ou WebP — até 15MB</p>
             </div>
           )}
         </div>

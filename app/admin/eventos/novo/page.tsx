@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Save, Eye, Upload, X, Calendar } from "lucide-react";
+import { ArrowLeft, Save, Eye, Upload, X, Calendar, Link as LinkIcon } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 
@@ -22,6 +22,8 @@ export default function NovoEventoPage() {
     published: false,
   });
   const [imagePreview, setImagePreview] = useState("");
+  const [imageMode, setImageMode] = useState<"upload" | "url">("upload");
+  const [imageUrl, setImageUrl] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
@@ -51,8 +53,16 @@ export default function NovoEventoPage() {
 
   const handleRemoveImage = () => {
     setImagePreview("");
+    setImageUrl("");
     setFormData((prev) => ({ ...prev, image: "" }));
     if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const url = e.target.value;
+    setImageUrl(url);
+    setImagePreview(url);
+    setFormData((prev) => ({ ...prev, image: url }));
   };
 
   const handleSubmit = async (e: React.FormEvent, shouldPublish: boolean) => {
@@ -144,9 +154,45 @@ export default function NovoEventoPage() {
 
         <div className="space-y-6">
           <div className="bg-parish-surface rounded-lg shadow-sm p-6 border border-parish-primary">
-            <label className="block text-sm font-medium text-parish-text-light mb-2">Imagem do Evento</label>
+            <label className="block text-sm font-medium text-parish-text-light mb-3">Imagem do Evento</label>
+
+            {/* Toggle upload/url */}
+            <div className="flex rounded-lg border border-parish-border overflow-hidden mb-4 text-sm">
+              <button
+                type="button"
+                onClick={() => { setImageMode("upload"); handleRemoveImage(); }}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2 transition ${imageMode === "upload" ? "bg-parish-gold text-white" : "bg-parish-background text-parish-text-light hover:bg-parish-primary"}`}
+              >
+                <Upload className="w-3.5 h-3.5" />Upload
+              </button>
+              <button
+                type="button"
+                onClick={() => { setImageMode("url"); handleRemoveImage(); }}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2 transition ${imageMode === "url" ? "bg-parish-gold text-white" : "bg-parish-background text-parish-text-light hover:bg-parish-primary"}`}
+              >
+                <LinkIcon className="w-3.5 h-3.5" />URL
+              </button>
+            </div>
+
             <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
-            {!imagePreview ? (
+
+            {imageMode === "url" ? (
+              <div className="space-y-3">
+                <input
+                  type="url"
+                  value={imageUrl}
+                  onChange={handleUrlChange}
+                  placeholder="https://exemplo.com/imagem.jpg"
+                  className="w-full px-4 py-2 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold focus:border-transparent outline-none text-sm"
+                />
+                {imagePreview && (
+                  <div className="relative">
+                    <img src={imagePreview} alt="Preview" className="w-full rounded-lg object-cover max-h-48" onError={() => { setImagePreview(""); toast.error("URL de imagem inválida"); }} />
+                    <button type="button" onClick={handleRemoveImage} className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full hover:bg-red-600 transition"><X className="w-3.5 h-3.5" /></button>
+                  </div>
+                )}
+              </div>
+            ) : !imagePreview ? (
               <div onClick={handleImageClick} className="border-2 border-dashed border-parish-border rounded-lg p-6 text-center hover:border-parish-gold transition cursor-pointer">
                 <Upload className="w-8 h-8 text-parish-secondary mx-auto mb-2" />
                 <p className="text-sm text-parish-text-light">Clique para fazer upload</p>

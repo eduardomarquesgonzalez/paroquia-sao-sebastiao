@@ -101,13 +101,13 @@ export default function LoginPage() {
           </Link>
         </div>
 
-        <div className="mt-6 p-4 bg-parish-background rounded-lg">
+        {/* <div className="mt-6 p-4 bg-parish-background rounded-lg">
           <p className="text-xs text-parish-text-light text-center">
             <strong>Credenciais padrão:</strong><br />
             Email: admin@paroquiasaosebastiao.com.br<br />
             Senha: Admin@123456
           </p>
-        </div>
+        </div> */}
       </div>
     </div>
   )
