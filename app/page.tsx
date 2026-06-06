@@ -208,34 +208,8 @@ export default function HomePage() {
         </CarouselFaixas>
       </section>
 
-      {/* Horários de Missa */}
-      <section id="missas" className="py-16 bg-parish-surface">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-3xl font-bold text-parish-text">
-                Horários de Missas
-              </h2>
-              <p className="text-parish-text-light mt-2">
-                Confira os horários das nossas celebrações
-              </p>
-            </div>
-            <Link
-              href="/missas"
-              className="text-parish-gold hover:text-parish-gold-dark flex items-center space-x-2 font-medium"
-            >
-              <span>Ver detalhes</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-          <div className="max-w-4xl mx-auto">
-            <HorariosMissasPorDia />
-          </div>
-        </div>
-      </section>
-
       {/* Próximos Eventos */}
-      <section id="eventos" className="py-16 bg-parish-background">
+      <section id="eventos" className="py-16 bg-parish-surface">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between mb-8">
             <div>
@@ -314,7 +288,7 @@ export default function HomePage() {
       </section>
 
       {/* Nossas Comunidades */}
-      <section id="comunidades" className="py-16 bg-parish-surface">
+      <section id="comunidades" className="py-16 bg-parish-background">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between mb-8">
             <div>
@@ -405,6 +379,32 @@ export default function HomePage() {
               ))}
             </div>
           )}
+        </div>
+      </section>
+
+      {/* Horários de Missa */}
+      <section id="missas" className="py-16 bg-parish-surface">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-3xl font-bold text-parish-text">
+                Horários de Missas
+              </h2>
+              <p className="text-parish-text-light mt-2">
+                Confira os horários das nossas celebrações
+              </p>
+            </div>
+            <Link
+              href="/missas"
+              className="text-parish-gold hover:text-parish-gold-dark flex items-center space-x-2 font-medium"
+            >
+              <span>Ver detalhes</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+          <div className="max-w-4xl mx-auto">
+            <HorariosMissasPorDia />
+          </div>
         </div>
       </section>
 
