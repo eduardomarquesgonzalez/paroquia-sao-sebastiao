@@ -8,21 +8,15 @@ interface Slide {
   image: string;
 }
 
-const FALLBACK: Slide[] = [
-  { id: "f1", image: "/faixa-1.png" },
-  { id: "f2", image: "/faixa-2.png" },
-  { id: "f3", image: "/faixa-3.png" },
-];
-
 export default function CarouselFaixas({ children }: { children?: ReactNode }) {
-  const [slides, setSlides] = useState<Slide[]>(FALLBACK);
+  const [slides, setSlides] = useState<Slide[]>([]);
   const [current, setCurrent] = useState(0);
 
   useEffect(() => {
     fetch("/api/banner-slides")
       .then((r) => r.json())
       .then((data: Slide[]) => {
-        if (Array.isArray(data) && data.length > 0) setSlides(data);
+        if (Array.isArray(data)) setSlides(data);
       })
       .catch(() => {});
   }, []);
@@ -32,9 +26,12 @@ export default function CarouselFaixas({ children }: { children?: ReactNode }) {
   }, [slides.length]);
 
   useEffect(() => {
+    if (slides.length === 0) return;
     const timer = setInterval(next, 3000);
     return () => clearInterval(timer);
-  }, [next]);
+  }, [next, slides.length]);
+
+  if (slides.length === 0) return <div className="relative w-full min-h-[500px] bg-parish-text-dark">{children && <div className="relative z-20">{children}</div>}</div>;
 
   return (
     <div className="relative w-full overflow-hidden">

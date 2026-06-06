@@ -3,21 +3,12 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-const defaults = {
-  heading: "Bem-vindo à Paróquia São Sebastião",
-  subtitle: "Uma comunidade de fé e amor no coração de Três Barras, Cuiabá-MT",
-  btn1Text: "Ver Horários de Missas",
-  btn1Link: "#missas",
-  btn2Text: "Entre em Contato",
-  btn2Link: "/contato",
-};
-
 export async function GET() {
   try {
     const hero = await prisma.homeHero.findFirst();
-    return NextResponse.json(hero ?? defaults);
+    return NextResponse.json(hero ?? null);
   } catch {
-    return NextResponse.json(defaults);
+    return NextResponse.json(null);
   }
 }
 

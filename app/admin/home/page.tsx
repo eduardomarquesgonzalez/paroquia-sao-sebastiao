@@ -32,19 +32,19 @@ interface HomeHero {
   btn2Link: string;
 }
 
-const heroDefaults: HomeHero = {
-  heading: "Bem-vindo à Paróquia São Sebastião",
-  subtitle: "Uma comunidade de fé e amor no coração de Três Barras, Cuiabá-MT",
-  btn1Text: "Ver Horários de Missas",
-  btn1Link: "#missas",
-  btn2Text: "Entre em Contato",
-  btn2Link: "/contato",
+const emptyHero: HomeHero = {
+  heading: "",
+  subtitle: "",
+  btn1Text: "",
+  btn1Link: "",
+  btn2Text: "",
+  btn2Link: "",
 };
 
 export default function AdminHomePage() {
   const [activeTab, setActiveTab] = useState<"slides" | "texto">("slides");
   const [slides, setSlides] = useState<BannerSlide[]>([]);
-  const [hero, setHero] = useState<HomeHero>(heroDefaults);
+  const [hero, setHero] = useState<HomeHero>(emptyHero);
   const [loading, setLoading] = useState(true);
   const [savingHero, setSavingHero] = useState(false);
   const [savingSlide, setSavingSlide] = useState(false);

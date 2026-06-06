@@ -15,12 +15,12 @@ import HorariosMissasPorDia from "@/components/HorariosMissasPorDia";
 import CarouselFaixas from "@/components/CarouselFaixas";
 
 interface HomeHero {
-  heading: string;
-  subtitle: string;
-  btn1Text: string;
-  btn1Link: string;
-  btn2Text: string;
-  btn2Link: string;
+  heading: string | null;
+  subtitle: string | null;
+  btn1Text: string | null;
+  btn1Link: string | null;
+  btn2Text: string | null;
+  btn2Link: string | null;
 }
 
 interface Post {
@@ -46,14 +46,7 @@ export default function HomePage() {
   const [eventos, setEventos] = useState<Event[]>([]);
   const [loadingPosts, setLoadingPosts] = useState(true);
   const [loadingEventos, setLoadingEventos] = useState(true);
-  const [hero, setHero] = useState<HomeHero>({
-    heading: "Bem-vindo à Paróquia São Sebastião",
-    subtitle: "Uma comunidade de fé e amor no coração de Três Barras, Cuiabá-MT",
-    btn1Text: "Ver Horários de Missas",
-    btn1Link: "#missas",
-    btn2Text: "Entre em Contato",
-    btn2Link: "/contato",
-  });
+  const [hero, setHero] = useState<HomeHero | null>(null);
 
   useEffect(() => {
     fetchPosts();
@@ -182,26 +175,38 @@ export default function HomePage() {
       {/* Welcome Section */}
       <section className="text-white">
         <CarouselFaixas>
-          <div className="container mx-auto px-4 py-24">
-            <div className="max-w-2xl">
-              <h2 className="text-5xl font-bold mb-6">{hero.heading}</h2>
-              <p className="text-xl mb-8 text-white/90">{hero.subtitle}</p>
-              <div className="flex flex-wrap gap-4">
-                <Link
-                  href={hero.btn1Link}
-                  className="bg-parish-surface text-parish-gold px-8 py-3 rounded-lg font-semibold hover:bg-parish-background transition"
-                >
-                  {hero.btn1Text}
-                </Link>
-                <Link
-                  href={hero.btn2Link}
-                  className="bg-transparent border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-parish-gold transition"
-                >
-                  {hero.btn2Text}
-                </Link>
+          {hero && (hero.heading || hero.subtitle || hero.btn1Text || hero.btn2Text) && (
+            <div className="container mx-auto px-4 py-24">
+              <div className="max-w-2xl">
+                {hero.heading && (
+                  <h2 className="text-5xl font-bold mb-6">{hero.heading}</h2>
+                )}
+                {hero.subtitle && (
+                  <p className="text-xl mb-8 text-white/90">{hero.subtitle}</p>
+                )}
+                {(hero.btn1Text || hero.btn2Text) && (
+                  <div className="flex flex-wrap gap-4">
+                    {hero.btn1Text && hero.btn1Link && (
+                      <Link
+                        href={hero.btn1Link}
+                        className="bg-parish-surface text-parish-gold px-8 py-3 rounded-lg font-semibold hover:bg-parish-background transition"
+                      >
+                        {hero.btn1Text}
+                      </Link>
+                    )}
+                    {hero.btn2Text && hero.btn2Link && (
+                      <Link
+                        href={hero.btn2Link}
+                        className="bg-transparent border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-parish-gold transition"
+                      >
+                        {hero.btn2Text}
+                      </Link>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
-          </div>
+          )}
         </CarouselFaixas>
       </section>
 
