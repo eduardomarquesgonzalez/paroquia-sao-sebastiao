@@ -172,3 +172,30 @@ model Newsletter {
 
   @@index([active])
 }
+
+model BannerSlide {
+  id        String   @id @default(cuid())
+  image     String   @db.Text
+  order     Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([active])
+  @@index([order])
+  @@map("banner_slides")
+}
+
+model HomeHero {
+  id       String @id @default(cuid())
+  heading  String
+  subtitle String
+  btn1Text String
+  btn1Link String
+  btn2Text String
+  btn2Link String
+
+  updatedAt DateTime @updatedAt
+
+  @@map("home_hero")
+}

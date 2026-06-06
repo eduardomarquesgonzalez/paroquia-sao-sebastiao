@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import {
   Calendar,
   Clock,
@@ -13,6 +12,16 @@ import {
   Church,
 } from "lucide-react";
 import HorariosMissasPorDia from "@/components/HorariosMissasPorDia";
+import CarouselFaixas from "@/components/CarouselFaixas";
+
+interface HomeHero {
+  heading: string;
+  subtitle: string;
+  btn1Text: string;
+  btn1Link: string;
+  btn2Text: string;
+  btn2Link: string;
+}
 
 interface Post {
   id: string;
@@ -37,10 +46,22 @@ export default function HomePage() {
   const [eventos, setEventos] = useState<Event[]>([]);
   const [loadingPosts, setLoadingPosts] = useState(true);
   const [loadingEventos, setLoadingEventos] = useState(true);
+  const [hero, setHero] = useState<HomeHero>({
+    heading: "Bem-vindo à Paróquia São Sebastião",
+    subtitle: "Uma comunidade de fé e amor no coração de Três Barras, Cuiabá-MT",
+    btn1Text: "Ver Horários de Missas",
+    btn1Link: "#missas",
+    btn2Text: "Entre em Contato",
+    btn2Link: "/contato",
+  });
 
   useEffect(() => {
     fetchPosts();
     fetchEventos();
+    fetch("/api/home-hero")
+      .then((r) => r.json())
+      .then((data: HomeHero) => setHero(data))
+      .catch(() => {});
   }, []);
 
   async function fetchPosts() {
@@ -96,7 +117,9 @@ export default function HomePage() {
         <nav className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <Church className="w-10 h-10 text-parish-gold" />
+              {/* <Church className="w-10 h-10 text-parish-gold" /> */}
+            
+              
               <div>
                 <h1 className="font-bold text-2xl text-parish-text-dark">
                   Paróquia São Sebastião
@@ -157,46 +180,29 @@ export default function HomePage() {
       </header>
 
       {/* Welcome Section */}
-      <section className="relative text-white overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-parish-text-dark via-parish-text to-parish-gold-dark"></div>
-        <div className="absolute inset-0 bg-black opacity-10"></div>
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="flex flex-col md:flex-row items-stretch gap-8">
-            <div className="flex-1 max-w-2xl py-24">
-              <h2 className="text-5xl font-bold mb-6">
-                Bem-vindo à Paróquia São Sebastião
-              </h2>
-              <p className="text-xl mb-8 text-parish-primary">
-                Uma comunidade de fé e amor no coração de Três Barras, Cuiabá-MT
-              </p>
+      <section className="text-white">
+        <CarouselFaixas>
+          <div className="container mx-auto px-4 py-24">
+            <div className="max-w-2xl">
+              <h2 className="text-5xl font-bold mb-6">{hero.heading}</h2>
+              <p className="text-xl mb-8 text-white/90">{hero.subtitle}</p>
               <div className="flex flex-wrap gap-4">
                 <Link
-                  href="#missas"
+                  href={hero.btn1Link}
                   className="bg-parish-surface text-parish-gold px-8 py-3 rounded-lg font-semibold hover:bg-parish-background transition"
                 >
-                  Ver Horários de Missas
+                  {hero.btn1Text}
                 </Link>
                 <Link
-                  href="/contato"
+                  href={hero.btn2Link}
                   className="bg-transparent border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-parish-gold transition"
                 >
-                  Entre em Contato
+                  {hero.btn2Text}
                 </Link>
-              </div>
-            </div>
-            <div className="flex-shrink-0 w-full md:w-[42%] py-8">
-              <div className="relative w-full h-64 md:h-full overflow-hidden shadow-2xl rounded-lg">
-                <Image
-                  src="/foto-paroquia.jpeg"
-                  alt="Paróquia São Sebastião"
-                  fill
-                  className="object-cover"
-                  priority
-                />
               </div>
             </div>
           </div>
-        </div>
+        </CarouselFaixas>
       </section>
 
       {/* Horários de Missa */}

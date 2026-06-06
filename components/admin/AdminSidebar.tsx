@@ -13,10 +13,12 @@ import {
   Clock,
   Image,
   Mail,
+  Home,
 } from "lucide-react";
 
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
+  { name: "Página Inicial", href: "/admin/home", icon: Home },
   { name: "Posts", href: "/admin/posts", icon: FileText },
   { name: "Eventos", href: "/admin/eventos", icon: Calendar },
   { name: "Comunidades", href: "/admin/comunidades", icon: Church },
