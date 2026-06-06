@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Calendar, Clock, MapPin, ArrowRight, Church } from "lucide-react";
+import { Calendar, Clock, MapPin, ArrowRight } from "lucide-react";
 import HorariosMissasPorDia from "@/components/HorariosMissasPorDia";
 import CarouselFaixas from "@/components/CarouselFaixas";
+import ComunidadesCarousel from "@/components/ComunidadesCarousel";
 import Image from "next/image";
 import logoImg from "@/public/logo.png";
 
@@ -90,27 +91,6 @@ export default function HomePage() {
       minute: "2-digit",
     });
 
-  function getFirstMasses(masses: CommunityPreview["masses"], max = 2): string {
-    if (!masses.length) return "";
-    const dayOrder: Record<string, number> = {
-      domingo: 0, segunda: 1, "segunda-feira": 1,
-      terça: 2, terca: 2, "terça-feira": 2,
-      quarta: 3, "quarta-feira": 3,
-      quinta: 4, "quinta-feira": 4,
-      sexta: 5, "sexta-feira": 5,
-      sábado: 6, sabado: 6,
-    };
-    const sorted = [...masses].sort(
-      (a, b) =>
-        (dayOrder[a.dayOfWeek.toLowerCase()] ?? 9) -
-        (dayOrder[b.dayOfWeek.toLowerCase()] ?? 9)
-    );
-    const formatted = sorted
-      .slice(0, max)
-      .map((m) => `${m.dayOfWeek.charAt(0).toUpperCase() + m.dayOfWeek.slice(1)} ${m.time}`);
-    const extra = masses.length - max;
-    return formatted.join(" · ") + (extra > 0 ? ` +${extra}` : "");
-  }
 
   return (
     <div className="min-h-screen bg-parish-background">
@@ -313,71 +293,13 @@ export default function HomePage() {
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-parish-gold mx-auto" />
             </div>
           ) : comunidades.length === 0 ? (
-            <div className="text-center py-12 bg-parish-background rounded-2xl border border-parish-border">
-              <Church className="w-16 h-16 text-parish-secondary mx-auto mb-4" />
+            <div className="text-center py-12 bg-parish-surface rounded-2xl border border-parish-border">
               <p className="text-parish-text-light">
                 As comunidades serão cadastradas em breve
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {comunidades.map((c) => (
-                <Link
-                  key={c.id}
-                  href={`/comunidades/${c.slug}`}
-                  className="group bg-parish-surface border border-parish-border rounded-2xl overflow-hidden hover:shadow-lg hover:-translate-y-1 hover:border-parish-gold/40 transition-all duration-300 flex flex-col"
-                >
-                  <div className="h-44 flex-shrink-0 overflow-hidden">
-                    {c.image ? (
-                      <img
-                        src={c.image}
-                        alt={c.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-parish-sky to-parish-gold flex items-center justify-center">
-                        <Church className="w-14 h-14 text-white opacity-60" />
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex-1 p-5 flex flex-col gap-2">
-                    <h3 className="font-bold text-parish-text group-hover:text-parish-gold transition leading-snug line-clamp-2">
-                      {c.name}
-                    </h3>
-
-                    {c.description && (
-                      <p className="text-sm text-parish-text-light line-clamp-2">
-                        {c.description}
-                      </p>
-                    )}
-
-                    <div className="space-y-1.5 mt-auto pt-3">
-                      {(c.neighborhood || c.city) && (
-                        <div className="flex items-center gap-1.5 text-xs text-parish-text-light">
-                          <MapPin className="w-3.5 h-3.5 text-parish-gold flex-shrink-0" />
-                          <span className="line-clamp-1">
-                            {[c.neighborhood, c.city].filter(Boolean).join(", ")}
-                          </span>
-                        </div>
-                      )}
-                      {c.masses.length > 0 && (
-                        <div className="flex items-center gap-1.5 text-xs text-parish-text-light">
-                          <Clock className="w-3.5 h-3.5 text-parish-gold flex-shrink-0" />
-                          <span className="line-clamp-1">{getFirstMasses(c.masses)}</span>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex items-center justify-end pt-2 border-t border-parish-border mt-1">
-                      <span className="inline-flex items-center gap-1 text-sm font-medium text-parish-gold group-hover:gap-2 transition-all">
-                        Ver comunidade <ArrowRight className="w-3.5 h-3.5" />
-                      </span>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
+            <ComunidadesCarousel comunidades={comunidades} />
           )}
         </div>
       </section>
