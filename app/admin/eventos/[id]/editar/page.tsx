@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { ArrowLeft, Save, Eye, Upload, X, Trash2, Link as LinkIcon } from "lucide-react";
+import { ArrowLeft, Save, Eye, Upload, X, Trash2, Link as LinkIcon, Globe } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 
@@ -12,6 +12,7 @@ interface EventData {
   date: string;
   endDate: string;
   location: string;
+  siteUrl: string;
   image: string;
   published: boolean;
 }
@@ -30,6 +31,7 @@ export default function EditarEventoPage() {
     date: "",
     endDate: "",
     location: "",
+    siteUrl: "",
     image: "",
     published: false,
   });
@@ -55,6 +57,7 @@ export default function EditarEventoPage() {
         date: formatDateForInput(data.date),
         endDate: data.endDate ? formatDateForInput(data.endDate) : "",
         location: data.location || "",
+        siteUrl: data.siteUrl || "",
         image: data.image || "",
         published: data.published,
       });
@@ -193,9 +196,18 @@ export default function EditarEventoPage() {
             <textarea name="description" value={formData.description} onChange={handleChange} placeholder="Descreva os detalhes do evento..." rows={8} className="w-full px-4 py-3 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold focus:border-transparent outline-none resize-none" required />
           </div>
 
-          <div className="bg-parish-surface rounded-lg shadow-sm p-6 border border-parish-primary">
-            <label className="block text-sm font-medium text-parish-text-light mb-2">Local</label>
-            <input type="text" name="location" value={formData.location} onChange={handleChange} placeholder="Ex: Igreja Matriz São Sebastião" className="w-full px-4 py-3 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold focus:border-transparent outline-none" />
+          <div className="bg-parish-surface rounded-lg shadow-sm p-6 border border-parish-primary space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-parish-text-light mb-2">Local</label>
+              <input type="text" name="location" value={formData.location} onChange={handleChange} placeholder="Ex: Igreja Matriz São Sebastião" className="w-full px-4 py-3 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold focus:border-transparent outline-none" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-parish-text-light mb-2 flex items-center gap-1.5">
+                <Globe className="w-4 h-4" /> Site / Link externo
+              </label>
+              <input type="url" name="siteUrl" value={formData.siteUrl} onChange={handleChange} placeholder="https://..." className="w-full px-4 py-3 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold focus:border-transparent outline-none" />
+              <p className="text-xs text-parish-secondary mt-1">Link para site externo, inscrições ou mais informações</p>
+            </div>
           </div>
         </div>
 

@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Save, Eye, Upload, X, Calendar, Link as LinkIcon } from "lucide-react";
+import { ArrowLeft, Save, Eye, Upload, X, Calendar, Link as LinkIcon, Globe } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 
@@ -18,6 +18,7 @@ export default function NovoEventoPage() {
     endDate: "",
     endTime: "",
     location: "",
+    siteUrl: "",
     image: "",
     published: false,
   });
@@ -146,9 +147,18 @@ export default function NovoEventoPage() {
             </div>
           </div>
 
-          <div className="bg-parish-surface rounded-lg shadow-sm p-6 border border-parish-primary">
-            <label className="block text-sm font-medium text-parish-text-light mb-2">Local</label>
-            <input type="text" name="location" value={formData.location} onChange={handleChange} placeholder="Ex: Igreja Matriz - Três Barras" className="w-full px-4 py-3 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold focus:border-transparent outline-none" />
+          <div className="bg-parish-surface rounded-lg shadow-sm p-6 border border-parish-primary space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-parish-text-light mb-2">Local</label>
+              <input type="text" name="location" value={formData.location} onChange={handleChange} placeholder="Ex: Igreja Matriz - Três Barras" className="w-full px-4 py-3 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold focus:border-transparent outline-none" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-parish-text-light mb-2 flex items-center gap-1.5">
+                <Globe className="w-4 h-4" /> Site / Link externo
+              </label>
+              <input type="url" name="siteUrl" value={formData.siteUrl} onChange={handleChange} placeholder="https://..." className="w-full px-4 py-3 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold focus:border-transparent outline-none" />
+              <p className="text-xs text-parish-secondary mt-1">Link para site externo, inscrições ou mais informações</p>
+            </div>
           </div>
         </div>
 

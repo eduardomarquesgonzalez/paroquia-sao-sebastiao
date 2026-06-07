@@ -88,6 +88,7 @@ export async function PUT(
         endDate: data.endDate ? new Date(data.endDate) : null,
         location: data.location || null,
         image: data.image || null,
+        siteUrl: data.siteUrl || null,
         published: data.published || false,
       },
       include: {

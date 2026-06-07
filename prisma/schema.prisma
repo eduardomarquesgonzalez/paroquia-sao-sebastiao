@@ -61,6 +61,7 @@ model Event {
   endDate     DateTime?
   location    String?
   image       String?
+  siteUrl     String?
   published   Boolean   @default(false)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Calendar, Clock, MapPin, ArrowLeft, ArrowRight } from "lucide-react";
+import { Calendar, Clock, MapPin, ArrowLeft, ArrowRight, Globe } from "lucide-react";
 
 interface Event {
   id: string;
@@ -12,6 +12,7 @@ interface Event {
   endDate: string | null;
   location: string | null;
   image: string | null;
+  siteUrl: string | null;
 }
 
 export default function EventosPage() {
@@ -131,9 +132,8 @@ export default function EventosPage() {
             {eventos.map((evento) => {
               const { day, month } = getDayMonth(evento.date);
               return (
-                <Link
+                <div
                   key={evento.id}
-                  href={`/eventos/${evento.id}`}
                   className="flex flex-col sm:flex-row bg-parish-surface rounded-2xl border border-parish-border overflow-hidden hover:shadow-md hover:border-parish-gold/40 transition group"
                 >
                   {/* Date badge */}
@@ -183,13 +183,29 @@ export default function EventosPage() {
                         {formatDate(evento.date)}
                       </span>
                     </div>
+
+                    {evento.siteUrl && (
+                      <div className="mt-4">
+                        <a
+                          href={evento.siteUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="inline-flex items-center gap-1.5 text-sm font-semibold text-parish-gold hover:text-parish-gold-dark transition"
+                        >
+                          <Globe className="w-4 h-4" />
+                          Acessar site do evento
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </a>
+                      </div>
+                    )}
                   </div>
 
                   {/* Arrow */}
                   <div className="hidden sm:flex items-center pr-6 text-parish-secondary group-hover:text-parish-gold transition">
                     <ArrowRight className="w-5 h-5" />
                   </div>
-                </Link>
+                </div>
               );
             })}
           </div>
