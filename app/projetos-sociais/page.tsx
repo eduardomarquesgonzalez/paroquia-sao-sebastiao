@@ -83,9 +83,9 @@ export default function ProjetosSociaisPage() {
           <div className="max-w-3xl mx-auto text-center">
             <div className="w-12 h-1 bg-parish-gold mx-auto mb-6 rounded-full" />
             <p className="text-lg text-parish-text-light leading-relaxed">
-              "O serviço ao próximo é parte essencial da vida cristã. Cada projeto social da
+              &ldquo;O serviço ao próximo é parte essencial da vida cristã. Cada projeto social da
               nossa paróquia nasce do amor e do compromisso com a dignidade humana,
-              levando esperança e cuidado a quem mais precisa."
+              levando esperança e cuidado a quem mais precisa.&rdquo;
             </p>
             <p className="text-sm text-parish-gold font-semibold mt-4">— Paróquia São Sebastião</p>
           </div>

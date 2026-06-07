@@ -115,9 +115,9 @@ export default function EventosPage() {
           <div className="max-w-3xl mx-auto text-center">
             <div className="w-12 h-1 bg-parish-gold mx-auto mb-6 rounded-full" />
             <p className="text-lg text-parish-text-light leading-relaxed">
-              "A comunidade paroquial se fortalece quando seus membros se encontram, celebram
+              &ldquo;A comunidade paroquial se fortalece quando seus membros se encontram, celebram
               e crescem juntos na fé. Cada evento é uma oportunidade de aprofundar os laços
-              de fraternidade e de viver o Evangelho em comunidade."
+              de fraternidade e de viver o Evangelho em comunidade.&rdquo;
             </p>
             <p className="text-sm text-parish-gold font-semibold mt-4">— Paróquia São Sebastião</p>
           </div>
