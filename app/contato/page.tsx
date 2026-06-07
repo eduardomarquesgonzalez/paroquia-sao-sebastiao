@@ -1,7 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { Mail, Phone, MapPin, MessageCircle, ArrowLeft, Clock, ExternalLink } from "lucide-react";
+import { Mail, MapPin, MessageCircle, ArrowLeft, Clock, ExternalLink } from "lucide-react";
+
+function InstagramIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+    </svg>
+  );
+}
+
+const INSTAGRAM_URL = "https://www.instagram.com/sebastiao.tresbarras/";
 
 const WHATSAPP_NUMBER = "5565992771705";
 const WHATSAPP_LINK = `https://wa.me/${WHATSAPP_NUMBER}?text=Ol%C3%A1%2C%20gostaria%20de%20mais%20informa%C3%A7%C3%B5es%20sobre%20a%20Par%C3%B3quia%20S%C3%A3o%20Sebasti%C3%A3o.`;
@@ -66,7 +78,7 @@ export default function ContatoPage() {
 
       {/* Cards de contato */}
       <main className="container mx-auto px-4 max-w-5xl">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 -mt-10 relative z-10 mb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 -mt-10 relative z-10 mb-16">
 
           {/* Email */}
           <div className="bg-parish-surface rounded-2xl border border-parish-border p-8 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col items-center text-center group">
@@ -126,6 +138,25 @@ export default function ContatoPage() {
             >
               <ExternalLink className="w-4 h-4" />
               Abrir no Google Maps
+            </a>
+          </div>
+
+          {/* Instagram */}
+          <div className="bg-parish-surface rounded-2xl border border-parish-border p-8 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col items-center text-center group">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 flex items-center justify-center mb-5 group-hover:from-purple-500/20 group-hover:to-pink-500/20 transition">
+              <InstagramIcon className="w-8 h-8 text-pink-500" />
+            </div>
+            <h2 className="font-bold text-lg text-parish-text mb-1">Instagram</h2>
+            <p className="text-sm text-parish-text-light mb-5">Acompanhe nossas novidades</p>
+            <p className="text-parish-text font-semibold text-sm mb-5">@sebastiao.tresbarras</p>
+            <a
+              href={INSTAGRAM_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-6 py-3 rounded-xl font-semibold transition-all"
+            >
+              <InstagramIcon className="w-5 h-5" />
+              Seguir no Instagram
             </a>
           </div>
         </div>
@@ -225,6 +256,12 @@ export default function ContatoPage() {
                 <li>Cuiabá-MT, 78058-531</li>
                 <li>saosebastiaomt@outlook.com.br</li>
                 <li>(65) 9 9277-1705</li>
+                <li>
+                  <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 hover:text-pink-400 transition">
+                    <svg className="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+                    @sebastiao.tresbarras
+                  </a>
+                </li>
               </ul>
             </div>
           </div>
