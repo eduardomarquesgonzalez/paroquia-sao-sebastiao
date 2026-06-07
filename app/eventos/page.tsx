@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Calendar, Clock, MapPin, ArrowLeft, ArrowRight, Globe } from "lucide-react";
+import { Calendar, Clock, MapPin, ArrowRight, ChevronRight, Globe } from "lucide-react";
 
 interface Event {
   id: string;
@@ -27,231 +27,245 @@ export default function EventosPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const formatDate = (dateString: string) =>
-    new Date(dateString).toLocaleDateString("pt-BR", {
+  const formatDate = (d: string) =>
+    new Date(d).toLocaleDateString("pt-BR", {
       day: "2-digit",
       month: "long",
       year: "numeric",
     });
 
-  const formatTime = (dateString: string) =>
-    new Date(dateString).toLocaleTimeString("pt-BR", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+  const formatTime = (d: string) =>
+    new Date(d).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 
-  const getDayMonth = (dateString: string) => {
-    const d = new Date(dateString);
-    return {
-      day: d.toLocaleDateString("pt-BR", { day: "2-digit" }),
-      month: d.toLocaleDateString("pt-BR", { month: "short" }).replace(".", ""),
-    };
-  };
+  const getDay = (d: string) =>
+    new Date(d).toLocaleDateString("pt-BR", { day: "2-digit" });
+
+  const getMonth = (d: string) =>
+    new Date(d).toLocaleDateString("pt-BR", { month: "short" }).replace(".", "").toUpperCase();
+
+  const getWeekday = (d: string) =>
+    new Date(d).toLocaleDateString("pt-BR", { weekday: "long" });
+
+  const isUpcoming = (d: string) => new Date(d) >= new Date();
+
+  const upcomingCount = eventos.filter((e) => isUpcoming(e.date)).length;
 
   return (
     <div className="min-h-screen bg-parish-background">
-      {/* Header */}
-      <header className="bg-parish-surface shadow-sm sticky top-0 z-50">
-        <nav className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center space-x-2">
-              <div>
-                <h1 className="font-bold text-xl text-parish-text-dark">
-                  Paróquia São Sebastião
-                </h1>
-                <p className="text-xs text-parish-text-light">
-                  Três Barras, Cuiabá-MT
-                </p>
+
+      {/* ─── HERO ─── */}
+      <section className="relative bg-parish-text-dark overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-parish-gold/20 via-transparent to-parish-sky/10" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-parish-gold/10 rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-parish-sky/10 rounded-full translate-y-1/2 -translate-x-1/2 pointer-events-none" />
+
+        <div className="container mx-auto px-4 py-24 relative">
+          {/* Breadcrumb */}
+          <nav className="flex items-center gap-2 text-xs text-white/50 mb-8">
+            <Link href="/" className="hover:text-white/80 transition">Início</Link>
+            <ChevronRight className="w-3 h-3" />
+            <span className="text-white/70">Eventos</span>
+          </nav>
+
+          <div className="max-w-2xl">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-parish-gold/20 flex items-center justify-center">
+                <Calendar className="w-5 h-5 text-parish-gold" />
               </div>
-            </Link>
-            <div className="hidden md:flex space-x-6">
-              <Link href="/" className="text-parish-text-light hover:text-parish-gold transition">
-                Início
-              </Link>
-              <Link href="/posts" className="text-parish-text-light hover:text-parish-gold transition">
-                Notícias
-              </Link>
-              <Link href="/eventos" className="text-parish-gold font-medium transition">
-                Eventos
-              </Link>
-              <Link href="/missas" className="text-parish-text-light hover:text-parish-gold transition">
-                Missas
-              </Link>
-              <Link href="/sobre" className="text-parish-text-light hover:text-parish-gold transition">
-                Sobre
-              </Link>
-              <Link href="/contato" className="text-parish-text-light hover:text-parish-gold transition">
-                Contato
-              </Link>
+              <span className="text-xs font-bold uppercase tracking-widest text-parish-gold">
+                Agenda Paroquial
+              </span>
             </div>
-            <Link
-              href="/auth/login"
-              className="px-4 py-2 bg-parish-gold text-white rounded-lg hover:bg-parish-gold-dark transition text-sm font-medium"
-            >
-              Admin
-            </Link>
-          </div>
-        </nav>
-      </header>
-
-      {/* Hero */}
-      <div className="bg-gradient-to-br from-parish-sky to-parish-gold py-16 text-white">
-        <div className="container mx-auto px-4">
-          <Link
-            href="/"
-            className="inline-flex items-center text-white/80 hover:text-white text-sm mb-6 transition"
-          >
-            <ArrowLeft className="w-4 h-4 mr-1" />
-            Voltar para o início
-          </Link>
-          <h1 className="text-4xl md:text-5xl font-bold mb-3">Eventos</h1>
-          <p className="text-white/80 text-lg">
-            Confira os próximos eventos da nossa paróquia
-          </p>
-        </div>
-      </div>
-
-      {/* Content */}
-      <main className="container mx-auto px-4 py-12 max-w-5xl">
-        {loading ? (
-          <div className="flex justify-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-parish-gold" />
-          </div>
-        ) : eventos.length === 0 ? (
-          <div className="text-center py-20 bg-parish-surface rounded-2xl border border-parish-border">
-            <Calendar className="w-16 h-16 text-parish-secondary mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-parish-text mb-2">
-              Nenhum evento próximo
-            </h2>
-            <p className="text-parish-text-light">
-              Volte em breve para conferir as próximas atividades.
+            <h1 className="font-playfair text-5xl font-bold text-white mb-6 leading-tight">
+              Próximos Eventos
+            </h1>
+            <p className="text-lg text-white/70 leading-relaxed">
+              Participe das celebrações, encontros e atividades que fortalecem
+              a fé e os laços da nossa comunidade paroquial.
             </p>
           </div>
-        ) : (
-          <div className="space-y-6">
-            {eventos.map((evento) => {
-              const { day, month } = getDayMonth(evento.date);
-              return (
-                <div
-                  key={evento.id}
-                  className="flex flex-col sm:flex-row bg-parish-surface rounded-2xl border border-parish-border overflow-hidden hover:shadow-md hover:border-parish-gold/40 transition group"
-                >
-                  {/* Date badge */}
-                  <div className="sm:w-28 flex-shrink-0 bg-gradient-to-b from-parish-gold to-parish-gold-dark flex flex-col items-center justify-center py-6 px-4 text-white">
-                    <span className="text-4xl font-bold leading-none">{day}</span>
-                    <span className="text-sm uppercase tracking-widest mt-1 opacity-90">
-                      {month}
-                    </span>
-                  </div>
 
+          {/* Stats bar */}
+          {!loading && eventos.length > 0 && (
+            <div className="mt-12 flex flex-wrap gap-6">
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl px-5 py-3 border border-white/10">
+                <p className="text-2xl font-bold text-white">{eventos.length}</p>
+                <p className="text-xs text-white/60 mt-0.5">Eventos cadastrados</p>
+              </div>
+              {upcomingCount > 0 && (
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl px-5 py-3 border border-white/10">
+                  <p className="text-2xl font-bold text-white">{upcomingCount}</p>
+                  <p className="text-xs text-white/60 mt-0.5">Próximos eventos</p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Bottom wave */}
+        <div
+          className="absolute bottom-0 left-0 right-0 h-12 bg-parish-background"
+          style={{ clipPath: "ellipse(55% 100% at 50% 100%)" }}
+        />
+      </section>
+
+      {/* ─── INTRO ─── */}
+      <section className="py-16 bg-parish-background">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto text-center">
+            <div className="w-12 h-1 bg-parish-gold mx-auto mb-6 rounded-full" />
+            <p className="text-lg text-parish-text-light leading-relaxed">
+              "A comunidade paroquial se fortalece quando seus membros se encontram, celebram
+              e crescem juntos na fé. Cada evento é uma oportunidade de aprofundar os laços
+              de fraternidade e de viver o Evangelho em comunidade."
+            </p>
+            <p className="text-sm text-parish-gold font-semibold mt-4">— Paróquia São Sebastião</p>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── LISTAGEM ─── */}
+      <section className="pb-20 bg-parish-background">
+        <div className="container mx-auto px-4">
+          {loading ? (
+            <div className="flex justify-center py-20">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-parish-gold" />
+            </div>
+          ) : eventos.length === 0 ? (
+            <div className="text-center py-20 bg-parish-surface rounded-3xl border border-parish-border">
+              <div className="w-16 h-16 rounded-2xl bg-parish-gold/10 flex items-center justify-center mx-auto mb-4">
+                <Calendar className="w-8 h-8 text-parish-gold" />
+              </div>
+              <p className="font-semibold text-parish-text mb-1">Nenhum evento cadastrado ainda</p>
+              <p className="text-sm text-parish-text-light">Em breve novos eventos serão divulgados</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {eventos.map((evento, index) => (
+                <article
+                  key={evento.id}
+                  className="group bg-parish-surface rounded-2xl overflow-hidden border border-parish-border/60 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 flex flex-col"
+                >
                   {/* Image */}
-                  {evento.image && (
-                    <div className="sm:w-48 h-40 sm:h-auto flex-shrink-0">
+                  <div className="relative h-56 overflow-hidden flex-shrink-0">
+                    {evento.image ? (
                       <img
                         src={evento.image}
                         alt={evento.title}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
-                    </div>
-                  )}
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-parish-gold/30 to-parish-sky/30 flex items-center justify-center">
+                        <Calendar className="w-16 h-16 text-parish-gold/40" />
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
 
-                  {/* Info */}
-                  <div className="flex-1 p-6 flex flex-col justify-between">
-                    <div>
-                      <h2 className="text-xl font-bold text-parish-text group-hover:text-parish-gold transition mb-2 line-clamp-2">
-                        {evento.title}
-                      </h2>
-                      <p className="text-parish-text-light text-sm line-clamp-2 mb-4">
-                        {evento.description}
-                      </p>
-                    </div>
-
-                    <div className="flex flex-wrap gap-4 text-sm text-parish-text-light">
-                      <span className="flex items-center gap-1.5">
-                        <Clock className="w-4 h-4 text-parish-gold flex-shrink-0" />
-                        {formatTime(evento.date)}
-                        {evento.endDate && ` – ${formatTime(evento.endDate)}`}
+                    {/* Date badge */}
+                    <div className="absolute top-4 left-4 bg-white rounded-xl px-3 py-2 text-center shadow-lg min-w-[52px]">
+                      <span className="block text-xl font-bold text-parish-navy-dark leading-none">
+                        {getDay(evento.date)}
                       </span>
-                      {evento.location && (
-                        <span className="flex items-center gap-1.5">
-                          <MapPin className="w-4 h-4 text-parish-gold flex-shrink-0" />
-                          {evento.location}
+                      <span className="block text-[10px] font-bold uppercase tracking-wide text-parish-text-light mt-0.5">
+                        {getMonth(evento.date)}
+                      </span>
+                    </div>
+
+                    {index === 0 && isUpcoming(evento.date) ? (
+                      <div className="absolute top-4 right-4 bg-parish-gold text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow">
+                        Próximo
+                      </div>
+                    ) : !isUpcoming(evento.date) ? (
+                      <div className="absolute top-4 right-4 bg-white/20 backdrop-blur-sm text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full">
+                        Realizado
+                      </div>
+                    ) : null}
+                  </div>
+
+                  {/* Content */}
+                  <div className="flex-1 flex flex-col p-6">
+                    <h2 className="font-playfair text-xl font-bold text-parish-text group-hover:text-parish-gold transition-colors duration-200 mb-2 leading-snug line-clamp-2">
+                      {evento.title}
+                    </h2>
+
+                    <p className="text-sm text-parish-text-light line-clamp-3 mb-4 leading-relaxed">
+                      {evento.description}
+                    </p>
+
+                    <div className="space-y-2 mt-auto mb-5">
+                      <div className="flex items-center gap-2 text-xs text-parish-text-light">
+                        <div className="w-5 h-5 rounded bg-parish-gold/10 flex items-center justify-center flex-shrink-0">
+                          <Clock className="w-3 h-3 text-parish-gold" />
+                        </div>
+                        <span className="capitalize line-clamp-1">
+                          {getWeekday(evento.date)}, {formatTime(evento.date)}
+                          {evento.endDate && ` – ${formatTime(evento.endDate)}`}
                         </span>
+                      </div>
+                      {evento.location && (
+                        <div className="flex items-center gap-2 text-xs text-parish-text-light">
+                          <div className="w-5 h-5 rounded bg-parish-gold/10 flex items-center justify-center flex-shrink-0">
+                            <MapPin className="w-3 h-3 text-parish-gold" />
+                          </div>
+                          <span className="line-clamp-1">{evento.location}</span>
+                        </div>
                       )}
-                      <span className="flex items-center gap-1.5">
-                        <Calendar className="w-4 h-4 text-parish-gold flex-shrink-0" />
-                        {formatDate(evento.date)}
-                      </span>
+                      <div className="flex items-center gap-2 text-xs text-parish-text-light">
+                        <div className="w-5 h-5 rounded bg-parish-gold/10 flex items-center justify-center flex-shrink-0">
+                          <Calendar className="w-3 h-3 text-parish-gold" />
+                        </div>
+                        <span>{formatDate(evento.date)}</span>
+                      </div>
                     </div>
 
-                    {evento.siteUrl && (
-                      <div className="mt-4">
+                    <div className="flex flex-col gap-2">
+                      <Link
+                        href={`/eventos/${evento.id}`}
+                        className="group/btn flex items-center justify-center gap-2 w-full py-2.5 bg-parish-gold hover:bg-parish-gold-dark text-white text-sm font-semibold rounded-xl transition-all duration-200"
+                      >
+                        Ver Detalhes
+                        <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-0.5 transition-transform" />
+                      </Link>
+                      {evento.siteUrl && (
                         <a
                           href={evento.siteUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          className="inline-flex items-center gap-1.5 text-sm font-semibold text-parish-gold hover:text-parish-gold-dark transition"
+                          className="flex items-center justify-center gap-2 w-full py-2.5 border border-parish-border text-parish-text-light text-sm font-medium rounded-xl hover:border-parish-gold hover:text-parish-gold transition-all duration-200"
                         >
-                          <Globe className="w-4 h-4" />
-                          Acessar site do evento
-                          <ArrowRight className="w-3.5 h-3.5" />
+                          <Globe className="w-3.5 h-3.5" />
+                          Site do Evento
                         </a>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
-
-                  {/* Arrow */}
-                  <div className="hidden sm:flex items-center pr-6 text-parish-secondary group-hover:text-parish-gold transition">
-                    <ArrowRight className="w-5 h-5" />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </main>
-
-      {/* Footer */}
-      <footer className="bg-parish-text-dark text-white py-12 mt-16">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-            <div>
-              <h3 className="font-bold text-lg mb-4">Paróquia São Sebastião</h3>
-              <p className="text-parish-secondary text-sm">
-                Uma comunidade católica dedicada à fé, esperança e caridade.
-              </p>
+                </article>
+              ))}
             </div>
-            <div>
-              <h3 className="font-bold text-lg mb-4">Links Rápidos</h3>
-              <ul className="text-parish-secondary text-sm space-y-2">
-                <li><Link href="/missas" className="hover:text-white transition">Horários de Missas</Link></li>
-                <li><Link href="/eventos" className="hover:text-white transition">Eventos</Link></li>
-                <li><Link href="/posts" className="hover:text-white transition">Notícias</Link></li>
-                <li><Link href="/contato" className="hover:text-white transition">Contato</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-bold text-lg mb-4">Contato</h3>
-              <ul className="text-parish-secondary text-sm space-y-2">
-                <li>Av. A, 332 – Três Barras</li>
-                <li>Cuiabá-MT, 78058-531</li>
-                <li>saosebastiaomt@outlook.com.br</li>
-                <li>(65) 9 9277-1705</li>
-                <li>
-                  <a href="https://www.instagram.com/sebastiao.tresbarras/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 hover:text-pink-400 transition">
-                    <svg className="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
-                    @sebastiao.tresbarras
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-parish-text pt-8 text-center text-parish-secondary text-sm">
-            <p>&copy; 2026 Paróquia São Sebastião. Todos os direitos reservados.</p>
-          </div>
+          )}
         </div>
-      </footer>
+      </section>
+
+      {/* ─── CTA ─── */}
+      <section className="py-16 bg-parish-surface border-t border-parish-border">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="font-playfair text-2xl font-bold text-parish-text mb-3">
+            Fique por dentro da nossa agenda
+          </h2>
+          <p className="text-parish-text-light mb-6 max-w-md mx-auto">
+            Entre em contato e saiba como participar ativamente dos eventos e
+            celebrações da nossa paróquia.
+          </p>
+          <Link
+            href="/contato"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-parish-gold text-white rounded-xl font-semibold hover:bg-parish-gold-dark transition"
+          >
+            Fale Conosco
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+      </section>
+
     </div>
   );
 }

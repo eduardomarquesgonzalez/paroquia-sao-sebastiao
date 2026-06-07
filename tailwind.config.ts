@@ -9,6 +9,10 @@ const config: Config = {
 
   theme: {
     extend: {
+      fontFamily: {
+        playfair: ["var(--font-playfair)", "Georgia", "serif"],
+      },
+
       colors: {
         primary: {
           50: "#faf8f5",
@@ -24,16 +28,22 @@ const config: Config = {
         },
 
         parish: {
-          background: "#F7F5F2",
+          background: "#F5F2EC",
           surface: "#FFFFFF",
 
-          primary: "#E8E1DA",
-          secondary: "#B9B0A8",
+          primary: "#E8E4DA",
+          secondary: "#8A9AAF",
+
+          navy: {
+            light: "#2A4A7F",
+            DEFAULT: "#1A3258",
+            dark: "#0D1B3E",
+          },
 
           gold: {
-            light: "#D8BE84",
-            DEFAULT: "#B89A5D",
-            dark: "#9C7F46",
+            light: "#E0C97A",
+            DEFAULT: "#C9A84C",
+            dark: "#A88A3A",
           },
 
           sky: {
@@ -43,21 +53,24 @@ const config: Config = {
           },
 
           text: {
-            light: "#7E746B",
-            DEFAULT: "#3F3A36",
-            dark: "#2B2724",
+            light: "#6B7A8A",
+            DEFAULT: "#1E2D40",
+            dark: "#0D1B3E",
           },
 
-          border: "#DDD6CF",
+          border: "#E2DBD0",
         },
       },
 
       backgroundImage: {
         "gradient-parish":
-          "linear-gradient(135deg, #F7F5F2 0%, #E8E1DA 50%, #B9B0A8 100%)",
+          "linear-gradient(135deg, #F5F2EC 0%, #E8E4DA 50%, #C9A84C15 100%)",
 
         "gradient-gold":
-          "linear-gradient(135deg, #D8BE84 0%, #B89A5D 50%, #9C7F46 100%)",
+          "linear-gradient(135deg, #E0C97A 0%, #C9A84C 50%, #A88A3A 100%)",
+
+        "gradient-navy":
+          "linear-gradient(135deg, #2A4A7F 0%, #1A3258 50%, #0D1B3E 100%)",
 
         "gradient-sky": "linear-gradient(135deg, #D6E4F2 0%, #9FB9D9 100%)",
 
@@ -68,12 +81,34 @@ const config: Config = {
       },
 
       boxShadow: {
-        parish: "0 4px 20px rgba(63, 58, 54, 0.08)",
-        gold: "0 4px 18px rgba(184, 154, 93, 0.25)",
+        parish: "0 4px 24px rgba(13, 27, 62, 0.07)",
+        gold: "0 4px 20px rgba(201, 168, 76, 0.35)",
+        navy: "0 8px 40px rgba(13, 27, 62, 0.18)",
+        glass: "0 8px 32px rgba(13, 27, 62, 0.08)",
       },
 
       borderRadius: {
         parish: "1.5rem",
+      },
+
+      keyframes: {
+        fadeUp: {
+          "0%": { opacity: "0", transform: "translateY(28px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        fadeIn: {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
+        shimmer: {
+          "0%": { backgroundPosition: "-200% 0" },
+          "100%": { backgroundPosition: "200% 0" },
+        },
+      },
+
+      animation: {
+        "fade-up": "fadeUp 0.7s ease-out forwards",
+        "fade-in": "fadeIn 0.5s ease-out forwards",
       },
     },
   },

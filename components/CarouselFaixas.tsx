@@ -27,18 +27,27 @@ export default function CarouselFaixas({ children }: { children?: ReactNode }) {
 
   useEffect(() => {
     if (slides.length === 0) return;
-    const timer = setInterval(next, 3000);
+    const timer = setInterval(next, 5000);
     return () => clearInterval(timer);
   }, [next, slides.length]);
 
-  if (slides.length === 0) return <div className="relative w-full min-h-[500px] bg-parish-text-dark">{children && <div className="relative z-20">{children}</div>}</div>;
+  /* Fallback when no slides */
+  if (slides.length === 0) {
+    return (
+      <div className="relative w-full min-h-[520px] md:min-h-[620px] bg-gradient-navy flex items-center">
+        <div className="absolute inset-0 bg-gradient-to-r from-parish-navy-dark/90 via-parish-navy-dark/60 to-parish-navy-dark/30" />
+        {children && <div className="relative z-20 w-full">{children}</div>}
+      </div>
+    );
+  }
 
   return (
-    <div className="relative w-full overflow-hidden">
+    <div className="relative w-full overflow-hidden min-h-[520px] md:min-h-[620px]">
+      {/* Slides */}
       {slides.map((slide, index) => (
         <div
           key={slide.id}
-          className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
+          className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
             index === current ? "opacity-100" : "opacity-0"
           }`}
         >
@@ -46,28 +55,35 @@ export default function CarouselFaixas({ children }: { children?: ReactNode }) {
             src={slide.image}
             alt={`Slide ${index + 1}`}
             fill
-            className="object-cover"
+            className="object-cover object-center"
             priority={index === 0}
           />
         </div>
       ))}
 
-      <div className="absolute inset-0 bg-black/50 z-10" />
+      {/* Cinematic directional overlay */}
+      <div className="absolute inset-0 bg-gradient-to-r from-parish-navy-dark/82 via-parish-navy-dark/50 to-parish-navy-dark/15 z-10" />
+      {/* Bottom fade for depth */}
+      <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-parish-navy-dark/40 to-transparent z-10" />
 
-      {children && <div className="relative z-20">{children}</div>}
+      {/* Content */}
+      {children && (
+        <div className="relative z-20 w-full h-full">{children}</div>
+      )}
 
+      {/* Dots */}
       {slides.length > 1 && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-30">
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-30">
           {slides.map((_, index) => (
             <button
               key={index}
               onClick={() => setCurrent(index)}
-              className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
-                index === current
-                  ? "bg-white scale-125"
-                  : "bg-white/50 hover:bg-white/75"
-              }`}
               aria-label={`Slide ${index + 1}`}
+              className={`rounded-full transition-all duration-400 ${
+                index === current
+                  ? "w-7 h-2 bg-parish-gold"
+                  : "w-2 h-2 bg-white/35 hover:bg-white/60"
+              }`}
             />
           ))}
         </div>

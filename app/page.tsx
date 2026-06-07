@@ -1,8 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { Calendar, Clock, MapPin, ArrowRight } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  MapPin,
+  ArrowRight,
+  Menu,
+  X,
+  Phone,
+  Mail,
+} from "lucide-react";
 import HorariosMissasPorDia from "@/components/HorariosMissasPorDia";
 import CarouselFaixas from "@/components/CarouselFaixas";
 import ComunidadesCarousel from "@/components/ComunidadesCarousel";
@@ -38,201 +47,354 @@ interface Event {
   image: string | null;
 }
 
+const NAV_LINKS = [
+  { href: "/", label: "Início" },
+  { href: "/eventos", label: "Eventos" },
+  { href: "/comunidades", label: "Comunidades" },
+  { href: "/projetos-sociais", label: "Projetos Sociais" },
+  { href: "/missas", label: "Missas" },
+  { href: "/contato", label: "Contato" },
+];
+
+function InstagramIcon() {
+  return (
+    <svg
+      className="w-4 h-4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      viewBox="0 0 24 24"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="2" y="2" width="20" height="20" rx="5" />
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+    </svg>
+  );
+}
+
+function PhoneIcon() {
+  return (
+    <svg
+      className="w-4 h-4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      viewBox="0 0 24 24"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+    </svg>
+  );
+}
+
+function MailIcon() {
+  return (
+    <svg
+      className="w-4 h-4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      viewBox="0 0 24 24"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+    </svg>
+  );
+}
+
+function SectionLabel({ children }: { children: string }) {
+  return (
+    <div className="flex items-center gap-3 mb-3">
+      <div className="gold-divider" />
+      <span className="text-[11px] font-bold uppercase tracking-[0.22em] text-parish-gold">
+        {children}
+      </span>
+    </div>
+  );
+}
+
+function SkeletonCard() {
+  return (
+    <div className="bg-parish-surface rounded-2xl overflow-hidden border border-parish-border animate-pulse">
+      <div className="h-52 bg-parish-primary/40" />
+      <div className="p-6 space-y-3">
+        <div className="h-4 bg-parish-primary/50 rounded w-3/4" />
+        <div className="h-3 bg-parish-primary/30 rounded" />
+        <div className="h-3 bg-parish-primary/30 rounded w-2/3" />
+      </div>
+    </div>
+  );
+}
+
 export default function HomePage() {
   const [comunidades, setComunidades] = useState<CommunityPreview[]>([]);
   const [eventos, setEventos] = useState<Event[]>([]);
   const [loadingComunidades, setLoadingComunidades] = useState(true);
   const [loadingEventos, setLoadingEventos] = useState(true);
   const [hero, setHero] = useState<HomeHero | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
+  /* Scroll observer for section animations */
   useEffect(() => {
-    fetchComunidades();
-    fetchEventos();
+    const els = document.querySelectorAll(".animate-on-scroll");
+    const obs = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) e.target.classList.add("is-visible");
+        });
+      },
+      { threshold: 0.08, rootMargin: "0px 0px -48px 0px" }
+    );
+    els.forEach((el) => obs.observe(el));
+    return () => obs.disconnect();
+  }, [loadingEventos, loadingComunidades]);
+
+  /* Navbar scroll state */
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  /* Data fetching */
+  useEffect(() => {
+    fetch("/api/comunidades/public")
+      .then((r) => r.json())
+      .then((d) => setComunidades(Array.isArray(d) ? d.slice(0, 6) : []))
+      .catch(() => {})
+      .finally(() => setLoadingComunidades(false));
+
+    fetch("/api/eventos/public")
+      .then((r) => r.json())
+      .then((d) => setEventos(d.slice(0, 3)))
+      .catch(() => {})
+      .finally(() => setLoadingEventos(false));
+
     fetch("/api/home-hero")
       .then((r) => r.json())
-      .then((data: HomeHero) => setHero(data))
+      .then((d: HomeHero) => setHero(d))
       .catch(() => {});
   }, []);
 
-  async function fetchComunidades() {
-    try {
-      const response = await fetch("/api/comunidades/public");
-      if (response.ok) {
-        const data = await response.json();
-        setComunidades(Array.isArray(data) ? data.slice(0, 6) : []);
-      }
-    } catch (error) {
-      console.error("Erro ao carregar comunidades:", error);
-    } finally {
-      setLoadingComunidades(false);
-    }
-  }
+  const getEventDay = (d: string) =>
+    new Date(d).toLocaleDateString("pt-BR", { day: "2-digit" });
+  const getEventMonth = (d: string) =>
+    new Date(d)
+      .toLocaleDateString("pt-BR", { month: "short" })
+      .replace(".", "")
+      .toUpperCase();
+  const getEventTime = (d: string) =>
+    new Date(d).toLocaleTimeString("pt-BR", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  const getEventWeekday = (d: string) =>
+    new Date(d).toLocaleDateString("pt-BR", { weekday: "long" });
 
-  async function fetchEventos() {
-    try {
-      const response = await fetch("/api/eventos/public");
-      if (response.ok) {
-        const data = await response.json();
-        setEventos(data.slice(0, 3));
-      }
-    } catch (error) {
-      console.error("Erro ao carregar eventos:", error);
-    } finally {
-      setLoadingEventos(false);
-    }
-  }
-
-  const getEventDay = (dateString: string) =>
-    new Date(dateString).toLocaleDateString("pt-BR", { day: "2-digit" });
-
-  const getEventMonth = (dateString: string) =>
-    new Date(dateString).toLocaleDateString("pt-BR", { month: "short" }).replace(".", "").toUpperCase();
-
-  const getEventTime = (dateString: string) =>
-    new Date(dateString).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
-
-  const getEventWeekday = (dateString: string) =>
-    new Date(dateString).toLocaleDateString("pt-BR", { weekday: "long" });
-
+  const closeMenu = useCallback(() => setMenuOpen(false), []);
 
   return (
     <div className="min-h-screen bg-parish-background">
-      {/* Header/Navbar */}
-      <header className="bg-parish-surface shadow-sm sticky top-0 z-50">
-        <nav className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
+
+      {/* ─── NAVBAR ─── */}
+      <header
+        className={`sticky top-0 z-50 transition-all duration-300 ${
+          scrolled
+            ? "bg-white/92 backdrop-blur-xl shadow-glass border-b border-white/30"
+            : "bg-white/75 backdrop-blur-lg"
+        }`}
+      >
+        <nav className="container mx-auto px-4 lg:px-8">
+          <div className="flex items-center justify-between h-16 md:h-20">
+
+            {/* Brand */}
+            <Link href="/" className="flex items-center gap-3 group">
               <Image
                 src={logoImg}
                 alt="Logo da Paróquia"
-                width={40}
-                height={40}
+                width={42}
+                height={42}
                 className="object-contain"
               />
               <div>
-                <h1 className="font-bold text-2xl text-parish-text-dark">
+                <span className="block font-playfair font-bold text-base md:text-lg text-parish-navy-dark leading-tight">
                   Paróquia São Sebastião
-                </h1>
-                <p className="text-sm text-parish-text-light">
-                  Três Barras, Cuiabá-MT
-                </p>
+                </span>
+                <span className="block text-[11px] text-parish-text-light tracking-wide hidden sm:block">
+                  Três Barras · Cuiabá-MT
+                </span>
+              </div>
+            </Link>
+
+            {/* Desktop nav */}
+            <div className="hidden lg:flex items-center gap-1">
+              {NAV_LINKS.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="px-3.5 py-2 text-sm font-medium text-parish-text hover:text-parish-gold rounded-lg hover:bg-parish-gold/6 transition-all duration-200"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+
+            {/* CTA + mobile toggle */}
+            <div className="flex items-center gap-3">
+              <Link
+                href="/auth/login"
+                className="hidden sm:inline-flex px-4 py-2 text-sm font-semibold bg-parish-navy text-white rounded-lg hover:bg-parish-navy-dark transition-colors duration-200"
+              >
+                Área Admin
+              </Link>
+              <button
+                onClick={() => setMenuOpen((v) => !v)}
+                className="lg:hidden p-2 text-parish-text hover:text-parish-gold rounded-lg hover:bg-parish-gold/6 transition-colors"
+                aria-label="Abrir menu"
+              >
+                {menuOpen ? (
+                  <X className="w-5 h-5" />
+                ) : (
+                  <Menu className="w-5 h-5" />
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Mobile menu */}
+          <div
+            className={`lg:hidden overflow-hidden transition-all duration-300 ease-in-out ${
+              menuOpen ? "max-h-96 pb-4" : "max-h-0"
+            }`}
+          >
+            <div className="border-t border-parish-border/40 pt-3 space-y-0.5">
+              {NAV_LINKS.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={closeMenu}
+                  className="block px-4 py-2.5 text-sm font-medium text-parish-text hover:text-parish-gold hover:bg-parish-gold/6 rounded-lg transition-all"
+                >
+                  {link.label}
+                </Link>
+              ))}
+              <div className="pt-2 border-t border-parish-border/40">
+                <Link
+                  href="/auth/login"
+                  onClick={closeMenu}
+                  className="block px-4 py-2.5 text-sm font-semibold bg-parish-navy text-white rounded-lg text-center hover:bg-parish-navy-dark transition-colors mt-2"
+                >
+                  Área Admin
+                </Link>
               </div>
             </div>
-
-            <div className="hidden md:flex space-x-6">
-              <Link href="/" className="text-parish-text-light hover:text-parish-gold transition font-medium">
-                Início
-              </Link>
-              
-              <Link href="/eventos" className="text-parish-text-light hover:text-parish-gold transition">
-                Eventos
-              </Link>
-              <Link href="/comunidades" className="text-parish-text-light hover:text-parish-gold transition">
-                Comunidades
-              </Link>
-              <Link href="/projetos-sociais" className="text-parish-text-light hover:text-parish-gold transition">
-                Projetos Sociais
-              </Link>
-              <Link href="/missas" className="text-parish-text-light hover:text-parish-gold transition">
-                Missas
-              </Link>
-             
-              <Link href="/contato" className="text-parish-text-light hover:text-parish-gold transition">
-                Contato
-              </Link>
-            </div>
-
-            <Link
-              href="/auth/login"
-              className="px-4 py-2 bg-parish-gold text-white rounded-lg hover:bg-parish-gold-dark transition text-sm font-medium"
-            >
-              Admin
-            </Link>
           </div>
         </nav>
       </header>
 
-      {/* Welcome Section */}
-      <section className="text-white">
+      {/* ─── HERO ─── */}
+      <section className="text-white relative">
         <CarouselFaixas>
-          {hero && (hero.heading || hero.subtitle || hero.btn1Text || hero.btn2Text) && (
-            <div className="container mx-auto px-4 py-24">
-              <div className="max-w-2xl">
-                {hero.heading && (
-                  <h2 className="text-5xl font-bold mb-6">{hero.heading}</h2>
-                )}
-                {hero.subtitle && (
-                  <p className="text-xl mb-8 text-white/90">{hero.subtitle}</p>
-                )}
-                {(hero.btn1Text || hero.btn2Text) && (
-                  <div className="flex flex-wrap gap-4">
-                    {hero.btn1Text && hero.btn1Link && (
-                      <Link
-                        href={hero.btn1Link}
-                        className="bg-parish-surface text-parish-gold px-8 py-3 rounded-lg font-semibold hover:bg-parish-background transition"
-                      >
-                        {hero.btn1Text}
-                      </Link>
-                    )}
-                    {hero.btn2Text && hero.btn2Link && (
-                      <Link
-                        href={hero.btn2Link}
-                        className="bg-transparent border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-parish-gold transition"
-                      >
-                        {hero.btn2Text}
-                      </Link>
-                    )}
-                  </div>
-                )}
+          {hero &&
+            (hero.heading ||
+              hero.subtitle ||
+              hero.btn1Text ||
+              hero.btn2Text) && (
+              <div className="container mx-auto px-4 lg:px-8 py-28 md:py-36 lg:py-44">
+                <div className="max-w-2xl">
+                  <SectionLabel>Paróquia São Sebastião</SectionLabel>
+
+                  {hero.heading && (
+                    <h2 className="font-playfair text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-5 text-balance">
+                      {hero.heading}
+                    </h2>
+                  )}
+
+                  {hero.subtitle && (
+                    <p className="text-base md:text-lg text-white/75 leading-relaxed mb-10 max-w-lg">
+                      {hero.subtitle}
+                    </p>
+                  )}
+
+                  {(hero.btn1Text || hero.btn2Text) && (
+                    <div className="flex flex-wrap gap-4">
+                      {hero.btn1Text && hero.btn1Link && (
+                        <Link
+                          href={hero.btn1Link}
+                          className="group inline-flex items-center gap-2 bg-parish-gold text-white px-7 py-3.5 rounded-lg font-semibold text-sm hover:bg-parish-gold-dark transition-all duration-200 shadow-gold"
+                        >
+                          {hero.btn1Text}
+                          <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                        </Link>
+                      )}
+                      {hero.btn2Text && hero.btn2Link && (
+                        <Link
+                          href={hero.btn2Link}
+                          className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/25 text-white px-7 py-3.5 rounded-lg font-semibold text-sm hover:bg-white/20 transition-all duration-200"
+                        >
+                          {hero.btn2Text}
+                        </Link>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          )}
+            )}
         </CarouselFaixas>
       </section>
 
-      {/* Próximos Eventos */}
-      <section id="eventos" className="py-20 bg-parish-surface relative overflow-hidden">
-        {/* Decorative blobs */}
-        <div className="absolute top-0 right-0 w-80 h-80 bg-parish-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-parish-sky/5 rounded-full translate-y-1/2 -translate-x-1/2 pointer-events-none" />
+      {/* ─── PRÓXIMOS EVENTOS ─── */}
+      <section
+        id="eventos"
+        className="py-24 bg-parish-background relative overflow-hidden"
+      >
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-parish-gold/5 rounded-full -translate-y-1/2 translate-x-1/3 blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-parish-navy/4 rounded-full translate-y-1/2 -translate-x-1/3 blur-3xl pointer-events-none" />
 
-        <div className="container mx-auto px-4 relative">
+        <div className="container mx-auto px-4 lg:px-8 relative">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-14 animate-on-scroll">
             <div>
-              <div className="flex items-center gap-3 mb-3">
-                <div className="h-px w-8 bg-parish-gold" />
-                <span className="text-xs font-bold uppercase tracking-widest text-parish-gold">
-                  Agenda da Paróquia
-                </span>
-              </div>
-              <h2 className="text-4xl font-bold text-parish-text leading-tight">
+              <SectionLabel>Agenda da Paróquia</SectionLabel>
+              <h2 className="font-playfair text-3xl md:text-4xl font-bold text-parish-navy-dark leading-tight">
                 Próximos Eventos
               </h2>
-              <p className="text-parish-text-light mt-2 text-base">
+              <p className="text-parish-text-light mt-2 text-sm md:text-base max-w-md">
                 Participe das celebrações e atividades da nossa comunidade
               </p>
             </div>
             <Link
               href="/eventos"
-              className="group inline-flex items-center gap-2 px-5 py-2.5 border border-parish-gold text-parish-gold rounded-xl text-sm font-semibold hover:bg-parish-gold hover:text-white transition-all duration-200 flex-shrink-0"
+              className="group inline-flex items-center gap-2 px-5 py-2.5 border border-parish-navy/20 text-parish-navy rounded-lg text-sm font-semibold hover:bg-parish-navy hover:text-white hover:border-parish-navy transition-all duration-200 flex-shrink-0"
             >
               Ver todos os eventos
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </Link>
           </div>
 
+          {/* Cards */}
           {loadingEventos ? (
-            <div className="flex justify-center py-20">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-parish-gold" />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <SkeletonCard />
+              <SkeletonCard />
+              <SkeletonCard />
             </div>
           ) : eventos.length === 0 ? (
-            <div className="text-center py-20 bg-parish-background rounded-3xl border border-parish-border">
-              <div className="w-16 h-16 rounded-2xl bg-parish-gold/10 flex items-center justify-center mx-auto mb-4">
-                <Calendar className="w-8 h-8 text-parish-gold" />
+            <div className="text-center py-20 bg-parish-surface rounded-3xl border border-parish-border">
+              <div className="w-16 h-16 rounded-2xl bg-parish-navy/8 flex items-center justify-center mx-auto mb-4">
+                <Calendar className="w-8 h-8 text-parish-navy" />
               </div>
-              <p className="font-semibold text-parish-text mb-1">Nenhum evento próximo</p>
-              <p className="text-sm text-parish-text-light">Em breve novas atividades serão divulgadas</p>
+              <p className="font-semibold text-parish-text mb-1">
+                Nenhum evento próximo
+              </p>
+              <p className="text-sm text-parish-text-light">
+                Em breve novas atividades serão divulgadas
+              </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -240,7 +402,9 @@ export default function HomePage() {
                 <Link
                   key={evento.id}
                   href={`/eventos/${evento.id}`}
-                  className="group relative flex flex-col bg-white rounded-2xl overflow-hidden border border-parish-border/60 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300"
+                  className={`group flex flex-col bg-parish-surface rounded-2xl overflow-hidden border border-parish-border/70 hover:shadow-navy hover:-translate-y-2 transition-all duration-300 animate-on-scroll ${
+                    index === 1 ? "stagger-1" : index === 2 ? "stagger-2" : ""
+                  }`}
                 >
                   {/* Image */}
                   <div className="relative h-52 overflow-hidden flex-shrink-0">
@@ -251,17 +415,15 @@ export default function HomePage() {
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                     ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-parish-sky to-parish-gold flex items-center justify-center">
-                        <Calendar className="w-16 h-16 text-white/50" />
+                      <div className="w-full h-full bg-gradient-navy flex items-center justify-center">
+                        <Calendar className="w-14 h-14 text-white/25" />
                       </div>
                     )}
-
-                    {/* Gradient overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-parish-navy-dark/55 via-transparent to-transparent" />
 
                     {/* Date badge */}
-                    <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm rounded-xl px-3 py-2 text-center shadow-lg min-w-[52px]">
-                      <span className="block text-xl font-bold text-parish-gold leading-none">
+                    <div className="absolute top-4 left-4 bg-white rounded-xl px-3 py-2 text-center shadow-lg min-w-[52px]">
+                      <span className="block text-xl font-bold text-parish-navy-dark leading-none">
                         {getEventDay(evento.date)}
                       </span>
                       <span className="block text-[10px] font-bold uppercase tracking-wide text-parish-text-light mt-0.5">
@@ -269,7 +431,6 @@ export default function HomePage() {
                       </span>
                     </div>
 
-                    {/* "Próximo" badge only on first */}
                     {index === 0 && (
                       <div className="absolute top-4 right-4 bg-parish-gold text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow">
                         Próximo
@@ -279,10 +440,9 @@ export default function HomePage() {
 
                   {/* Content */}
                   <div className="flex-1 flex flex-col p-6">
-                    <h3 className="text-lg font-bold text-parish-text group-hover:text-parish-gold transition-colors duration-200 line-clamp-2 mb-2 leading-snug">
+                    <h3 className="font-playfair text-lg font-bold text-parish-navy-dark group-hover:text-parish-gold transition-colors duration-200 line-clamp-2 mb-2 leading-snug">
                       {evento.title}
                     </h3>
-
                     <p className="text-sm text-parish-text-light line-clamp-2 mb-4 leading-relaxed">
                       {evento.description}
                     </p>
@@ -292,7 +452,10 @@ export default function HomePage() {
                         <div className="w-6 h-6 rounded-md bg-parish-gold/10 flex items-center justify-center flex-shrink-0">
                           <Clock className="w-3.5 h-3.5 text-parish-gold" />
                         </div>
-                        <span className="capitalize">{getEventWeekday(evento.date)}, {getEventTime(evento.date)}</span>
+                        <span className="capitalize">
+                          {getEventWeekday(evento.date)},{" "}
+                          {getEventTime(evento.date)}
+                        </span>
                       </div>
                       {evento.location && (
                         <div className="flex items-center gap-2 text-xs text-parish-text-light">
@@ -304,13 +467,12 @@ export default function HomePage() {
                       )}
                     </div>
 
-                    {/* CTA */}
                     <div className="mt-5 pt-4 border-t border-parish-border flex items-center justify-between">
                       <span className="text-sm font-semibold text-parish-gold flex items-center gap-1.5 group-hover:gap-2.5 transition-all duration-200">
                         Saiba mais
                         <ArrowRight className="w-3.5 h-3.5" />
                       </span>
-                      <span className="text-xs text-parish-secondary bg-parish-background px-2.5 py-1 rounded-full">
+                      <span className="text-xs text-parish-text-light bg-parish-background px-2.5 py-1 rounded-full">
                         {getEventMonth(evento.date)}
                       </span>
                     </div>
@@ -322,33 +484,42 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Nossas Comunidades */}
-      <section id="comunidades" className="py-16 bg-parish-background">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between mb-8">
+      {/* ─── NOSSAS COMUNIDADES ─── */}
+      <section
+        id="comunidades"
+        className="py-24 bg-parish-surface relative overflow-hidden"
+      >
+        {/* Subtle dot grid */}
+        <div className="absolute inset-0 dot-pattern opacity-[0.018] pointer-events-none" />
+
+        <div className="container mx-auto px-4 lg:px-8 relative">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-14 animate-on-scroll">
             <div>
-              <h2 className="text-3xl font-bold text-parish-text">
+              <SectionLabel>Nossa Diocese</SectionLabel>
+              <h2 className="font-playfair text-3xl md:text-4xl font-bold text-parish-navy-dark leading-tight">
                 Nossas Comunidades
               </h2>
-              <p className="text-parish-text-light mt-2">
+              <p className="text-parish-text-light mt-2 text-sm md:text-base max-w-md">
                 Conheça as comunidades da Paróquia São Sebastião
               </p>
             </div>
             <Link
               href="/comunidades"
-              className="text-parish-gold hover:text-parish-gold-dark flex items-center space-x-2 font-medium"
+              className="group inline-flex items-center gap-2 px-5 py-2.5 border border-parish-navy/20 text-parish-navy rounded-lg text-sm font-semibold hover:bg-parish-navy hover:text-white hover:border-parish-navy transition-all duration-200 flex-shrink-0"
             >
-              <span>Ver todas</span>
-              <ArrowRight className="w-4 h-4" />
+              Ver todas
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </Link>
           </div>
 
           {loadingComunidades ? (
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-parish-gold mx-auto" />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <SkeletonCard />
+              <SkeletonCard />
+              <SkeletonCard />
             </div>
           ) : comunidades.length === 0 ? (
-            <div className="text-center py-12 bg-parish-surface rounded-2xl border border-parish-border">
+            <div className="text-center py-12 bg-parish-background rounded-2xl border border-parish-border">
               <p className="text-parish-text-light">
                 As comunidades serão cadastradas em breve
               </p>
@@ -359,90 +530,177 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Horários de Missa */}
-      <section id="missas" className="py-16 bg-parish-surface">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between mb-8">
+      {/* ─── HORÁRIOS DE MISSAS ─── */}
+      <section
+        id="missas"
+        className="py-24 bg-parish-background relative overflow-hidden"
+      >
+        <div className="absolute top-0 left-0 w-[400px] h-[400px] bg-parish-navy/4 rounded-full -translate-y-1/2 -translate-x-1/2 blur-3xl pointer-events-none" />
+
+        <div className="container mx-auto px-4 lg:px-8 relative">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-14 animate-on-scroll">
             <div>
-              <h2 className="text-3xl font-bold text-parish-text">
+              <SectionLabel>Celebrações</SectionLabel>
+              <h2 className="font-playfair text-3xl md:text-4xl font-bold text-parish-navy-dark leading-tight">
                 Horários de Missas
               </h2>
-              <p className="text-parish-text-light mt-2">
+              <p className="text-parish-text-light mt-2 text-sm md:text-base max-w-md">
                 Confira os horários das nossas celebrações
               </p>
             </div>
             <Link
               href="/missas"
-              className="text-parish-gold hover:text-parish-gold-dark flex items-center space-x-2 font-medium"
+              className="group inline-flex items-center gap-2 px-5 py-2.5 border border-parish-navy/20 text-parish-navy rounded-lg text-sm font-semibold hover:bg-parish-navy hover:text-white hover:border-parish-navy transition-all duration-200 flex-shrink-0"
             >
-              <span>Ver detalhes</span>
-              <ArrowRight className="w-4 h-4" />
+              Ver detalhes
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </Link>
           </div>
-          <div className="max-w-4xl mx-auto">
+
+          <div className="max-w-5xl mx-auto">
             <HorariosMissasPorDia />
           </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-parish-text-dark text-white py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-            <div>
-              <h3 className="font-bold text-lg mb-4">Paróquia São Sebastião</h3>
-              <p className="text-parish-secondary text-sm">
-                Uma comunidade católica dedicada à fé, esperança e caridade.
-              </p>
-            </div>
+      {/* ─── FOOTER ─── */}
+      <footer className="bg-parish-navy-dark text-white">
+        {/* Main footer */}
+        <div className="border-b border-white/8">
+          <div className="container mx-auto px-4 lg:px-8 py-16">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10">
 
-            <div>
-              <h3 className="font-bold text-lg mb-4">Links Rápidos</h3>
-              <ul className="text-parish-secondary text-sm space-y-2">
-                <li>
-                  <Link href="/missas" className="hover:text-white transition">
-                    Horários de Missas
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/comunidades" className="hover:text-white transition">
-                    Comunidades
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/eventos" className="hover:text-white transition">
-                    Eventos
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/contato" className="hover:text-white transition">
-                    Contato
-                  </Link>
-                </li>
-              </ul>
-            </div>
+              {/* Brand */}
+              <div className="lg:col-span-5">
+                <Link href="/" className="flex items-center gap-3 mb-5">
+                  <Image
+                    src={logoImg}
+                    alt="Logo da Paróquia"
+                    width={44}
+                    height={44}
+                    className="object-contain brightness-0 invert opacity-90"
+                  />
+                  <div>
+                    <span className="block font-playfair font-bold text-xl text-white leading-tight">
+                      Paróquia São Sebastião
+                    </span>
+                    <span className="block text-[11px] text-white/45 tracking-widest uppercase mt-0.5">
+                      Três Barras · Cuiabá-MT
+                    </span>
+                  </div>
+                </Link>
+                <p className="text-white/55 text-sm leading-relaxed max-w-xs">
+                  Uma comunidade católica dedicada à fé, esperança e caridade.
+                  Bem-vindo à nossa família paroquial em Três Barras.
+                </p>
 
-            <div>
-              <h3 className="font-bold text-lg mb-4">Contato</h3>
-              <ul className="text-parish-secondary text-sm space-y-2">
-                <li>Av. A, 332 – Três Barras</li>
-                <li>Cuiabá-MT, 78058-531</li>
-                <li>saosebastiaomt@outlook.com.br</li>
-                <li>(65) 9 9277-1705</li>
-                <li>
-                  <a href="https://www.instagram.com/sebastiao.tresbarras/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 hover:text-pink-400 transition">
-                    <svg className="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
-                    @sebastiao.tresbarras
+                {/* Social */}
+                <div className="flex items-center gap-3 mt-6">
+                  <a
+                    href="https://www.instagram.com/sebastiao.tresbarras/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-9 h-9 rounded-lg bg-white/8 hover:bg-parish-gold border border-white/10 hover:border-parish-gold flex items-center justify-center transition-all duration-200"
+                    aria-label="Instagram da Paróquia"
+                  >
+                    <InstagramIcon />
                   </a>
-                </li>
-              </ul>
+                </div>
+              </div>
+
+              {/* Links rápidos */}
+              <div className="lg:col-span-3">
+                <h4 className="text-[11px] font-bold uppercase tracking-[0.22em] text-parish-gold mb-5">
+                  Links Rápidos
+                </h4>
+                <ul className="space-y-3">
+                  {[
+                    { href: "/missas", label: "Horários de Missas" },
+                    { href: "/comunidades", label: "Comunidades" },
+                    { href: "/eventos", label: "Eventos" },
+                    { href: "/projetos-sociais", label: "Projetos Sociais" },
+                    { href: "/contato", label: "Contato" },
+                  ].map((link) => (
+                    <li key={link.href}>
+                      <Link
+                        href={link.href}
+                        className="group flex items-center gap-2.5 text-white/55 hover:text-white text-sm transition-colors duration-200"
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full bg-parish-gold/40 group-hover:bg-parish-gold transition-colors flex-shrink-0" />
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Contato */}
+              <div className="lg:col-span-4">
+                <h4 className="text-[11px] font-bold uppercase tracking-[0.22em] text-parish-gold mb-5">
+                  Contato
+                </h4>
+                <ul className="space-y-4">
+                  <li className="flex items-start gap-3">
+                    <MapPin className="w-4 h-4 text-parish-gold flex-shrink-0 mt-0.5" />
+                    <div className="text-white/55 text-sm leading-relaxed">
+                      Av. A, 332 – Três Barras
+                      <br />
+                      Cuiabá-MT, 78058-531
+                    </div>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <span className="text-parish-gold flex-shrink-0">
+                      <PhoneIcon />
+                    </span>
+                    <a
+                      href="tel:+5565992771705"
+                      className="text-white/55 hover:text-white text-sm transition-colors duration-200"
+                    >
+                      (65) 9 9277-1705
+                    </a>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <span className="text-parish-gold flex-shrink-0">
+                      <MailIcon />
+                    </span>
+                    <a
+                      href="mailto:saosebastiaomt@outlook.com.br"
+                      className="text-white/55 hover:text-white text-sm transition-colors duration-200 break-all"
+                    >
+                      saosebastiaomt@outlook.com.br
+                    </a>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <span className="text-parish-gold flex-shrink-0">
+                      <InstagramIcon />
+                    </span>
+                    <a
+                      href="https://www.instagram.com/sebastiao.tresbarras/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-white/55 hover:text-white text-sm transition-colors duration-200"
+                    >
+                      @sebastiao.tresbarras
+                    </a>
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
+        </div>
 
-          <div className="border-t border-parish-text pt-8 text-center text-parish-secondary text-sm">
-            <p>
+        {/* Bottom bar */}
+        <div className="container mx-auto px-4 lg:px-8 py-5">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
+            <p className="text-white/30 text-xs">
               &copy; 2026 Paróquia São Sebastião. Todos os direitos reservados.
             </p>
+            <div className="flex items-center gap-1.5">
+              <span className="text-parish-gold/40 text-xs">✦</span>
+              <span className="text-white/25 text-xs">
+                Três Barras, Cuiabá-MT
+              </span>
+            </div>
           </div>
         </div>
       </footer>
