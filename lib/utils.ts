@@ -119,6 +119,34 @@ export function isEventEnded(event: { date: string | Date; endDate?: string | Da
   return reference < new Date()
 }
 
+// ─── Dias da semana ────────────────────────────────────────────────────────────
+
+const DAY_OF_WEEK_PT: Record<string, string> = {
+  SUNDAY:    'Domingo',
+  MONDAY:    'Segunda-feira',
+  TUESDAY:   'Terça-feira',
+  WEDNESDAY: 'Quarta-feira',
+  THURSDAY:  'Quinta-feira',
+  FRIDAY:    'Sexta-feira',
+  SATURDAY:  'Sábado',
+}
+
+/** Traduz o valor enum do banco (SUNDAY, MONDAY…) para pt-BR. */
+export function formatDayOfWeek(day: string): string {
+  return DAY_OF_WEEK_PT[day.toUpperCase()] ?? day
+}
+
+/** Ordem canônica para sort (dom=0…sáb=6). Aceita enum inglês ou nome pt-BR. */
+export const DAY_OF_WEEK_ORDER: Record<string, number> = {
+  sunday: 0, domingo: 0,
+  monday: 1, segunda: 1, 'segunda-feira': 1,
+  tuesday: 2, 'terça': 2, terca: 2, 'terça-feira': 2,
+  wednesday: 3, quarta: 3, 'quarta-feira': 3,
+  thursday: 4, quinta: 4, 'quinta-feira': 4,
+  friday: 5, sexta: 5, 'sexta-feira': 5,
+  saturday: 6, 'sábado': 6, sabado: 6,
+}
+
 // \u2500\u2500\u2500 Outras utilidades \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 
 export function formatCurrency(amount: number): string {

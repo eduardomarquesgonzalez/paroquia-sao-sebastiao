@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import PublicNavbar from "@/components/PublicNavbar";
 import PublicFooter from "@/components/PublicFooter";
+import { formatDayOfWeek, DAY_OF_WEEK_ORDER } from "@/lib/utils";
 
 interface Mass {
   id: string;
@@ -35,22 +36,12 @@ interface Community {
   masses: Mass[];
 }
 
-const DAY_ORDER: Record<string, number> = {
-  domingo: 0,
-  segunda: 1, "segunda-feira": 1,
-  terça: 2, "terca": 2, "terça-feira": 2,
-  quarta: 3, "quarta-feira": 3,
-  quinta: 4, "quinta-feira": 4,
-  sexta: 5, "sexta-feira": 5,
-  sábado: 6, sabado: 6,
-};
-
 function groupMassesByDay(masses: Mass[]) {
   const map = new Map<string, Mass[]>();
   const sorted = [...masses].sort(
     (a, b) =>
-      (DAY_ORDER[a.dayOfWeek.toLowerCase()] ?? 9) -
-      (DAY_ORDER[b.dayOfWeek.toLowerCase()] ?? 9)
+      (DAY_OF_WEEK_ORDER[a.dayOfWeek.toLowerCase()] ?? 9) -
+      (DAY_OF_WEEK_ORDER[b.dayOfWeek.toLowerCase()] ?? 9)
   );
   for (const m of sorted) {
     const key = m.dayOfWeek;
@@ -60,9 +51,6 @@ function groupMassesByDay(masses: Mass[]) {
   return map;
 }
 
-function capitalize(str: string) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
 
 export default function ComunidadePage() {
   const params = useParams();
@@ -190,7 +178,7 @@ export default function ComunidadePage() {
                     <div key={day} className="flex flex-col sm:flex-row sm:items-start gap-2 p-4 rounded-xl bg-parish-background">
                       <div className="sm:w-32 flex-shrink-0">
                         <span className="font-semibold text-parish-text text-sm">
-                          {capitalize(day)}
+                          {formatDayOfWeek(day)}
                         </span>
                       </div>
                       <div className="flex-1 space-y-1.5">

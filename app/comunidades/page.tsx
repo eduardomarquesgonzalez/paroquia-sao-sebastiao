@@ -5,6 +5,7 @@ import Link from "next/link";
 import { MapPin, Clock, Church, ArrowRight, ChevronRight } from "lucide-react";
 import PublicNavbar from "@/components/PublicNavbar";
 import PublicFooter from "@/components/PublicFooter";
+import { formatDayOfWeek, DAY_OF_WEEK_ORDER } from "@/lib/utils";
 
 interface Mass {
   id: string;
@@ -26,29 +27,16 @@ interface Community {
   masses: Mass[];
 }
 
-const DAY_ORDER: Record<string, number> = {
-  domingo: 0, segunda: 1, "segunda-feira": 1,
-  terca: 2, "terça": 2, "terça-feira": 2,
-  quarta: 3, "quarta-feira": 3,
-  quinta: 4, "quinta-feira": 4,
-  sexta: 5, "sexta-feira": 5,
-  sabado: 6, "sábado": 6,
-};
-
 function getFirstMasses(masses: Mass[], max = 2): string {
   if (!masses.length) return "";
   const sorted = [...masses].sort(
     (a, b) =>
-      (DAY_ORDER[a.dayOfWeek.toLowerCase()] ?? 9) -
-      (DAY_ORDER[b.dayOfWeek.toLowerCase()] ?? 9)
+      (DAY_OF_WEEK_ORDER[a.dayOfWeek.toLowerCase()] ?? 9) -
+      (DAY_OF_WEEK_ORDER[b.dayOfWeek.toLowerCase()] ?? 9)
   );
-  const formatted = sorted.slice(0, max).map((m) => `${capitalize(m.dayOfWeek)} ${m.time}`);
+  const formatted = sorted.slice(0, max).map((m) => `${formatDayOfWeek(m.dayOfWeek)} ${m.time}`);
   const extra = masses.length - max;
   return formatted.join(" · ") + (extra > 0 ? ` +${extra}` : "");
-}
-
-function capitalize(str: string) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
 export default function ComunidadesPage() {
