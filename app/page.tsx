@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import CarouselFaixas from "@/components/CarouselFaixas";
 import ComunidadesCarousel from "@/components/ComunidadesCarousel";
+import CleroCarousel, { CleroSkeletonCard } from "@/components/CleroCarousel";
 import Image from "next/image";
 import logoImg from "@/public/logo.png";
 import { formatDay, formatMonthShort, formatTime, formatWeekday } from "@/lib/utils";
@@ -48,6 +49,14 @@ interface Event {
   date: string;
   location: string | null;
   image: string | null;
+}
+
+interface CleroMember {
+  id: string;
+  name: string;
+  role: string;
+  photo: string | null;
+  currentRole: string | null;
 }
 
 const NAV_LINKS = [
@@ -136,8 +145,10 @@ function SkeletonCard() {
 export default function HomePage() {
   const [comunidades, setComunidades] = useState<CommunityPreview[]>([]);
   const [eventos, setEventos] = useState<Event[]>([]);
+  const [clero, setClero] = useState<CleroMember[]>([]);
   const [loadingComunidades, setLoadingComunidades] = useState(true);
   const [loadingEventos, setLoadingEventos] = useState(true);
+  const [loadingClero, setLoadingClero] = useState(true);
   const [hero, setHero] = useState<HomeHero | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [hoje, setHoje] = useState("");
@@ -188,6 +199,12 @@ export default function HomePage() {
       .then((r) => r.json())
       .then((d: HomeHero) => setHero(d))
       .catch(() => {});
+
+    fetch("/api/clero/public")
+      .then((r) => r.json())
+      .then((d) => setClero(Array.isArray(d) ? d : []))
+      .catch(() => {})
+      .finally(() => setLoadingClero(false));
   }, []);
 
   const getEventDay = formatDay;
@@ -497,6 +514,49 @@ export default function HomePage() {
           )}
         </div>
       </section>
+
+      {/* ─── CLERO ─── */}
+      {(loadingClero || clero.length > 0) && (
+        <section className="py-24 bg-parish-navy relative overflow-hidden">
+          <div
+            className="absolute inset-0 opacity-[0.04] pointer-events-none"
+            style={{ backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.15) 1px, transparent 1px)", backgroundSize: "28px 28px" }}
+          />
+          <div className="absolute top-0 left-0 w-96 h-96 bg-parish-gold/8 rounded-full -translate-y-1/2 -translate-x-1/3 blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 right-0 w-80 h-80 bg-white/4 rounded-full translate-y-1/2 translate-x-1/3 blur-3xl pointer-events-none" />
+
+          <div className="container mx-auto px-4 lg:px-8 relative">
+            {/* Header */}
+            <div className="text-center mb-14 animate-on-scroll">
+              <div className="flex items-center justify-center gap-3 mb-3">
+                <div className="w-8 h-px bg-parish-gold" />
+                <span className="text-[11px] font-bold uppercase tracking-[0.22em] text-parish-gold">
+                  Nossa Família Paroquial
+                </span>
+                <div className="w-8 h-px bg-parish-gold" />
+              </div>
+              <h2 className="font-playfair text-3xl md:text-4xl font-bold text-white leading-tight">
+                Nosso Clero
+              </h2>
+              <p className="text-white/55 mt-3 text-sm md:text-base max-w-md mx-auto leading-relaxed">
+                Conheça os padres e seminaristas que servem à nossa comunidade
+                com dedicação e fé
+              </p>
+            </div>
+
+            {/* Carousel / skeleton */}
+            {loadingClero ? (
+              <div className="flex gap-4 overflow-hidden">
+                {[1, 2, 3, 4].map((i) => (
+                  <CleroSkeletonCard key={i} />
+                ))}
+              </div>
+            ) : (
+              <CleroCarousel members={clero} />
+            )}
+          </div>
+        </section>
+      )}
 
       {/* ─── NOSSA PARÓQUIA ─── */}
       <section className="py-24 bg-parish-navy relative overflow-hidden">

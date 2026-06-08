@@ -266,3 +266,29 @@ model Movement {
   @@index([order])
   @@map("movements")
 }
+
+model Clero {
+  id             String    @id @default(cuid())
+  name           String
+  role           String    // "Pároco" | "Vigário" | "Seminarista"
+  photo          String?   @db.Text
+  birthDate      DateTime?
+  birthCity      String?
+  ordinationDate DateTime?
+  ordainer       String?
+  currentRole    String?
+  biography      String?   @db.Text
+  instagram      String?
+  facebook       String?
+  youtube        String?
+  whatsapp       String?
+  tiktok         String?
+  order          Int       @default(0)
+  active         Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([active])
+  @@index([order])
+  @@map("clero")
+}

@@ -15,6 +15,7 @@ import {
   Mail,
   Home,
   HandHeart,
+  UserCheck,
 } from "lucide-react";
 
 const navigation = [
@@ -26,6 +27,7 @@ const navigation = [
   { name: "Projetos Sociais", href: "/admin/projetos-sociais", icon: HandHeart },
   { name: "Horários de Missas", href: "/admin/missas", icon: Clock },
   { name: "Sacramentos", href: "/admin/sacramentos", icon: Church },
+  { name: "Clero", href: "/admin/clero", icon: UserCheck },
   { name: "Movimentos", href: "/admin/movimentos", icon: Users },
   { name: "Doações", href: "/admin/doacoes", icon: Heart },
   { name: "Galeria", href: "/admin/galeria", icon: Image },
