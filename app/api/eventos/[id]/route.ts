@@ -90,6 +90,7 @@ export async function PUT(
         image: data.image || null,
         siteUrl: data.siteUrl || null,
         published: data.published || false,
+        order: data.order ?? existingEvento.order,
       },
       include: {
         createdBy: {

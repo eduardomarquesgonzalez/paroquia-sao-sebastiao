@@ -110,6 +110,15 @@ export function isDatePast(date: Date | string): boolean {
   return new Date(date) < new Date()
 }
 
+/**
+ * Verifica se um evento j\u00e1 encerrou, usando endDate se dispon\u00edvel.
+ * Encerrado = endDate (ou date, se n\u00e3o houver endDate) < agora.
+ */
+export function isEventEnded(event: { date: string | Date; endDate?: string | Date | null }): boolean {
+  const reference = event.endDate ? new Date(event.endDate) : new Date(event.date)
+  return reference < new Date()
+}
+
 // \u2500\u2500\u2500 Outras utilidades \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 
 export function formatCurrency(amount: number): string {

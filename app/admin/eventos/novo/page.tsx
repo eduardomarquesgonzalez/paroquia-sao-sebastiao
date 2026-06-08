@@ -22,6 +22,7 @@ export default function NovoEventoPage() {
     siteUrl: "",
     image: "",
     published: false,
+    order: 0,
   });
   const [imagePreview, setImagePreview] = useState("");
   const [imageMode, setImageMode] = useState<"upload" | "url">("upload");
@@ -79,7 +80,7 @@ export default function NovoEventoPage() {
       const response = await fetch("/api/eventos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: formData.title, description: formData.description, date: dateTime, endDate: endDateTime, location: formData.location, image: formData.image, published: shouldPublish }),
+        body: JSON.stringify({ title: formData.title, description: formData.description, date: dateTime, endDate: endDateTime, location: formData.location, image: formData.image, published: shouldPublish, order: formData.order }),
       });
       if (!response.ok) throw new Error("Erro ao criar evento");
       toast.success(shouldPublish ? "Evento publicado com sucesso!" : "Rascunho salvo!");
@@ -147,6 +148,19 @@ export default function NovoEventoPage() {
                 <label className="block text-sm text-parish-secondary mb-2">Horário de Término</label>
                 <input type="time" name="endTime" value={formData.endTime} onChange={handleChange} className="w-full px-4 py-2 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold focus:border-transparent outline-none" />
               </div>
+            </div>
+
+            <div className="mt-4 pt-4 border-t border-parish-border">
+              <label className="block text-sm text-parish-secondary mb-2">Ordem de exibição</label>
+              <input
+                type="number"
+                name="order"
+                value={formData.order}
+                onChange={(e) => setFormData((prev) => ({ ...prev, order: Number(e.target.value) }))}
+                min={0}
+                className="w-full px-4 py-2 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold focus:border-transparent outline-none"
+              />
+              <p className="text-xs text-parish-secondary mt-1">Menor número = exibido primeiro na página inicial</p>
             </div>
           </div>
 

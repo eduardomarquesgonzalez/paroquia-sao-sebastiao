@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { formatDateTimeShort, isDatePast } from "@/lib/utils";
+import { formatDateTimeShort, isEventEnded } from "@/lib/utils";
 
 interface Event {
   id: string;
@@ -74,7 +74,7 @@ export default function EventosPage() {
   };
 
   const formatDate = formatDateTimeShort;
-  const isEventPast = isDatePast;
+  const isEnded = isEventEnded;
 
   if (loading) {
     return (
@@ -96,9 +96,9 @@ export default function EventosPage() {
   });
 
   const upcomingEvents = eventos.filter(
-    (e) => e.published && !isEventPast(e.date)
+    (e) => e.published && !isEnded(e)
   ).length;
-  const pastEvents = eventos.filter((e) => isEventPast(e.date)).length;
+  const endedEvents = eventos.filter((e) => isEnded(e)).length;
 
   return (
     <div className="space-y-6">
@@ -132,8 +132,8 @@ export default function EventosPage() {
           </p>
         </div>
         <div className="bg-parish-surface rounded-lg shadow-sm p-4 border border-parish-primary">
-          <p className="text-sm text-parish-text-light">Realizados</p>
-          <p className="text-2xl font-bold text-parish-text-light mt-1">{pastEvents}</p>
+          <p className="text-sm text-parish-text-light">Encerrados</p>
+          <p className="text-2xl font-bold text-gray-400 mt-1">{endedEvents}</p>
         </div>
         <div className="bg-parish-surface rounded-lg shadow-sm p-4 border border-parish-primary">
           <p className="text-sm text-parish-text-light">Rascunhos</p>
@@ -182,22 +182,29 @@ export default function EventosPage() {
             </Link>
           </div>
         ) : (
-          filteredEventos.map((evento) => (
+          filteredEventos.map((evento) => {
+            const eventEnded = isEnded(evento);
+            return (
             <div
               key={evento.id}
-              className="bg-parish-surface rounded-lg shadow-sm border border-parish-primary overflow-hidden hover:shadow-md transition"
+              className={`rounded-lg shadow-sm border overflow-hidden transition ${
+                eventEnded
+                  ? "bg-gray-50 border-gray-200 opacity-80 hover:opacity-100 hover:shadow-sm"
+                  : "bg-parish-surface border-parish-primary hover:shadow-md"
+              }`}
             >
               {/* Image */}
               {evento.image ? (
-                <div className="h-48 bg-parish-primary">
+                <div className="h-48 bg-parish-primary relative overflow-hidden">
                   <img
                     src={evento.image}
                     alt={evento.title}
-                    className="w-full h-full object-cover"
+                    className={`w-full h-full object-cover ${eventEnded ? "grayscale" : ""}`}
                   />
+                  {eventEnded && <div className="absolute inset-0 bg-black/20" />}
                 </div>
               ) : (
-                <div className="h-48 bg-gradient-to-br from-parish-sky to-parish-gold flex items-center justify-center">
+                <div className={`h-48 flex items-center justify-center ${eventEnded ? "bg-gradient-to-br from-gray-300 to-gray-400" : "bg-gradient-to-br from-parish-sky to-parish-gold"}`}>
                   <Calendar className="w-16 h-16 text-white opacity-50" />
                 </div>
               )}
@@ -206,18 +213,23 @@ export default function EventosPage() {
               <div className="p-4">
                 {/* Status Badge */}
                 <div className="flex items-center justify-between mb-2">
-                  {evento.published ? (
-                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      Publicado
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                      Rascunho
-                    </span>
-                  )}
-                  {isEventPast(evento.date) && (
-                    <span className="text-xs text-parish-secondary">Realizado</span>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {evento.published ? (
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        Publicado
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                        Rascunho
+                      </span>
+                    )}
+                    {eventEnded && (
+                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-500 border border-gray-200">
+                        <span className="w-1.5 h-1.5 rounded-full bg-gray-400 inline-block" />
+                        Encerrado
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 {/* Title */}
@@ -274,7 +286,8 @@ export default function EventosPage() {
                 </div>
               </div>
             </div>
-          ))
+            );
+          })
         )}
       </div>
     </div>

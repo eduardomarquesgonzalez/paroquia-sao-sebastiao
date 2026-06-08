@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Calendar, Clock, MapPin, ArrowRight, ChevronRight, Globe } from "lucide-react";
 import PublicNavbar from "@/components/PublicNavbar";
 import PublicFooter from "@/components/PublicFooter";
-import { formatDate, formatTime, formatDay, formatMonthShort, formatWeekday, isDatePast } from "@/lib/utils";
+import { formatDate, formatTime, formatDay, formatMonthShort, formatWeekday, isEventEnded } from "@/lib/utils";
 
 interface Event {
   id: string;
@@ -33,9 +33,9 @@ export default function EventosPage() {
   const getDay = formatDay;
   const getMonth = formatMonthShort;
   const getWeekday = formatWeekday;
-  const isUpcoming = (d: string) => !isDatePast(d);
+  const ended = (e: Event) => isEventEnded(e);
 
-  const upcomingCount = eventos.filter((e) => isUpcoming(e.date)).length;
+  const upcomingCount = eventos.filter((e) => !ended(e)).length;
 
   return (
     <div className="min-h-screen bg-parish-background">
@@ -65,7 +65,7 @@ export default function EventosPage() {
               </span>
             </div>
             <h1 className="font-playfair text-5xl font-bold text-white mb-6 leading-tight">
-              Próximos Eventos
+              Agenda Paroquial
             </h1>
             <p className="text-lg text-white/70 leading-relaxed">
               Participe das celebrações, encontros e atividades que fortalecem
@@ -76,14 +76,16 @@ export default function EventosPage() {
           {/* Stats bar */}
           {!loading && eventos.length > 0 && (
             <div className="mt-12 flex flex-wrap gap-6">
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl px-5 py-3 border border-white/10">
-                <p className="text-2xl font-bold text-white">{eventos.length}</p>
-                <p className="text-xs text-white/60 mt-0.5">Eventos cadastrados</p>
-              </div>
               {upcomingCount > 0 && (
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl px-5 py-3 border border-white/10">
                   <p className="text-2xl font-bold text-white">{upcomingCount}</p>
                   <p className="text-xs text-white/60 mt-0.5">Próximos eventos</p>
+                </div>
+              )}
+              {eventos.length - upcomingCount > 0 && (
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl px-5 py-3 border border-white/10">
+                  <p className="text-2xl font-bold text-white">{eventos.length - upcomingCount}</p>
+                  <p className="text-xs text-white/60 mt-0.5">Realizados</p>
                 </div>
               )}
             </div>
@@ -129,106 +131,128 @@ export default function EventosPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {eventos.map((evento, index) => (
-                <article
-                  key={evento.id}
-                  className="group bg-parish-surface rounded-2xl overflow-hidden border border-parish-border/60 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 flex flex-col"
-                >
-                  {/* Image */}
-                  <div className="relative h-56 overflow-hidden flex-shrink-0">
-                    {evento.image ? (
-                      <img
-                        src={evento.image}
-                        alt={evento.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-parish-gold/30 to-parish-sky/30 flex items-center justify-center">
-                        <Calendar className="w-16 h-16 text-parish-gold/40" />
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
-
-                    {/* Date badge */}
-                    <div className="absolute top-4 left-4 bg-white rounded-xl px-3 py-2 text-center shadow-lg min-w-[52px]">
-                      <span className="block text-xl font-bold text-parish-navy-dark leading-none">
-                        {getDay(evento.date)}
-                      </span>
-                      <span className="block text-[10px] font-bold uppercase tracking-wide text-parish-text-light mt-0.5">
-                        {getMonth(evento.date)}
-                      </span>
-                    </div>
-
-                    {index === 0 && isUpcoming(evento.date) ? (
-                      <div className="absolute top-4 right-4 bg-parish-gold text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow">
-                        Próximo
-                      </div>
-                    ) : !isUpcoming(evento.date) ? (
-                      <div className="absolute top-4 right-4 bg-white/20 backdrop-blur-sm text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full">
-                        Realizado
-                      </div>
-                    ) : null}
-                  </div>
-
-                  {/* Content */}
-                  <div className="flex-1 flex flex-col p-6">
-                    <h2 className="font-playfair text-xl font-bold text-parish-text group-hover:text-parish-gold transition-colors duration-200 mb-2 leading-snug line-clamp-2">
-                      {evento.title}
-                    </h2>
-
-                    <p className="text-sm text-parish-text-light line-clamp-3 mb-4 leading-relaxed">
-                      {evento.description}
-                    </p>
-
-                    <div className="space-y-2 mt-auto mb-5">
-                      <div className="flex items-center gap-2 text-xs text-parish-text-light">
-                        <div className="w-5 h-5 rounded bg-parish-gold/10 flex items-center justify-center flex-shrink-0">
-                          <Clock className="w-3 h-3 text-parish-gold" />
+              {eventos.map((evento, index) => {
+                const isEnded = ended(evento);
+                const firstUpcomingIdx = eventos.findIndex((e) => !ended(e));
+                return (
+                  <article
+                    key={evento.id}
+                    className={`group bg-parish-surface rounded-2xl overflow-hidden border flex flex-col transition-all duration-300 ${
+                      isEnded
+                        ? "border-parish-border/40 shadow-sm opacity-75 hover:opacity-85 hover:shadow-md"
+                        : "border-parish-border/60 shadow-sm hover:shadow-2xl hover:-translate-y-2"
+                    }`}
+                  >
+                    {/* Image */}
+                    <div className="relative h-56 overflow-hidden flex-shrink-0">
+                      {evento.image ? (
+                        <img
+                          src={evento.image}
+                          alt={evento.title}
+                          className={`w-full h-full object-cover transition-transform duration-500 ${
+                            isEnded ? "grayscale group-hover:scale-102" : "group-hover:scale-105"
+                          }`}
+                        />
+                      ) : (
+                        <div className={`w-full h-full bg-gradient-to-br flex items-center justify-center ${isEnded ? "from-gray-300/50 to-gray-400/30" : "from-parish-gold/30 to-parish-sky/30"}`}>
+                          <Calendar className={`w-16 h-16 ${isEnded ? "text-gray-400/50" : "text-parish-gold/40"}`} />
                         </div>
-                        <span className="capitalize line-clamp-1">
-                          {getWeekday(evento.date)}, {formatTime(evento.date)}
-                          {evento.endDate && ` – ${formatTime(evento.endDate)}`}
+                      )}
+                      <div className={`absolute inset-0 bg-gradient-to-t ${isEnded ? "from-black/70 via-black/20 to-transparent" : "from-black/50 via-black/10 to-transparent"}`} />
+
+                      {/* Date badge */}
+                      <div className={`absolute top-4 left-4 rounded-xl px-3 py-2 text-center shadow-lg min-w-[52px] ${isEnded ? "bg-gray-100" : "bg-white"}`}>
+                        <span className={`block text-xl font-bold leading-none ${isEnded ? "text-gray-500" : "text-parish-navy-dark"}`}>
+                          {getDay(evento.date)}
+                        </span>
+                        <span className={`block text-[10px] font-bold uppercase tracking-wide mt-0.5 ${isEnded ? "text-gray-400" : "text-parish-text-light"}`}>
+                          {getMonth(evento.date)}
                         </span>
                       </div>
-                      {evento.location && (
-                        <div className="flex items-center gap-2 text-xs text-parish-text-light">
-                          <div className="w-5 h-5 rounded bg-parish-gold/10 flex items-center justify-center flex-shrink-0">
-                            <MapPin className="w-3 h-3 text-parish-gold" />
-                          </div>
-                          <span className="line-clamp-1">{evento.location}</span>
+
+                      {isEnded ? (
+                        <div className="absolute top-4 right-4 bg-gray-800/80 backdrop-blur-sm text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-gray-400 inline-block" />
+                          Encerrado
                         </div>
-                      )}
-                      <div className="flex items-center gap-2 text-xs text-parish-text-light">
-                        <div className="w-5 h-5 rounded bg-parish-gold/10 flex items-center justify-center flex-shrink-0">
-                          <Calendar className="w-3 h-3 text-parish-gold" />
+                      ) : index === firstUpcomingIdx ? (
+                        <div className="absolute top-4 right-4 bg-parish-gold text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow">
+                          Próximo
                         </div>
-                        <span>{formatDate(evento.date)}</span>
-                      </div>
+                      ) : null}
                     </div>
 
-                    <div className="flex flex-col gap-2">
-                      <Link
-                        href={`/eventos/${evento.id}`}
-                        className="group/btn flex items-center justify-center gap-2 w-full py-2.5 bg-parish-gold hover:bg-parish-gold-dark text-white text-sm font-semibold rounded-xl transition-all duration-200"
-                      >
-                        Ver Detalhes
-                        <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-0.5 transition-transform" />
-                      </Link>
-                      {evento.siteUrl && (
-                        <a
-                          href={evento.siteUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center justify-center gap-2 w-full py-2.5 border border-parish-border text-parish-text-light text-sm font-medium rounded-xl hover:border-parish-gold hover:text-parish-gold transition-all duration-200"
+                    {/* Content */}
+                    <div className="flex-1 flex flex-col p-6">
+                      <h2 className={`font-playfair text-xl font-bold mb-2 leading-snug line-clamp-2 transition-colors duration-200 ${
+                        isEnded ? "text-parish-text-light group-hover:text-parish-text" : "text-parish-text group-hover:text-parish-gold"
+                      }`}>
+                        {evento.title}
+                      </h2>
+
+                      <p className="text-sm text-parish-text-light line-clamp-3 mb-4 leading-relaxed">
+                        {evento.description}
+                      </p>
+
+                      <div className="space-y-2 mt-auto mb-5">
+                        <div className="flex items-center gap-2 text-xs text-parish-text-light">
+                          <div className={`w-5 h-5 rounded flex items-center justify-center flex-shrink-0 ${isEnded ? "bg-gray-100" : "bg-parish-gold/10"}`}>
+                            <Clock className={`w-3 h-3 ${isEnded ? "text-gray-400" : "text-parish-gold"}`} />
+                          </div>
+                          <span className="capitalize line-clamp-1">
+                            {getWeekday(evento.date)}, {formatTime(evento.date)}
+                            {evento.endDate && ` – ${formatTime(evento.endDate)}`}
+                          </span>
+                        </div>
+                        {evento.location && (
+                          <div className="flex items-center gap-2 text-xs text-parish-text-light">
+                            <div className={`w-5 h-5 rounded flex items-center justify-center flex-shrink-0 ${isEnded ? "bg-gray-100" : "bg-parish-gold/10"}`}>
+                              <MapPin className={`w-3 h-3 ${isEnded ? "text-gray-400" : "text-parish-gold"}`} />
+                            </div>
+                            <span className="line-clamp-1">{evento.location}</span>
+                          </div>
+                        )}
+                        <div className="flex items-center gap-2 text-xs text-parish-text-light">
+                          <div className={`w-5 h-5 rounded flex items-center justify-center flex-shrink-0 ${isEnded ? "bg-gray-100" : "bg-parish-gold/10"}`}>
+                            <Calendar className={`w-3 h-3 ${isEnded ? "text-gray-400" : "text-parish-gold"}`} />
+                          </div>
+                          <span>{formatDate(evento.date)}</span>
+                        </div>
+                        {isEnded && evento.endDate && (
+                          <p className="text-xs text-gray-400 pl-7">
+                            Encerrado em {formatDate(evento.endDate)}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="flex flex-col gap-2">
+                        <Link
+                          href={`/eventos/${evento.id}`}
+                          className={`flex items-center justify-center gap-2 w-full py-2.5 text-sm font-semibold rounded-xl transition-all duration-200 ${
+                            isEnded
+                              ? "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                              : "bg-parish-gold hover:bg-parish-gold-dark text-white group/btn"
+                          }`}
                         >
-                          <Globe className="w-3.5 h-3.5" />
-                          Site do Evento
-                        </a>
-                      )}
+                          {isEnded ? "Ver Registro" : "Ver Detalhes"}
+                          <ArrowRight className="w-4 h-4" />
+                        </Link>
+                        {evento.siteUrl && !isEnded && (
+                          <a
+                            href={evento.siteUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center justify-center gap-2 w-full py-2.5 border border-parish-border text-parish-text-light text-sm font-medium rounded-xl hover:border-parish-gold hover:text-parish-gold transition-all duration-200"
+                          >
+                            <Globe className="w-3.5 h-3.5" />
+                            Site do Evento
+                          </a>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </article>
-              ))}
+                  </article>
+                );
+              })}
             </div>
           )}
         </div>

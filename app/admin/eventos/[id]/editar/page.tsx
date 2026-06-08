@@ -16,6 +16,7 @@ interface EventData {
   siteUrl: string;
   image: string;
   published: boolean;
+  order: number;
 }
 
 export default function EditarEventoPage() {
@@ -35,6 +36,7 @@ export default function EditarEventoPage() {
     siteUrl: "",
     image: "",
     published: false,
+    order: 0,
   });
   const [imagePreview, setImagePreview] = useState("");
   const [imageMode, setImageMode] = useState<"upload" | "url">("upload");
@@ -57,6 +59,7 @@ export default function EditarEventoPage() {
         siteUrl: data.siteUrl || "",
         image: data.image || "",
         published: data.published,
+        order: data.order ?? 0,
       });
       if (data.image) {
         setImagePreview(data.image);
@@ -224,6 +227,19 @@ export default function EditarEventoPage() {
             <label className="block text-sm font-medium text-parish-text-light mb-2">Data de Término (Opcional)</label>
             <input type="datetime-local" name="endDate" value={formData.endDate} onChange={handleChange} className="w-full px-4 py-2 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold focus:border-transparent outline-none" />
             <p className="text-xs text-parish-secondary mt-2">Para eventos que duram mais de um dia</p>
+          </div>
+
+          <div className="bg-parish-surface rounded-lg shadow-sm p-6 border border-parish-primary">
+            <label className="block text-sm font-medium text-parish-text-light mb-2">Ordem de exibição</label>
+            <input
+              type="number"
+              name="order"
+              value={formData.order}
+              onChange={(e) => setFormData((prev) => ({ ...prev, order: Number(e.target.value) }))}
+              min={0}
+              className="w-full px-4 py-2 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold focus:border-transparent outline-none"
+            />
+            <p className="text-xs text-parish-secondary mt-2">Menor número = exibido primeiro na página inicial. Padrão: 0</p>
           </div>
 
           <div className="bg-parish-surface rounded-lg shadow-sm p-6 border border-parish-primary">

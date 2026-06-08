@@ -1,15 +1,13 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-// GET - Listar eventos públicos futuros (sem autenticação)
+// GET - Listar eventos públicos publicados (sem autenticação)
+// Retorna todos os publicados — encerrados são diferenciados visualmente no frontend
 export async function GET() {
   try {
     const eventos = await prisma.event.findMany({
       where: {
         published: true,
-        date: {
-          gte: new Date(), // Apenas eventos futuros
-        },
       },
       include: {
         createdBy: {
@@ -19,10 +17,7 @@ export async function GET() {
           },
         },
       },
-      orderBy: {
-        date: "asc", // Ordenar do mais próximo para o mais distante
-      },
-      take: 10, // Limitar a 10 próximos eventos
+      orderBy: [{ order: "asc" }, { date: "asc" }],
     });
 
     return NextResponse.json(eventos);

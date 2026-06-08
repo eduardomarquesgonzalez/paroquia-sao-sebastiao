@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Calendar, MapPin, Clock, ArrowLeft, Share2 } from "lucide-react";
-import { formatDateFull, formatTime, isDatePast } from "@/lib/utils";
+import { formatDateFull, formatTime, formatDate, isEventEnded } from "@/lib/utils";
 
 interface Event {
   id: string;
@@ -73,8 +73,8 @@ export default function EventoPage() {
     );
   }
 
-  const formatDate = formatDateFull;
-  const isEventPast = () => isDatePast(evento.date);
+  const formatFullDate = formatDateFull;
+  const ended = isEventEnded(evento);
 
   return (
     <div className="min-h-screen bg-parish-background">
@@ -96,43 +96,50 @@ export default function EventoPage() {
       </header>
 
       {evento.image ? (
-        <div className="w-full h-96 bg-parish-primary">
-          <img src={evento.image} alt={evento.title} className="w-full h-full object-cover" />
+        <div className="w-full h-96 bg-parish-primary relative overflow-hidden">
+          <img src={evento.image} alt={evento.title} className={`w-full h-full object-cover ${ended ? "grayscale" : ""}`} />
+          {ended && <div className="absolute inset-0 bg-black/30" />}
         </div>
       ) : (
-        <div className="w-full h-96 bg-gradient-to-br from-parish-sky to-parish-gold flex items-center justify-center">
+        <div className={`w-full h-96 flex items-center justify-center ${ended ? "bg-gradient-to-br from-gray-300 to-gray-400" : "bg-gradient-to-br from-parish-sky to-parish-gold"}`}>
           <Calendar className="w-24 h-24 text-white opacity-50" />
         </div>
       )}
 
       <article className="container mx-auto px-4 py-12 max-w-4xl">
-        {isEventPast() && (
-          <div className="mb-4">
-            <span className="inline-block px-4 py-2 bg-parish-primary text-parish-text rounded-full text-sm font-medium">
-              Evento Realizado
+        {ended ? (
+          <div className="mb-4 flex items-center gap-3">
+            <span className="inline-flex items-center gap-1.5 px-4 py-2 bg-gray-100 text-gray-600 rounded-full text-sm font-medium border border-gray-200">
+              <span className="w-2 h-2 rounded-full bg-gray-400 inline-block" />
+              Evento Encerrado
             </span>
+            {evento.endDate && (
+              <span className="text-sm text-parish-text-light">
+                Encerrado em {formatDate(evento.endDate)}
+              </span>
+            )}
           </div>
-        )}
+        ) : null}
 
-        <h1 className="text-4xl md:text-5xl font-bold text-parish-text mb-6 leading-tight">{evento.title}</h1>
+        <h1 className={`text-4xl md:text-5xl font-bold mb-6 leading-tight ${ended ? "text-parish-text-light" : "text-parish-text"}`}>{evento.title}</h1>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-parish-surface rounded-lg shadow-sm p-4 border border-parish-border">
+          <div className={`rounded-lg shadow-sm p-4 border ${ended ? "bg-gray-50 border-gray-200" : "bg-parish-surface border-parish-border"}`}>
             <div className="flex items-start space-x-3">
-              <Calendar className="w-5 h-5 text-parish-gold mt-1" />
+              <Calendar className={`w-5 h-5 mt-1 ${ended ? "text-gray-400" : "text-parish-gold"}`} />
               <div>
                 <p className="text-sm text-parish-text-light mb-1">Data</p>
-                <p className="font-semibold text-parish-text">{formatDate(evento.date)}</p>
+                <p className={`font-semibold ${ended ? "text-gray-500" : "text-parish-text"}`}>{formatFullDate(evento.date)}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-parish-surface rounded-lg shadow-sm p-4 border border-parish-border">
+          <div className={`rounded-lg shadow-sm p-4 border ${ended ? "bg-gray-50 border-gray-200" : "bg-parish-surface border-parish-border"}`}>
             <div className="flex items-start space-x-3">
-              <Clock className="w-5 h-5 text-parish-gold mt-1" />
+              <Clock className={`w-5 h-5 mt-1 ${ended ? "text-gray-400" : "text-parish-gold"}`} />
               <div>
                 <p className="text-sm text-parish-text-light mb-1">Horário</p>
-                <p className="font-semibold text-parish-text">
+                <p className={`font-semibold ${ended ? "text-gray-500" : "text-parish-text"}`}>
                   {formatTime(evento.date)}{evento.endDate && ` - ${formatTime(evento.endDate)}`}
                 </p>
               </div>
@@ -140,12 +147,12 @@ export default function EventoPage() {
           </div>
 
           {evento.location && (
-            <div className="bg-parish-surface rounded-lg shadow-sm p-4 border border-parish-border">
+            <div className={`rounded-lg shadow-sm p-4 border ${ended ? "bg-gray-50 border-gray-200" : "bg-parish-surface border-parish-border"}`}>
               <div className="flex items-start space-x-3">
-                <MapPin className="w-5 h-5 text-parish-gold mt-1" />
+                <MapPin className={`w-5 h-5 mt-1 ${ended ? "text-gray-400" : "text-parish-gold"}`} />
                 <div>
                   <p className="text-sm text-parish-text-light mb-1">Local</p>
-                  <p className="font-semibold text-parish-text">{evento.location}</p>
+                  <p className={`font-semibold ${ended ? "text-gray-500" : "text-parish-text"}`}>{evento.location}</p>
                 </div>
               </div>
             </div>
@@ -165,16 +172,16 @@ export default function EventoPage() {
         </div>
 
         {evento.endDate && (
-          <div className="bg-parish-sky-light border-l-4 border-parish-gold p-6 mb-8">
-            <h3 className="font-semibold text-parish-text mb-2">Duração do Evento</h3>
+          <div className={`border-l-4 p-6 mb-8 ${ended ? "bg-gray-50 border-gray-300" : "bg-parish-sky-light border-parish-gold"}`}>
+            <h3 className={`font-semibold mb-2 ${ended ? "text-gray-600" : "text-parish-text"}`}>Duração do Evento</h3>
             <p className="text-parish-text-light">
-              De {formatDate(evento.date)} às {formatTime(evento.date)} <br />
-              até {formatDate(evento.endDate)} às {formatTime(evento.endDate)}
+              De {formatFullDate(evento.date)} às {formatTime(evento.date)} <br />
+              até {formatFullDate(evento.endDate)} às {formatTime(evento.endDate)}
             </p>
           </div>
         )}
 
-        {!isEventPast() && (
+        {!ended && (
           <div className="bg-gradient-gold rounded-lg p-8 text-center text-white mb-8">
             <h3 className="text-2xl font-bold mb-4">Participe deste Evento!</h3>
             <p className="mb-6 opacity-90">Sua presença é muito importante para nós. Venha participar!</p>

@@ -65,6 +65,7 @@ export async function POST(request: Request) {
         image: data.image || null,
         siteUrl: data.siteUrl || null,
         published: data.published || false,
+        order: data.order ?? 0,
         createdById: session.user.id,
       },
       include: {
