@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Calendar, Clock, MapPin, ArrowRight, ChevronRight, Globe } from "lucide-react";
+import PublicNavbar from "@/components/PublicNavbar";
+import PublicFooter from "@/components/PublicFooter";
 
 interface Event {
   id: string;
@@ -52,6 +54,7 @@ export default function EventosPage() {
 
   return (
     <div className="min-h-screen bg-parish-background">
+      <PublicNavbar />
 
       {/* ─── HERO ─── */}
       <section className="relative bg-parish-text-dark overflow-hidden">
@@ -266,6 +269,7 @@ export default function EventosPage() {
         </div>
       </section>
 
+      <PublicFooter />
     </div>
   );
 }
