@@ -241,7 +241,7 @@ export default function EditarCleroPage() {
               ].map(({ key, label, placeholder }) => (
                 <div key={key}>
                   <label className="block text-xs text-parish-text-light mb-1.5">{label}</label>
-                  <input type="text" value={(form as Record<string, unknown>)[key] as string}
+                  <input type="text" value={(form as unknown as Record<string, string>)[key]}
                     onChange={(e) => set(key, e.target.value)} placeholder={placeholder}
                     className="w-full px-4 py-2.5 border border-parish-border rounded-lg text-sm outline-none focus:ring-2 focus:ring-parish-gold" />
                 </div>
