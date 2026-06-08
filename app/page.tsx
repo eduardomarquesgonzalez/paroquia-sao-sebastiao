@@ -307,18 +307,37 @@ export default function HomePage() {
               hero.subtitle ||
               hero.btn1Text ||
               hero.btn2Text) && (
-              <div className="container mx-auto px-4 lg:px-8 py-28 md:py-36 lg:py-44">
+              <div className="container mx-auto px-4 lg:px-8 py-32 md:py-44 lg:py-52">
                 <div className="max-w-2xl">
-                  <SectionLabel>Paróquia São Sebastião</SectionLabel>
+
+                  {/* Label com linha dourada à esquerda */}
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="w-1 h-10 rounded-full bg-gradient-to-b from-parish-gold to-parish-gold-dark flex-shrink-0" />
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-parish-gold/80 block mb-0.5">
+                        Bem-vindo à
+                      </span>
+                      <span className="text-[12px] font-bold uppercase tracking-[0.20em] text-white/90">
+                        Paróquia São Sebastião
+                      </span>
+                    </div>
+                  </div>
 
                   {hero.heading && (
-                    <h2 className="font-playfair text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-5 text-balance">
+                    <h2 className="font-playfair text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.12] mb-5 text-balance drop-shadow-[0_2px_24px_rgba(0,0,0,0.55)]">
                       {hero.heading}
                     </h2>
                   )}
 
+                  {/* Divisor dourado */}
+                  <div className="flex items-center gap-3 mb-7">
+                    <div className="w-10 h-px bg-parish-gold" />
+                    <div className="w-2 h-2 rounded-full bg-parish-gold/60" />
+                    <div className="w-5 h-px bg-parish-gold/40" />
+                  </div>
+
                   {hero.subtitle && (
-                    <p className="text-base md:text-lg text-white/75 leading-relaxed mb-10 max-w-lg">
+                    <p className="text-base md:text-lg text-white/72 leading-relaxed mb-10 max-w-lg drop-shadow-[0_1px_8px_rgba(0,0,0,0.4)]">
                       {hero.subtitle}
                     </p>
                   )}
@@ -328,16 +347,16 @@ export default function HomePage() {
                       {hero.btn1Text && hero.btn1Link && (
                         <Link
                           href={hero.btn1Link}
-                          className="group inline-flex items-center gap-2 bg-parish-gold text-white px-7 py-3.5 rounded-lg font-semibold text-sm hover:bg-parish-gold-dark transition-all duration-200 shadow-gold"
+                          className="group inline-flex items-center gap-2.5 bg-parish-gold text-white px-7 py-3.5 rounded-lg font-semibold text-sm hover:bg-parish-gold-dark transition-all duration-300 shadow-gold hover:shadow-[0_6px_28px_rgba(201,168,76,0.50)] hover:-translate-y-0.5"
                         >
                           {hero.btn1Text}
-                          <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
                         </Link>
                       )}
                       {hero.btn2Text && hero.btn2Link && (
                         <Link
                           href={hero.btn2Link}
-                          className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/25 text-white px-7 py-3.5 rounded-lg font-semibold text-sm hover:bg-white/20 transition-all duration-200"
+                          className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 text-white px-7 py-3.5 rounded-lg font-semibold text-sm hover:bg-white/18 hover:border-white/35 transition-all duration-300 hover:-translate-y-0.5"
                         >
                           {hero.btn2Text}
                         </Link>
