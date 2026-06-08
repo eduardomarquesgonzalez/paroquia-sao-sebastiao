@@ -19,6 +19,7 @@ import CarouselFaixas from "@/components/CarouselFaixas";
 import ComunidadesCarousel from "@/components/ComunidadesCarousel";
 import Image from "next/image";
 import logoImg from "@/public/logo.png";
+import { formatDay, formatMonthShort, formatTime, formatWeekday } from "@/lib/utils";
 
 interface CommunityPreview {
   id: string;
@@ -139,7 +140,20 @@ export default function HomePage() {
   const [loadingEventos, setLoadingEventos] = useState(true);
   const [hero, setHero] = useState<HomeHero | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+  const [hoje, setHoje] = useState("");
+
+  /* Data local de Cuiabá para exibição no hero */
+  useEffect(() => {
+    setHoje(
+      new Date().toLocaleDateString("pt-BR", {
+        timeZone: "America/Cuiaba",
+        weekday: "short",
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      })
+    );
+  }, []);
 
   /* Scroll observer for section animations */
   useEffect(() => {
@@ -155,13 +169,6 @@ export default function HomePage() {
     els.forEach((el) => obs.observe(el));
     return () => obs.disconnect();
   }, [loadingEventos, loadingComunidades]);
-
-  /* Navbar scroll state */
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   /* Data fetching */
   useEffect(() => {
@@ -183,33 +190,17 @@ export default function HomePage() {
       .catch(() => {});
   }, []);
 
-  const getEventDay = (d: string) =>
-    new Date(d).toLocaleDateString("pt-BR", { day: "2-digit" });
-  const getEventMonth = (d: string) =>
-    new Date(d)
-      .toLocaleDateString("pt-BR", { month: "short" })
-      .replace(".", "")
-      .toUpperCase();
-  const getEventTime = (d: string) =>
-    new Date(d).toLocaleTimeString("pt-BR", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  const getEventWeekday = (d: string) =>
-    new Date(d).toLocaleDateString("pt-BR", { weekday: "long" });
+  const getEventDay = formatDay;
+  const getEventMonth = formatMonthShort;
+  const getEventTime = formatTime;
+  const getEventWeekday = formatWeekday;
 
   const closeMenu = useCallback(() => setMenuOpen(false), []);
 
   return (
     <div className="min-h-screen bg-parish-background">
       {/* ─── NAVBAR ─── */}
-      <header
-        className={`sticky top-0 z-50 transition-all duration-300 ${
-          scrolled
-            ? "bg-white/92 backdrop-blur-xl shadow-glass border-b border-white/30"
-            : "bg-white/75 backdrop-blur-lg"
-        }`}
-      >
+      <header className="sticky top-0 z-50 bg-white border-b border-parish-border">
         <nav className="container mx-auto px-4 lg:px-8">
           <div className="flex items-center justify-between h-16 md:h-20">
             {/* Brand */}
@@ -237,7 +228,7 @@ export default function HomePage() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="px-3.5 py-2 text-sm font-medium text-parish-text hover:text-parish-gold rounded-lg hover:bg-parish-gold/6 transition-all duration-200"
+                  className="px-3.5 py-2 text-sm font-medium text-parish-text rounded-lg"
                 >
                   {link.label}
                 </Link>
@@ -278,7 +269,7 @@ export default function HomePage() {
                   key={link.href}
                   href={link.href}
                   onClick={closeMenu}
-                  className="block px-4 py-2.5 text-sm font-medium text-parish-text hover:text-parish-gold hover:bg-parish-gold/6 rounded-lg transition-all"
+                  className="block px-4 py-2.5 text-sm font-medium text-parish-text rounded-lg"
                 >
                   {link.label}
                 </Link>
@@ -312,11 +303,14 @@ export default function HomePage() {
                     <div className="w-1 h-10 rounded-full bg-gradient-to-b from-parish-gold to-parish-gold-dark flex-shrink-0" />
                     <div>
                       <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-parish-gold/80 block mb-0.5">
-                        Bem-vindo à
+                        Cuiabá-MT
                       </span>
-                      <span className="text-[12px] font-bold uppercase tracking-[0.20em] text-white/90">
-                        Paróquia São Sebastião
-                      </span>
+                      {hoje && (
+                        <span className="flex items-center gap-1 text-[11px] font-medium text-white/75 capitalize">
+                          <Clock className="w-3 h-3 text-parish-gold/70 flex-shrink-0" />
+                          {hoje}
+                        </span>
+                      )}
                     </div>
                   </div>
 

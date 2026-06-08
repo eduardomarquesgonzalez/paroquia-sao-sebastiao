@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Calendar, Clock, MapPin, ArrowRight, ChevronRight, Globe } from "lucide-react";
 import PublicNavbar from "@/components/PublicNavbar";
 import PublicFooter from "@/components/PublicFooter";
+import { formatDate, formatTime, formatDay, formatMonthShort, formatWeekday, isDatePast } from "@/lib/utils";
 
 interface Event {
   id: string;
@@ -29,26 +30,10 @@ export default function EventosPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const formatDate = (d: string) =>
-    new Date(d).toLocaleDateString("pt-BR", {
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-    });
-
-  const formatTime = (d: string) =>
-    new Date(d).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
-
-  const getDay = (d: string) =>
-    new Date(d).toLocaleDateString("pt-BR", { day: "2-digit" });
-
-  const getMonth = (d: string) =>
-    new Date(d).toLocaleDateString("pt-BR", { month: "short" }).replace(".", "").toUpperCase();
-
-  const getWeekday = (d: string) =>
-    new Date(d).toLocaleDateString("pt-BR", { weekday: "long" });
-
-  const isUpcoming = (d: string) => new Date(d) >= new Date();
+  const getDay = formatDay;
+  const getMonth = formatMonthShort;
+  const getWeekday = formatWeekday;
+  const isUpcoming = (d: string) => !isDatePast(d);
 
   const upcomingCount = eventos.filter((e) => isUpcoming(e.date)).length;
 

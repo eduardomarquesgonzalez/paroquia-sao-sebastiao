@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { Calendar, User, Tag, ArrowLeft, Eye, Share2 } from 'lucide-react'
 import PublicNavbar from "@/components/PublicNavbar"
 import PublicFooter from "@/components/PublicFooter"
+import { formatDate } from "@/lib/utils"
 
 interface Post {
   id: string;
@@ -75,9 +76,6 @@ export default function PostPage() {
       </div>
     )
   }
-
-  const formatDate = (dateString: string) =>
-    new Date(dateString).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })
 
   return (
     <div className="min-h-screen bg-parish-background">

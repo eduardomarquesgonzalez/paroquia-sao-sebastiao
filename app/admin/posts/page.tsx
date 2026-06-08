@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Plus, Search, Edit, Trash2, Eye, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { formatDate } from "@/lib/utils";
 
 interface Post {
   id: string;
@@ -281,7 +282,7 @@ export default function PostsPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-parish-text-light">
-                      {new Date(post.createdAt).toLocaleDateString("pt-BR")}
+                      {formatDate(post.createdAt)}
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end space-x-2">

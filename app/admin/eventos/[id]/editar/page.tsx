@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import { ArrowLeft, Save, Eye, Upload, X, Trash2, Link as LinkIcon, Globe } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { toDatetimeLocalCuiaba, fromDatetimeLocalCuiaba } from "@/lib/utils";
 
 interface EventData {
   title: string;
@@ -47,15 +48,11 @@ export default function EditarEventoPage() {
       const response = await fetch(`/api/eventos/${eventoId}`);
       if (!response.ok) throw new Error("Evento não encontrado");
       const data = await response.json();
-      const formatDateForInput = (dateString: string) => {
-        if (!dateString) return "";
-        return new Date(dateString).toISOString().slice(0, 16);
-      };
       setFormData({
         title: data.title,
         description: data.description,
-        date: formatDateForInput(data.date),
-        endDate: data.endDate ? formatDateForInput(data.endDate) : "",
+        date: toDatetimeLocalCuiaba(data.date),
+        endDate: data.endDate ? toDatetimeLocalCuiaba(data.endDate) : "",
         location: data.location || "",
         siteUrl: data.siteUrl || "",
         image: data.image || "",
@@ -122,10 +119,16 @@ export default function EditarEventoPage() {
     if (!formData.title || !formData.description || !formData.date) { toast.error("Preencha os campos obrigatórios"); return; }
     setIsSubmitting(true);
     try {
+      const payload = {
+        ...formData,
+        published: shouldPublish,
+        date: fromDatetimeLocalCuiaba(formData.date),
+        endDate: formData.endDate ? fromDatetimeLocalCuiaba(formData.endDate) : null,
+      };
       const response = await fetch(`/api/eventos/${eventoId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...formData, published: shouldPublish }),
+        body: JSON.stringify(payload),
       });
       if (!response.ok) throw new Error("Erro ao atualizar");
       toast.success(shouldPublish ? "Evento publicado com sucesso!" : "Evento atualizado!");

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Save, Eye, Upload, X, Calendar, Link as LinkIcon, Globe } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { fromDatetimeLocalCuiaba } from "@/lib/utils";
 
 export default function NovoEventoPage() {
   const router = useRouter();
@@ -71,8 +72,10 @@ export default function NovoEventoPage() {
     if (!formData.title || !formData.description || !formData.date) { toast.error("Preencha os campos obrigatórios"); return; }
     setIsSubmitting(true);
     try {
-      const dateTime = `${formData.date}T${formData.time || "00:00"}`;
-      const endDateTime = formData.endDate && formData.endTime ? `${formData.endDate}T${formData.endTime}` : null;
+      const dateTime = fromDatetimeLocalCuiaba(`${formData.date}T${formData.time || "00:00"}`);
+      const endDateTime = formData.endDate
+        ? fromDatetimeLocalCuiaba(`${formData.endDate}T${formData.endTime || "00:00"}`)
+        : null;
       const response = await fetch("/api/eventos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

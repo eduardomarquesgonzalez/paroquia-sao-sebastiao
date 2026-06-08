@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Calendar, MapPin, Clock, ArrowLeft, Share2 } from "lucide-react";
+import { formatDateFull, formatTime, isDatePast } from "@/lib/utils";
 
 interface Event {
   id: string;
@@ -72,13 +73,8 @@ export default function EventoPage() {
     );
   }
 
-  const formatDate = (dateString: string) =>
-    new Date(dateString).toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long", year: "numeric" });
-
-  const formatTime = (dateString: string) =>
-    new Date(dateString).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
-
-  const isEventPast = () => new Date(evento.date) < new Date();
+  const formatDate = formatDateFull;
+  const isEventPast = () => isDatePast(evento.date);
 
   return (
     <div className="min-h-screen bg-parish-background">

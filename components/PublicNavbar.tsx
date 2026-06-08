@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Menu, X } from "lucide-react";
@@ -17,24 +17,11 @@ const NAV_LINKS = [
 
 export default function PublicNavbar() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   const closeMenu = useCallback(() => setMenuOpen(false), []);
 
   return (
-    <header
-      className={`sticky top-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? "bg-white/92 backdrop-blur-xl shadow-glass border-b border-white/30"
-          : "bg-white/75 backdrop-blur-lg"
-      }`}
-    >
+    <header className="sticky top-0 z-50 bg-white border-b border-parish-border">
       <nav className="container mx-auto px-4 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
 

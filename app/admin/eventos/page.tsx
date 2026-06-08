@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { formatDateTimeShort, isDatePast } from "@/lib/utils";
 
 interface Event {
   id: string;
@@ -72,19 +73,8 @@ export default function EventosPage() {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("pt-BR", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
-  const isEventPast = (dateString: string) => {
-    return new Date(dateString) < new Date();
-  };
+  const formatDate = formatDateTimeShort;
+  const isEventPast = isDatePast;
 
   if (loading) {
     return (
