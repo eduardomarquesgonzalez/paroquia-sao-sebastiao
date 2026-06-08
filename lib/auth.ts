@@ -12,33 +12,30 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Senha", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          return null;
-        }
+        if (!credentials?.email || !credentials?.password) return null;
 
         const user = await prisma.user.findUnique({
           where: { email: credentials.email },
         });
 
-        if (!user) {
-          return null;
-        }
+        if (!user) return null;
 
         const isPasswordValid = await bcrypt.compare(
           credentials.password,
           user.password
         );
+        if (!isPasswordValid) return null;
 
-        if (!isPasswordValid) {
-          return null;
-        }
+        // Bloqueia contas inativas, suspensas ou sem verificação
+        if (user.status !== "ACTIVE") return null;
 
         return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-          image: user.image,
+          id:     user.id,
+          email:  user.email,
+          name:   user.name,
+          role:   user.role,
+          status: user.status,
+          image:  user.image,
         };
       },
     }),
@@ -46,15 +43,17 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.role = user.role;
-        token.id = user.id;
+        token.role   = user.role;
+        token.id     = user.id;
+        token.status = user.status;
       }
       return token;
     },
     async session({ session, token }) {
       if (session?.user) {
-        session.user.role = token.role as string;
-        session.user.id = token.id as string;
+        session.user.role   = token.role   as string;
+        session.user.id     = token.id     as string;
+        session.user.status = token.status as string;
       }
       return session;
     },
@@ -64,6 +63,7 @@ export const authOptions: NextAuthOptions = {
   },
   session: {
     strategy: "jwt",
+    maxAge:   8 * 60 * 60, // 8 horas
   },
   secret: process.env.NEXTAUTH_SECRET,
 };

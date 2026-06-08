@@ -1,6 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
+// Prisma Schema — Paróquia São Sebastião
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,26 +8,75 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  password      String
-  role          Role      @default(USER)
-  image         String?
-  emailVerified DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  posts  Post[]
-  events Event[]
-}
+// ─── Enums ─────────────────────────────────────────────────────────────────────
 
 enum Role {
-  USER
-  EDITOR
-  ADMIN
+  SUPER_ADMIN  // Acesso irrestrito ao sistema
+  ADMIN        // Administrador paroquial
+  FINANCE      // Financeiro — dízimos e relatórios
+  SECRETARY    // Secretaria — sacramentos e eventos
+  COORDINATOR  // Coordenadores de movimentos/pastorais
+  DIZIMISTA    // Área exclusiva do dizimista
+  EDITOR       // Deprecated — migrar para SECRETARY
+  USER         // Usuário comum
 }
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  PENDING_VERIFICATION
+}
+
+enum PaymentMethod {
+  PIX
+  CREDIT_CARD
+  DEBIT_CARD
+  BOLETO
+  CASH
+  TRANSFER
+}
+
+enum ContributionStatus {
+  PENDING
+  PROCESSING
+  PAID
+  FAILED
+  CANCELLED
+  REFUNDED
+}
+
+// ─── Usuários / Auth ───────────────────────────────────────────────────────────
+
+model User {
+  id            String     @id @default(cuid())
+  name          String?
+  email         String     @unique
+  password      String
+  role          Role       @default(USER)
+  status        UserStatus @default(ACTIVE)
+  image         String?
+  phone         String?
+  cpf           String?    @unique
+  emailVerified DateTime?
+
+  passwordResetToken   String?
+  passwordResetExpires DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  posts     Post[]
+  events    Event[]
+  dizimista Dizimista?
+  auditLogs AuditLog[]
+
+  @@index([email])
+  @@index([role])
+  @@index([status])
+}
+
+// ─── Conteúdo ──────────────────────────────────────────────────────────────────
 
 model Post {
   id          String    @id @default(cuid())
@@ -124,12 +171,12 @@ model Mass {
 
 model Sacrament {
   id        String    @id @default(cuid())
-  type      String // Batismo, Casamento, Primeira Comunhão, etc.
+  type      String
   name      String
   email     String?
   phone     String?
   date      DateTime?
-  status    String    @default("PENDENTE") // PENDENTE, APROVADO, REALIZADO
+  status    String    @default("PENDENTE")
   notes     String?   @db.Text
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -144,8 +191,8 @@ model Donation {
   donorName String?
   email     String?
   amount    Decimal  @db.Decimal(10, 2)
-  type      String // Dízimo, Oferta, Campanha, etc.
-  method    String // PIX, Dinheiro, Cartão
+  type      String
+  method    String
   notes     String?
   createdAt DateTime @default(now())
 
@@ -157,7 +204,7 @@ model Gallery {
   id          String   @id @default(cuid())
   title       String
   description String?
-  images      String[] // URLs das imagens
+  images      String[]
   eventId     String?
   published   Boolean  @default(false)
   createdAt   DateTime @default(now())
@@ -272,7 +319,7 @@ model Movement {
 model Clero {
   id             String    @id @default(cuid())
   name           String
-  role           String    // "Pároco" | "Vigário" | "Seminarista"
+  role           String
   photo          String?   @db.Text
   birthDate      DateTime?
   birthCity      String?
@@ -293,4 +340,128 @@ model Clero {
   @@index([active])
   @@index([order])
   @@map("clero")
+}
+
+// ─── Dizimistas ────────────────────────────────────────────────────────────────
+
+model Dizimista {
+  id           String    @id @default(cuid())
+  userId       String    @unique
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  cpf          String?   @unique
+  birthDate    DateTime?
+  address      String?
+  neighborhood String?
+  city         String?   @default("Cuiabá")
+  state        String?   @default("MT")
+  zipCode      String?
+
+  registrationDate DateTime @default(now())
+  active           Boolean  @default(true)
+  notes            String?  @db.Text
+
+  contributions  TitheContribution[]
+  recurringPlans RecurringContribution[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([active])
+  @@map("dizimistas")
+}
+
+model TitheContribution {
+  id          String             @id @default(cuid())
+  dizimistaId String
+  dizimista   Dizimista          @relation(fields: [dizimistaId], references: [id])
+
+  amount     Decimal            @db.Decimal(10, 2)
+  competence DateTime           // Primeiro dia do mês de referência
+  method     PaymentMethod
+  status     ContributionStatus @default(PENDING)
+
+  gatewayId       String?
+  gatewayProvider String?
+  pixQrCode       String?  @db.Text
+  pixCopyPaste    String?  @db.Text
+  pixExpiration   DateTime?
+  boletoUrl       String?
+  boletoBarCode   String?
+
+  paidAt DateTime?
+  notes  String?  @db.Text
+
+  receipt TitheReceipt?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([dizimistaId])
+  @@index([competence])
+  @@index([status])
+  @@map("tithe_contributions")
+}
+
+model TitheReceipt {
+  id             String            @id @default(cuid())
+  contributionId String            @unique
+  contribution   TitheContribution @relation(fields: [contributionId], references: [id])
+
+  receiptNumber String   @unique
+  issuedAt      DateTime @default(now())
+  pdfUrl        String?
+
+  @@map("tithe_receipts")
+}
+
+model RecurringContribution {
+  id          String    @id @default(cuid())
+  dizimistaId String
+  dizimista   Dizimista @relation(fields: [dizimistaId], references: [id])
+
+  amount     Decimal       @db.Decimal(10, 2)
+  method     PaymentMethod
+  dayOfMonth Int           // Dia do mês para cobrança (1–28)
+  active     Boolean       @default(true)
+
+  gatewaySubscriptionId String?
+
+  startDate   DateTime
+  endDate     DateTime?
+  lastCharged DateTime?
+  nextCharge  DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([dizimistaId])
+  @@index([active])
+  @@map("recurring_contributions")
+}
+
+// ─── Auditoria ─────────────────────────────────────────────────────────────────
+
+model AuditLog {
+  id      String  @id @default(cuid())
+  userId  String?
+  user    User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  action   String  // CREATE | UPDATE | DELETE | LOGIN | LOGOUT | PAYMENT
+  entity   String  // "User" | "TitheContribution" | "Event" etc.
+  entityId String?
+  oldData  Json?
+  newData  Json?
+
+  ipAddress String?
+  userAgent String?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([entity, entityId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
 }

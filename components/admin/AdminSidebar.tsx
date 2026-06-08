@@ -2,42 +2,46 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
 import {
-  LayoutDashboard,
-  FileText,
-  Calendar,
-  Heart,
-  Users,
-  Settings,
-  Church,
-  Clock,
-  Image,
-  Mail,
-  Home,
-  HandHeart,
-  UserCheck,
+  LayoutDashboard, FileText, Calendar, Heart, Users, Settings,
+  Church, Clock, Image, Mail, Home, HandHeart, UserCheck, Shield,
 } from "lucide-react";
+import { hasRole } from "@/lib/permissions";
 
-const navigation = [
-  { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
-  { name: "Página Inicial", href: "/admin/home", icon: Home },
-  { name: "Posts", href: "/admin/posts", icon: FileText },
-  { name: "Eventos", href: "/admin/eventos", icon: Calendar },
-  { name: "Comunidades", href: "/admin/comunidades", icon: Church },
-  { name: "Projetos Sociais", href: "/admin/projetos-sociais", icon: HandHeart },
-  { name: "Horários de Missas", href: "/admin/missas", icon: Clock },
-  { name: "Sacramentos", href: "/admin/sacramentos", icon: Church },
-  { name: "Clero", href: "/admin/clero", icon: UserCheck },
-  { name: "Movimentos", href: "/admin/movimentos", icon: Users },
-  { name: "Doações", href: "/admin/doacoes", icon: Heart },
-  { name: "Galeria", href: "/admin/galeria", icon: Image },
-  { name: "Newsletter", href: "/admin/newsletter", icon: Mail },
-  { name: "Usuários", href: "/admin/usuarios", icon: Users },
-  { name: "Configurações", href: "/admin/configuracoes", icon: Settings },
+interface NavItem {
+  name:      string
+  href:      string
+  icon:      React.ElementType
+  minRole?:  string  // Role mínimo necessário para ver o item
+}
+
+const navigation: NavItem[] = [
+  { name: "Dashboard",         href: "/admin",                   icon: LayoutDashboard },
+  { name: "Página Inicial",    href: "/admin/home",              icon: Home },
+  { name: "Posts",             href: "/admin/posts",             icon: FileText },
+  { name: "Eventos",           href: "/admin/eventos",           icon: Calendar },
+  { name: "Comunidades",       href: "/admin/comunidades",       icon: Church },
+  { name: "Projetos Sociais",  href: "/admin/projetos-sociais",  icon: HandHeart },
+  { name: "Horários de Missas",href: "/admin/missas",            icon: Clock },
+  { name: "Sacramentos",       href: "/admin/sacramentos",       icon: Church },
+  { name: "Clero",             href: "/admin/clero",             icon: UserCheck },
+  { name: "Movimentos",        href: "/admin/movimentos",        icon: Users },
+  { name: "Doações",           href: "/admin/doacoes",           icon: Heart,     minRole: "FINANCE" },
+  { name: "Galeria",           href: "/admin/galeria",           icon: Image },
+  { name: "Newsletter",        href: "/admin/newsletter",        icon: Mail },
+  { name: "Usuários",          href: "/admin/usuarios",          icon: Shield,    minRole: "ADMIN" },
+  { name: "Configurações",     href: "/admin/configuracoes",     icon: Settings,  minRole: "ADMIN" },
 ];
 
 export default function AdminSidebar() {
-  const pathname = usePathname();
+  const pathname            = usePathname();
+  const { data: session }   = useSession();
+  const role                = session?.user?.role ?? "";
+
+  const visibleNav = navigation.filter((item) =>
+    !item.minRole || hasRole(role, item.minRole)
+  );
 
   return (
     <>
@@ -53,7 +57,7 @@ export default function AdminSidebar() {
               </div>
             </div>
             <nav className="mt-5 flex-1 space-y-1 px-2">
-              {navigation.map((item) => {
+              {visibleNav.map((item) => {
                 const isActive = pathname === item.href;
                 return (
                   <Link
