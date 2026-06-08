@@ -7,6 +7,8 @@ import {
   MapPin, Clock, Phone, Mail, ArrowLeft, Church,
   MessageCircle, ExternalLink, Calendar,
 } from "lucide-react";
+import PublicNavbar from "@/components/PublicNavbar";
+import PublicFooter from "@/components/PublicFooter";
 
 interface Mass {
   id: string;
@@ -122,30 +124,7 @@ export default function ComunidadePage() {
 
   return (
     <div className="min-h-screen bg-parish-background">
-      {/* Header */}
-      <header className="bg-parish-surface shadow-sm sticky top-0 z-50">
-        <nav className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center space-x-2">
-              <div>
-                <h1 className="font-bold text-xl text-parish-text-dark">Paróquia São Sebastião</h1>
-                <p className="text-xs text-parish-text-light">Três Barras, Cuiabá-MT</p>
-              </div>
-            </Link>
-            <div className="hidden md:flex space-x-6">
-              <Link href="/" className="text-parish-text-light hover:text-parish-gold transition">Início</Link>
-              <Link href="/posts" className="text-parish-text-light hover:text-parish-gold transition">Notícias</Link>
-              <Link href="/eventos" className="text-parish-text-light hover:text-parish-gold transition">Eventos</Link>
-              <Link href="/comunidades" className="text-parish-gold font-medium">Comunidades</Link>
-              <Link href="/missas" className="text-parish-text-light hover:text-parish-gold transition">Missas</Link>
-              <Link href="/contato" className="text-parish-text-light hover:text-parish-gold transition">Contato</Link>
-            </div>
-            <Link href="/auth/login" className="px-4 py-2 bg-parish-gold text-white rounded-lg hover:bg-parish-gold-dark transition text-sm font-medium">
-              Admin
-            </Link>
-          </div>
-        </nav>
-      </header>
+      <PublicNavbar />
 
       {/* Banner */}
       <div className="relative w-full h-72 md:h-96 overflow-hidden">
@@ -333,38 +312,7 @@ export default function ComunidadePage() {
         )}
       </main>
 
-      {/* Footer */}
-      <footer className="bg-parish-text-dark text-white py-12 mt-8">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-            <div>
-              <h3 className="font-bold text-lg mb-4">Paróquia São Sebastião</h3>
-              <p className="text-parish-secondary text-sm">Uma comunidade católica dedicada à fé, esperança e caridade.</p>
-            </div>
-            <div>
-              <h3 className="font-bold text-lg mb-4">Links Rápidos</h3>
-              <ul className="text-parish-secondary text-sm space-y-2">
-                <li><Link href="/missas" className="hover:text-white transition">Horários de Missas</Link></li>
-                <li><Link href="/comunidades" className="hover:text-white transition">Comunidades</Link></li>
-                <li><Link href="/eventos" className="hover:text-white transition">Eventos</Link></li>
-                <li><Link href="/contato" className="hover:text-white transition">Contato</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-bold text-lg mb-4">Contato</h3>
-              <ul className="text-parish-secondary text-sm space-y-2">
-                <li>Av. A, 332 – Três Barras</li>
-                <li>Cuiabá-MT, 78058-531</li>
-                <li>saosebastiaomt@outlook.com.br</li>
-                <li>(65) 9 9277-1705</li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-parish-text pt-8 text-center text-parish-secondary text-sm">
-            <p>&copy; 2026 Paróquia São Sebastião. Todos os direitos reservados.</p>
-          </div>
-        </div>
-      </footer>
+      <PublicFooter />
     </div>
   );
 }

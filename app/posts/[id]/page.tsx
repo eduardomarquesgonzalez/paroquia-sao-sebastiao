@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Calendar, User, Tag, ArrowLeft, Eye, Share2 } from 'lucide-react'
+import PublicNavbar from "@/components/PublicNavbar"
+import PublicFooter from "@/components/PublicFooter"
 
 interface Post {
   id: string;
@@ -79,22 +81,7 @@ export default function PostPage() {
 
   return (
     <div className="min-h-screen bg-parish-background">
-      <header className="bg-parish-surface shadow-sm sticky top-0 z-50">
-        <nav className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center space-x-2">
-              <div>
-                <h1 className="font-bold text-xl text-parish-text-dark">Paróquia São Sebastião</h1>
-                <p className="text-xs text-parish-text-light">Três Barras, Cuiabá-MT</p>
-              </div>
-            </Link>
-            <div className="flex space-x-4">
-              <Link href="/" className="text-parish-text-light hover:text-parish-gold transition">Início</Link>
-              <Link href="/posts" className="text-parish-text-light hover:text-parish-gold transition">Posts</Link>
-            </div>
-          </div>
-        </nav>
-      </header>
+      <PublicNavbar />
 
       {post.coverImage && (
         <div className="w-full h-96 bg-parish-primary">
@@ -162,13 +149,7 @@ export default function PostPage() {
         </div>
       </article>
 
-      <footer className="bg-parish-text-dark text-white py-12 mt-16">
-        <div className="container mx-auto px-4 text-center">
-          <h3 className="font-bold text-lg mb-2">Paróquia São Sebastião</h3>
-          <p className="text-parish-secondary text-sm">Bairro Três Barras, Cuiabá-MT</p>
-          <p className="text-parish-secondary text-sm mt-4">&copy; 2025 Paróquia São Sebastião. Todos os direitos reservados.</p>
-        </div>
-      </footer>
+      <PublicFooter />
     </div>
   )
 }

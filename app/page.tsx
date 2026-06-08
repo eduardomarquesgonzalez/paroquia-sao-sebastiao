@@ -150,7 +150,7 @@ export default function HomePage() {
           if (e.isIntersecting) e.target.classList.add("is-visible");
         });
       },
-      { threshold: 0.08, rootMargin: "0px 0px -48px 0px" }
+      { threshold: 0.08, rootMargin: "0px 0px -48px 0px" },
     );
     els.forEach((el) => obs.observe(el));
     return () => obs.disconnect();
@@ -202,7 +202,6 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-parish-background">
-
       {/* ─── NAVBAR ─── */}
       <header
         className={`sticky top-0 z-50 transition-all duration-300 ${
@@ -213,7 +212,6 @@ export default function HomePage() {
       >
         <nav className="container mx-auto px-4 lg:px-8">
           <div className="flex items-center justify-between h-16 md:h-20">
-
             {/* Brand */}
             <Link href="/" className="flex items-center gap-3 group">
               <Image
@@ -309,7 +307,6 @@ export default function HomePage() {
               hero.btn2Text) && (
               <div className="container mx-auto px-4 lg:px-8 py-32 md:py-44 lg:py-52">
                 <div className="max-w-2xl">
-
                   {/* Label com linha dourada à esquerda */}
                   <div className="flex items-center gap-3 mb-5">
                     <div className="w-1 h-10 rounded-full bg-gradient-to-b from-parish-gold to-parish-gold-dark flex-shrink-0" />
@@ -483,7 +480,9 @@ export default function HomePage() {
                           <div className="w-6 h-6 rounded-md bg-parish-gold/10 flex items-center justify-center flex-shrink-0">
                             <MapPin className="w-3.5 h-3.5 text-parish-gold" />
                           </div>
-                          <span className="line-clamp-1">{evento.location}</span>
+                          <span className="line-clamp-1">
+                            {evento.location}
+                          </span>
                         </div>
                       )}
                     </div>
@@ -507,8 +506,13 @@ export default function HomePage() {
 
       {/* ─── NOSSA PARÓQUIA ─── */}
       <section className="py-24 bg-parish-navy relative overflow-hidden">
-        <div className="absolute inset-0 opacity-[0.04] pointer-events-none"
-          style={{ backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.15) 1px, transparent 1px)", backgroundSize: "28px 28px" }}
+        <div
+          className="absolute inset-0 opacity-[0.04] pointer-events-none"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle, rgba(255,255,255,0.15) 1px, transparent 1px)",
+            backgroundSize: "28px 28px",
+          }}
         />
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3 blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-80 h-80 bg-parish-gold/10 rounded-full translate-y-1/2 -translate-x-1/3 blur-3xl pointer-events-none" />
@@ -524,16 +528,16 @@ export default function HomePage() {
               <div className="w-8 h-px bg-parish-gold" />
             </div>
             <h2 className="font-playfair text-3xl md:text-4xl font-bold text-white leading-tight">
-              Explore Nossa Comunidade
+              Explore Nossa Paróquia
             </h2>
             <p className="text-white/55 mt-3 text-sm md:text-base max-w-md mx-auto leading-relaxed">
-              Conheça os serviços e atividades que formam a vida da nossa paróquia
+              Conheça os serviços e atividades que formam a vida da nossa
+              paróquia
             </p>
           </div>
 
           {/* Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-on-scroll">
-
             {/* Card Missas */}
             <Link
               href="/missas"
@@ -543,7 +547,7 @@ export default function HomePage() {
               <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/35 to-black/20 z-10 group-hover:from-black/65 transition-all duration-500" />
               <div
                 className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-700 ease-out"
-                style={{ backgroundImage: "url('https://images.unsplash.com/photo-1548625361-58a9d86b7c2f?w=800&q=80')" }}
+                style={{ backgroundImage: "url('/santamissa.jpg')" }}
               />
               <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-6 text-center">
                 <div className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-parish-gold/30 transition-all duration-300">
@@ -572,7 +576,7 @@ export default function HomePage() {
               <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/35 to-black/20 z-10 group-hover:from-black/65 transition-all duration-500" />
               <div
                 className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-700 ease-out"
-                style={{ backgroundImage: "url('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80')" }}
+                style={{ backgroundImage: "url('/sacramentos.jpg')" }}
               />
               <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-6 text-center">
                 <div className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-parish-gold/30 transition-all duration-300">
@@ -601,14 +605,14 @@ export default function HomePage() {
               <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/35 to-black/20 z-10 group-hover:from-black/65 transition-all duration-500" />
               <div
                 className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-700 ease-out"
-                style={{ backgroundImage: "url('https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=800&q=80')" }}
+                style={{ backgroundImage: "url('/pastorais.jpg')" }}
               />
               <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-6 text-center">
                 <div className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-parish-gold/30 transition-all duration-300">
                   <Users className="w-7 h-7 text-white" />
                 </div>
                 <h3 className="font-playfair text-2xl font-bold text-white mb-2 leading-tight">
-                  Movimentos
+                  Pastorais e Movimentos
                 </h3>
                 <p className="text-white/65 text-sm leading-relaxed max-w-[200px]">
                   Pastorais e movimentos da paróquia
@@ -676,7 +680,6 @@ export default function HomePage() {
         <div className="border-b border-white/8">
           <div className="container mx-auto px-4 lg:px-8 py-16">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10">
-
               {/* Brand */}
               <div className="lg:col-span-5">
                 <Link href="/" className="flex items-center gap-3 mb-5">

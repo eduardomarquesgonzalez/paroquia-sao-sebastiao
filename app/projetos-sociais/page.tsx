@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Heart, ArrowRight, MapPin, Clock, Users, ChevronRight } from "lucide-react";
+import PublicNavbar from "@/components/PublicNavbar";
+import PublicFooter from "@/components/PublicFooter";
 
 interface SocialProject {
   id: string;
@@ -30,6 +32,8 @@ export default function ProjetosSociaisPage() {
 
   return (
     <div className="min-h-screen bg-parish-background">
+      <PublicNavbar />
+
       {/* Hero */}
       <section className="relative bg-parish-text-dark overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-parish-gold/20 via-transparent to-parish-sky/10" />
@@ -201,6 +205,8 @@ export default function ProjetosSociaisPage() {
           </Link>
         </div>
       </section>
+
+      <PublicFooter />
     </div>
   );
 }

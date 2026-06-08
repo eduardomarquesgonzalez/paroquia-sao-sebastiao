@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Users, Clock, User, Phone, Star, ChevronRight, ArrowRight } from "lucide-react";
+import PublicNavbar from "@/components/PublicNavbar";
+import PublicFooter from "@/components/PublicFooter";
 
 interface Movement {
   id: string;
@@ -32,6 +34,8 @@ export default function MovimentosPage() {
 
   return (
     <div className="min-h-screen bg-parish-background">
+      <PublicNavbar />
+
       {/* Hero */}
       <section className="relative bg-parish-navy-dark overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-parish-sky/15 via-transparent to-parish-navy/40" />
@@ -152,6 +156,8 @@ export default function MovimentosPage() {
           </Link>
         </div>
       </section>
+
+      <PublicFooter />
     </div>
   );
 }

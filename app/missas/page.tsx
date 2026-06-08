@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Clock, MapPin, Info, Calendar, ArrowLeft } from "lucide-react";
+import { Clock, MapPin, Info, Calendar, ChevronRight, ArrowRight } from "lucide-react";
+import PublicNavbar from "@/components/PublicNavbar";
+import PublicFooter from "@/components/PublicFooter";
 
 interface Mass {
   id: string;
@@ -57,181 +59,192 @@ export default function MissasPage() {
 
   return (
     <div className="min-h-screen bg-parish-background">
-      <header className="bg-parish-surface shadow-sm sticky top-0 z-50">
-        <nav className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="font-bold text-2xl text-parish-text-dark">Paróquia São Sebastião</h1>
-              <p className="text-sm text-parish-text-light">Três Barras, Cuiabá-MT</p>
-            </div>
-            <div className="hidden md:flex space-x-6">
-              <Link href="/" className="text-parish-text-light hover:text-parish-gold transition">Início</Link>
-              <Link href="/posts" className="text-parish-text-light hover:text-parish-gold transition">Notícias</Link>
-              <Link href="/eventos" className="text-parish-text-light hover:text-parish-gold transition">Eventos</Link>
-              <Link href="/missas" className="text-parish-text-light hover:text-parish-gold transition font-medium">Missas</Link>
-              <Link href="/contato" className="text-parish-text-light hover:text-parish-gold transition">Contato</Link>
-            </div>
-            <Link href="/auth/login" className="px-4 py-2 bg-parish-gold text-white rounded-lg hover:bg-parish-gold-dark transition text-sm font-medium">
-              Admin
-            </Link>
-          </div>
-        </nav>
-      </header>
+      <PublicNavbar />
 
-      <section className="bg-gradient-gold text-white py-16">
-        <div className="container mx-auto px-4 text-center">
-          <Clock className="w-16 h-16 mx-auto mb-4" />
-          <h2 className="text-4xl font-bold mb-4">Horários de Missas</h2>
-          <p className="text-xl opacity-90 max-w-2xl mx-auto">Participe de nossas celebrações. Todos são bem-vindos!</p>
+      {/* Hero */}
+      <section className="relative bg-parish-text-dark overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-parish-gold/20 via-transparent to-parish-sky/10" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-parish-gold/10 rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-parish-sky/10 rounded-full translate-y-1/2 -translate-x-1/2 pointer-events-none" />
+
+        <div className="container mx-auto px-4 py-24 relative">
+          <nav className="flex items-center gap-2 text-xs text-white/50 mb-8">
+            <Link href="/" className="hover:text-white/80 transition">Início</Link>
+            <ChevronRight className="w-3 h-3" />
+            <span className="text-white/70">Missas</span>
+          </nav>
+
+          <div className="max-w-2xl">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-parish-gold/20 flex items-center justify-center">
+                <Clock className="w-5 h-5 text-parish-gold" />
+              </div>
+              <span className="text-xs font-bold uppercase tracking-widest text-parish-gold">
+                Agenda Litúrgica
+              </span>
+            </div>
+            <h1 className="font-playfair text-5xl font-bold text-white mb-6 leading-tight">
+              Horários de Missas
+            </h1>
+            <p className="text-lg text-white/70 leading-relaxed">
+              Participe de nossas celebrações eucarísticas. Todos são bem-vindos
+              à mesa do Senhor.
+            </p>
+          </div>
+
+          {!loading && missas.length > 0 && (
+            <div className="mt-12 flex flex-wrap gap-6">
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl px-5 py-3 border border-white/10">
+                <p className="text-2xl font-bold text-white">{missas.length}</p>
+                <p className="text-xs text-white/60 mt-0.5">Celebrações semanais</p>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl px-5 py-3 border border-white/10">
+                <p className="text-2xl font-bold text-white">{Object.keys(groupedMissas).length}</p>
+                <p className="text-xs text-white/60 mt-0.5">Dias de celebração</p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div
+          className="absolute bottom-0 left-0 right-0 h-12 bg-parish-background"
+          style={{ clipPath: "ellipse(55% 100% at 50% 100%)" }}
+        />
+      </section>
+
+      {/* Intro */}
+      <section className="py-16 bg-parish-background">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto text-center">
+            <div className="w-12 h-1 bg-parish-gold mx-auto mb-6 rounded-full" />
+            <p className="text-lg text-parish-text-light leading-relaxed">
+              &ldquo;A Eucaristia é a fonte e o cume de toda a vida cristã. Todos são chamados
+              a reunir-se ao redor da mesa do Senhor para celebrar juntos o mistério da fé.&rdquo;
+            </p>
+            <p className="text-sm text-parish-gold font-semibold mt-4">— Paróquia São Sebastião</p>
+          </div>
         </div>
       </section>
 
-      <section className="py-12">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <Link href="/" className="inline-flex items-center text-parish-gold hover:text-parish-gold-dark mb-6 transition">
-              <ArrowLeft className="w-4 h-4 mr-2" />Voltar para início
-            </Link>
-
-            {loading ? (
-              <div className="bg-parish-surface rounded-lg shadow-sm p-12 border border-parish-primary">
-                <div className="animate-pulse space-y-6">
-                  <div className="h-8 bg-parish-primary rounded w-1/3"></div>
-                  <div className="space-y-3">
-                    <div className="h-6 bg-parish-primary rounded"></div>
-                    <div className="h-6 bg-parish-primary rounded"></div>
-                    <div className="h-6 bg-parish-primary rounded"></div>
-                  </div>
-                </div>
+      {/* Schedule */}
+      <section className="pb-20 bg-parish-background">
+        <div className="container mx-auto px-4 max-w-4xl">
+          {loading ? (
+            <div className="flex justify-center py-20">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-parish-gold" />
+            </div>
+          ) : missas.length === 0 ? (
+            <div className="text-center py-20 bg-parish-surface rounded-3xl border border-parish-border">
+              <div className="w-16 h-16 rounded-2xl bg-parish-gold/10 flex items-center justify-center mx-auto mb-4">
+                <Clock className="w-8 h-8 text-parish-gold" />
               </div>
-            ) : missas.length === 0 ? (
-              <div className="bg-parish-surface rounded-lg shadow-sm p-12 border border-parish-primary text-center">
-                <Clock className="w-16 h-16 text-parish-secondary mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-parish-text mb-2">Horários em Atualização</h3>
-                <p className="text-parish-text-light">Em breve disponibilizaremos os horários das celebrações.</p>
-              </div>
-            ) : (
-              <div className="bg-parish-surface rounded-lg shadow-sm border border-parish-primary overflow-hidden">
-                <div className="bg-gradient-gold px-6 py-5">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-2xl font-bold text-white">Horários das Celebrações</h3>
-                      <p className="text-white opacity-80 text-sm mt-1">Confira todos os horários disponíveis</p>
+              <p className="font-semibold text-parish-text mb-1">Horários em atualização</p>
+              <p className="text-sm text-parish-text-light">Em breve disponibilizaremos os horários das celebrações.</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {Object.entries(groupedMissas).map(([day, dayMissas]) => (
+                <div key={day} className="bg-parish-surface rounded-2xl border border-parish-border overflow-hidden">
+                  <div className="flex items-center gap-3 px-6 py-4 border-b border-parish-border bg-parish-background">
+                    <div className="w-8 h-8 rounded-lg bg-parish-gold/10 flex items-center justify-center flex-shrink-0">
+                      <Calendar className="w-4 h-4 text-parish-gold" />
                     </div>
-                    <Calendar className="w-12 h-12 text-white opacity-50" />
+                    <h3 className="font-playfair font-bold text-lg text-parish-text">
+                      {DAYS_OF_WEEK[day] || day}
+                    </h3>
                   </div>
-                </div>
-
-                <div className="divide-y divide-parish-border">
-                  {Object.entries(groupedMissas).map(([day, dayMissas]) => (
-                    <div key={day} className="p-6 hover:bg-parish-background transition">
-                      <h4 className="font-bold text-xl text-parish-text mb-4 flex items-center">
-                        <Calendar className="w-5 h-5 mr-2 text-parish-gold" />
-                        {DAYS_OF_WEEK[day]}
-                      </h4>
-                      <div className="space-y-4">
-                        {dayMissas.map((missa) => (
-                          <div key={missa.id} className="flex items-start space-x-4 p-4 rounded-lg bg-gradient-to-r from-parish-background to-parish-surface border border-parish-border hover:border-parish-gold transition">
-                            <div className="flex-shrink-0 bg-parish-gold-light/30 rounded-full p-3">
-                              <Clock className="w-6 h-6 text-parish-gold" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center space-x-3 mb-2">
-                                <span className="text-2xl font-bold text-parish-text">{missa.time}</span>
-                                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${MASS_TYPES[missa.type]?.color || "bg-parish-primary text-parish-text"}`}>
-                                  {MASS_TYPES[missa.type]?.label || missa.type}
-                                </span>
-                              </div>
-                              {missa.location && (
-                                <div className="flex items-center text-sm text-parish-text-light mb-2">
-                                  <MapPin className="w-4 h-4 mr-2 text-parish-secondary" />
-                                  <span className="font-medium">{missa.location}</span>
-                                </div>
-                              )}
-                              {missa.observations && (
-                                <div className="flex items-start text-sm mt-3 bg-parish-sky-light rounded-lg p-3 border border-parish-sky-light">
-                                  <Info className="w-4 h-4 mr-2 text-parish-sky-dark flex-shrink-0 mt-0.5" />
-                                  <span className="text-parish-text-dark">{missa.observations}</span>
-                                </div>
-                              )}
-                            </div>
+                  <div className="divide-y divide-parish-border">
+                    {dayMissas.map((missa) => (
+                      <div key={missa.id} className="flex items-start gap-4 p-5 hover:bg-parish-background/60 transition">
+                        <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-parish-gold/10 flex items-center justify-center">
+                          <Clock className="w-5 h-5 text-parish-gold" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-3 mb-1.5">
+                            <span className="text-xl font-bold text-parish-text">{missa.time}</span>
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${MASS_TYPES[missa.type]?.color || "bg-parish-primary text-parish-text"}`}>
+                              {MASS_TYPES[missa.type]?.label || missa.type}
+                            </span>
                           </div>
-                        ))}
+                          {missa.location && (
+                            <div className="flex items-center gap-2 text-sm text-parish-text-light mb-1.5">
+                              <MapPin className="w-3.5 h-3.5 text-parish-gold flex-shrink-0" />
+                              <span>{missa.location}</span>
+                            </div>
+                          )}
+                          {missa.observations && (
+                            <div className="flex items-start gap-2 mt-2 bg-parish-gold/5 rounded-lg p-2.5 border border-parish-gold/15">
+                              <Info className="w-3.5 h-3.5 text-parish-gold flex-shrink-0 mt-0.5" />
+                              <span className="text-xs text-parish-text-light">{missa.observations}</span>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="bg-gradient-to-r from-parish-background to-parish-sky-light px-6 py-5 border-t border-parish-sky-light">
-                  <div className="flex items-center justify-center space-x-2 text-center">
-                    <span className="text-2xl">⛪</span>
-                    <div>
-                      <p className="font-semibold text-parish-text">Venha celebrar conosco!</p>
-                      <p className="text-sm text-parish-text-light">Todos são bem-vindos em nossa comunidade</p>
-                    </div>
+                    ))}
                   </div>
                 </div>
-              </div>
-            )}
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-              <div className="bg-parish-surface rounded-lg shadow-sm p-6 border border-parish-primary">
-                <div className="bg-parish-gold-light/30 rounded-full w-12 h-12 flex items-center justify-center mb-4">
-                  <Clock className="w-6 h-6 text-parish-gold" />
-                </div>
-                <h3 className="font-semibold text-parish-text mb-2">Pontualidade</h3>
-                <p className="text-sm text-parish-text-light">Chegue 10 minutos antes para uma melhor acomodação.</p>
-              </div>
-              <div className="bg-parish-surface rounded-lg shadow-sm p-6 border border-parish-primary">
-                <div className="bg-parish-sky-light rounded-full w-12 h-12 flex items-center justify-center mb-4">
-                  <Info className="w-6 h-6 text-parish-sky-dark" />
-                </div>
-                <h3 className="font-semibold text-parish-text mb-2">Confissões</h3>
-                <p className="text-sm text-parish-text-light">Disponível 30 minutos antes das missas ou agende com o padre.</p>
-              </div>
-              <div className="bg-parish-surface rounded-lg shadow-sm p-6 border border-parish-primary">
-                <div className="bg-green-100 rounded-full w-12 h-12 flex items-center justify-center mb-4">
-                  <MapPin className="w-6 h-6 text-green-600" />
-                </div>
-                <h3 className="font-semibold text-parish-text mb-2">Localização</h3>
-                <p className="text-sm text-parish-text-light">Bairro Três Barras, Cuiabá-MT. Estacionamento disponível.</p>
-              </div>
+              ))}
             </div>
+          )}
+
+          {/* Info cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+            {[
+              {
+                icon: Clock,
+                title: "Pontualidade",
+                text: "Chegue 10 minutos antes para uma melhor acomodação.",
+                bg: "bg-parish-gold/10",
+                color: "text-parish-gold",
+              },
+              {
+                icon: Info,
+                title: "Confissões",
+                text: "Disponível 30 minutos antes das missas ou agende com o padre.",
+                bg: "bg-parish-sky/10",
+                color: "text-parish-sky-dark",
+              },
+              {
+                icon: MapPin,
+                title: "Localização",
+                text: "Bairro Três Barras, Cuiabá-MT. Estacionamento disponível.",
+                bg: "bg-green-50",
+                color: "text-green-600",
+              },
+            ].map(({ icon: Icon, title, text, bg, color }) => (
+              <div key={title} className="bg-parish-surface rounded-2xl border border-parish-border p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                <div className={`w-12 h-12 rounded-xl ${bg} flex items-center justify-center mb-4`}>
+                  <Icon className={`w-6 h-6 ${color}`} />
+                </div>
+                <h3 className="font-semibold text-parish-text mb-2">{title}</h3>
+                <p className="text-sm text-parish-text-light leading-relaxed">{text}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      <footer className="bg-parish-text-dark text-white py-12 mt-12">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-            <div>
-              <h3 className="font-bold text-lg mb-4">Paróquia São Sebastião</h3>
-              <p className="text-parish-secondary text-sm">Uma comunidade católica dedicada à fé, esperança e caridade.</p>
-            </div>
-            <div>
-              <h3 className="font-bold text-lg mb-4">Links Rápidos</h3>
-              <ul className="text-parish-secondary text-sm space-y-2">
-                <li><Link href="/" className="hover:text-white transition">Início</Link></li>
-                <li><Link href="/posts" className="hover:text-white transition">Notícias</Link></li>
-                <li><Link href="/eventos" className="hover:text-white transition">Eventos</Link></li>
-                <li><Link href="/contato" className="hover:text-white transition">Contato</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-bold text-lg mb-4">Contato</h3>
-              <ul className="text-parish-secondary text-sm space-y-2">
-                <li>Bairro Três Barras</li>
-                <li>Cuiabá-MT</li>
-                <li>saosebastiaomt@outlook.com.br</li>
-                <li>65 - 99277 1705</li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-parish-text pt-8 text-center text-parish-secondary text-sm">
-            <p>&copy; 2025 Paróquia São Sebastião. Todos os direitos reservados.</p>
-          </div>
+      {/* CTA */}
+      <section className="py-16 bg-parish-surface border-t border-parish-border">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="font-playfair text-2xl font-bold text-parish-text mb-3">
+            Venha celebrar conosco!
+          </h2>
+          <p className="text-parish-text-light mb-6 max-w-md mx-auto">
+            Todos são bem-vindos. Entre em contato para mais informações sobre
+            nossas celebrações.
+          </p>
+          <Link
+            href="/contato"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-parish-gold text-white rounded-xl font-semibold hover:bg-parish-gold-dark transition"
+          >
+            Fale Conosco
+            <ArrowRight className="w-4 h-4" />
+          </Link>
         </div>
-      </footer>
+      </section>
+
+      <PublicFooter />
     </div>
   );
 }

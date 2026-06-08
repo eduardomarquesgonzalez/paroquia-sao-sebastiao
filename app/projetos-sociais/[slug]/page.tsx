@@ -7,6 +7,8 @@ import {
   Heart, MapPin, Clock, Users, User, Phone, Mail,
   ArrowLeft, MessageCircle, HandHeart, ChevronRight, X
 } from "lucide-react";
+import PublicNavbar from "@/components/PublicNavbar";
+import PublicFooter from "@/components/PublicFooter";
 
 interface SocialProject {
   id: string;
@@ -64,6 +66,8 @@ export default function ProjetoSocialPage() {
 
   return (
     <div className="min-h-screen bg-parish-background">
+      <PublicNavbar />
+
       {/* Lightbox */}
       {lightboxImg && (
         <div
@@ -304,6 +308,8 @@ export default function ProjetoSocialPage() {
           </aside>
         </div>
       </div>
+
+      <PublicFooter />
     </div>
   );
 }
