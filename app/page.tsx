@@ -11,8 +11,10 @@ import {
   X,
   Phone,
   Mail,
+  Church,
+  Sparkles,
+  Users,
 } from "lucide-react";
-import HorariosMissasPorDia from "@/components/HorariosMissasPorDia";
 import CarouselFaixas from "@/components/CarouselFaixas";
 import ComunidadesCarousel from "@/components/ComunidadesCarousel";
 import Image from "next/image";
@@ -484,6 +486,125 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ─── NOSSA PARÓQUIA ─── */}
+      <section className="py-24 bg-parish-navy relative overflow-hidden">
+        <div className="absolute inset-0 opacity-[0.04] pointer-events-none"
+          style={{ backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.15) 1px, transparent 1px)", backgroundSize: "28px 28px" }}
+        />
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3 blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-parish-gold/10 rounded-full translate-y-1/2 -translate-x-1/3 blur-3xl pointer-events-none" />
+
+        <div className="container mx-auto px-4 lg:px-8 relative">
+          {/* Header */}
+          <div className="text-center mb-14 animate-on-scroll">
+            <div className="flex items-center justify-center gap-3 mb-3">
+              <div className="w-8 h-px bg-parish-gold" />
+              <span className="text-[11px] font-bold uppercase tracking-[0.22em] text-parish-gold">
+                Nossa Paróquia
+              </span>
+              <div className="w-8 h-px bg-parish-gold" />
+            </div>
+            <h2 className="font-playfair text-3xl md:text-4xl font-bold text-white leading-tight">
+              Explore Nossa Comunidade
+            </h2>
+            <p className="text-white/55 mt-3 text-sm md:text-base max-w-md mx-auto leading-relaxed">
+              Conheça os serviços e atividades que formam a vida da nossa paróquia
+            </p>
+          </div>
+
+          {/* Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-on-scroll">
+
+            {/* Card Missas */}
+            <Link
+              href="/missas"
+              className="group relative h-80 rounded-2xl overflow-hidden block shadow-navy hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-parish-navy-dark via-parish-navy to-parish-navy-light" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/35 to-black/20 z-10 group-hover:from-black/65 transition-all duration-500" />
+              <div
+                className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-700 ease-out"
+                style={{ backgroundImage: "url('https://images.unsplash.com/photo-1548625361-58a9d86b7c2f?w=800&q=80')" }}
+              />
+              <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-6 text-center">
+                <div className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-parish-gold/30 transition-all duration-300">
+                  <Church className="w-7 h-7 text-white" />
+                </div>
+                <h3 className="font-playfair text-2xl font-bold text-white mb-2 leading-tight">
+                  Missas
+                </h3>
+                <p className="text-white/65 text-sm leading-relaxed max-w-[200px]">
+                  Horários de celebrações da semana
+                </p>
+                <div className="mt-5 flex items-center gap-2 text-parish-gold text-sm font-semibold">
+                  <span>Ver horários</span>
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </div>
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-parish-gold scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+              </div>
+            </Link>
+
+            {/* Card Sacramentos */}
+            <Link
+              href="/sacramentos"
+              className="group relative h-80 rounded-2xl overflow-hidden block shadow-navy hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-parish-navy-dark via-parish-navy to-parish-navy-light" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/35 to-black/20 z-10 group-hover:from-black/65 transition-all duration-500" />
+              <div
+                className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-700 ease-out"
+                style={{ backgroundImage: "url('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80')" }}
+              />
+              <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-6 text-center">
+                <div className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-parish-gold/30 transition-all duration-300">
+                  <Sparkles className="w-7 h-7 text-white" />
+                </div>
+                <h3 className="font-playfair text-2xl font-bold text-white mb-2 leading-tight">
+                  Sacramentos
+                </h3>
+                <p className="text-white/65 text-sm leading-relaxed max-w-[200px]">
+                  Batismo, casamento e demais sacramentos
+                </p>
+                <div className="mt-5 flex items-center gap-2 text-parish-gold text-sm font-semibold">
+                  <span>Saiba mais</span>
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </div>
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-parish-gold scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+              </div>
+            </Link>
+
+            {/* Card Movimentos / Pastorais */}
+            <Link
+              href="/movimentos"
+              className="group relative h-80 rounded-2xl overflow-hidden block shadow-navy hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-parish-navy-dark via-parish-navy to-parish-navy-light" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/35 to-black/20 z-10 group-hover:from-black/65 transition-all duration-500" />
+              <div
+                className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-700 ease-out"
+                style={{ backgroundImage: "url('https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=800&q=80')" }}
+              />
+              <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-6 text-center">
+                <div className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-parish-gold/30 transition-all duration-300">
+                  <Users className="w-7 h-7 text-white" />
+                </div>
+                <h3 className="font-playfair text-2xl font-bold text-white mb-2 leading-tight">
+                  Movimentos
+                </h3>
+                <p className="text-white/65 text-sm leading-relaxed max-w-[200px]">
+                  Pastorais e movimentos da paróquia
+                </p>
+                <div className="mt-5 flex items-center gap-2 text-parish-gold text-sm font-semibold">
+                  <span>Conheça</span>
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </div>
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-parish-gold scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+              </div>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* ─── NOSSAS COMUNIDADES ─── */}
       <section
         id="comunidades"
@@ -527,39 +648,6 @@ export default function HomePage() {
           ) : (
             <ComunidadesCarousel comunidades={comunidades} />
           )}
-        </div>
-      </section>
-
-      {/* ─── HORÁRIOS DE MISSAS ─── */}
-      <section
-        id="missas"
-        className="py-24 bg-parish-background relative overflow-hidden"
-      >
-        <div className="absolute top-0 left-0 w-[400px] h-[400px] bg-parish-navy/4 rounded-full -translate-y-1/2 -translate-x-1/2 blur-3xl pointer-events-none" />
-
-        <div className="container mx-auto px-4 lg:px-8 relative">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-14 animate-on-scroll">
-            <div>
-              <SectionLabel>Celebrações</SectionLabel>
-              <h2 className="font-playfair text-3xl md:text-4xl font-bold text-parish-navy-dark leading-tight">
-                Horários de Missas
-              </h2>
-              <p className="text-parish-text-light mt-2 text-sm md:text-base max-w-md">
-                Confira os horários das nossas celebrações
-              </p>
-            </div>
-            <Link
-              href="/missas"
-              className="group inline-flex items-center gap-2 px-5 py-2.5 border border-parish-navy/20 text-parish-navy rounded-lg text-sm font-semibold hover:bg-parish-navy hover:text-white hover:border-parish-navy transition-all duration-200 flex-shrink-0"
-            >
-              Ver detalhes
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-            </Link>
-          </div>
-
-          <div className="max-w-5xl mx-auto">
-            <HorariosMissasPorDia />
-          </div>
         </div>
       </section>
 

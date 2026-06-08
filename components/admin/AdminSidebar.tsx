@@ -26,6 +26,7 @@ const navigation = [
   { name: "Projetos Sociais", href: "/admin/projetos-sociais", icon: HandHeart },
   { name: "Horários de Missas", href: "/admin/missas", icon: Clock },
   { name: "Sacramentos", href: "/admin/sacramentos", icon: Church },
+  { name: "Movimentos", href: "/admin/movimentos", icon: Users },
   { name: "Doações", href: "/admin/doacoes", icon: Heart },
   { name: "Galeria", href: "/admin/galeria", icon: Image },
   { name: "Newsletter", href: "/admin/newsletter", icon: Mail },

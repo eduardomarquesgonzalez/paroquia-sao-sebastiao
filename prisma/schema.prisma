@@ -228,3 +228,41 @@ model SocialProject {
   @@index([active])
   @@map("social_projects")
 }
+
+model SacramentInfo {
+  id                String   @id @default(cuid())
+  name              String
+  description       String   @db.Text
+  schedules         String[]
+  responsible       String?
+  requiredDocuments String[]
+  image             String?  @db.Text
+  highlight         Boolean  @default(false)
+  active            Boolean  @default(true)
+  order             Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([active])
+  @@index([order])
+  @@map("sacrament_info")
+}
+
+model Movement {
+  id          String   @id @default(cuid())
+  name        String
+  description String   @db.Text
+  coordinator String?
+  schedules   String[]
+  contact     String?
+  image       String?  @db.Text
+  highlight   Boolean  @default(false)
+  active      Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([active])
+  @@index([order])
+  @@map("movements")
+}
