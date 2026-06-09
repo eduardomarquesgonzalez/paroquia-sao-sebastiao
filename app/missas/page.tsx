@@ -2,7 +2,16 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Clock, MapPin, Info, Calendar, ChevronRight, ArrowRight } from "lucide-react";
+import {
+  Clock,
+  MapPin,
+  ChevronRight,
+  ArrowRight,
+  Church,
+  Calendar,
+  Info,
+  ExternalLink,
+} from "lucide-react";
 import PublicNavbar from "@/components/PublicNavbar";
 import PublicFooter from "@/components/PublicFooter";
 
@@ -11,11 +20,44 @@ interface Mass {
   dayOfWeek: string;
   time: string;
   type: string;
-  location: string | null;
   observations: string | null;
 }
 
-const DAYS_OF_WEEK: { [key: string]: string } = {
+interface Community {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  address: string | null;
+  neighborhood: string | null;
+  city: string | null;
+  state: string | null;
+  image: string | null;
+  mapUrl: string | null;
+  masses: Mass[];
+}
+
+const DAY_ORDER: Record<string, number> = {
+  SUNDAY: 0,
+  MONDAY: 1,
+  TUESDAY: 2,
+  WEDNESDAY: 3,
+  THURSDAY: 4,
+  FRIDAY: 5,
+  SATURDAY: 6,
+};
+
+const DAY_LABELS: Record<string, string> = {
+  SUNDAY: "Domingo",
+  MONDAY: "Segunda",
+  TUESDAY: "Terça",
+  WEDNESDAY: "Quarta",
+  THURSDAY: "Quinta",
+  FRIDAY: "Sexta",
+  SATURDAY: "Sábado",
+};
+
+const DAY_LABELS_FULL: Record<string, string> = {
   SUNDAY: "Domingo",
   MONDAY: "Segunda-feira",
   TUESDAY: "Terça-feira",
@@ -25,43 +67,64 @@ const DAYS_OF_WEEK: { [key: string]: string } = {
   SATURDAY: "Sábado",
 };
 
-const MASS_TYPES: { [key: string]: { label: string; color: string } } = {
-  DOMINICAL: { label: "Dominical", color: "bg-parish-sky-light text-parish-sky-dark" },
-  SEMANAL: { label: "Semanal", color: "bg-parish-primary text-parish-text" },
-  ESPECIAL: { label: "Especial", color: "bg-parish-gold-light/40 text-parish-gold-dark" },
+const TYPE_STYLES: Record<string, string> = {
+  DOMINICAL: "bg-parish-sky-light text-parish-sky-dark",
+  SEMANAL: "bg-parish-primary text-parish-text",
+  ESPECIAL: "bg-parish-gold/15 text-parish-gold-dark",
 };
 
-export default function MissasPage() {
-  const [missas, setMissas] = useState<Mass[]>([]);
-  const [loading, setLoading] = useState(true);
+const TYPE_LABELS: Record<string, string> = {
+  DOMINICAL: "Dominical",
+  SEMANAL: "Semanal",
+  ESPECIAL: "Especial",
+};
 
-  useEffect(() => { fetchMissas(); }, []);
-
-  async function fetchMissas() {
-    try {
-      const response = await fetch("/api/missas/public");
-      if (response.ok) {
-        const data = await response.json();
-        setMissas(data);
-      }
-    } catch (error) {
-      console.error("Erro ao carregar missas:", error);
-    } finally {
-      setLoading(false);
-    }
+function groupMassesByDay(masses: Mass[]): [string, Mass[]][] {
+  const map: Record<string, Mass[]> = {};
+  for (const m of masses) {
+    if (!map[m.dayOfWeek]) map[m.dayOfWeek] = [];
+    map[m.dayOfWeek].push(m);
   }
+  return Object.entries(map).sort(
+    ([a], [b]) => (DAY_ORDER[a] ?? 7) - (DAY_ORDER[b] ?? 7),
+  );
+}
 
-  const groupedMissas = missas.reduce((acc, missa) => {
-    if (!acc[missa.dayOfWeek]) acc[missa.dayOfWeek] = [];
-    acc[missa.dayOfWeek].push(missa);
-    return acc;
-  }, {} as { [key: string]: Mass[] });
+function allDaysWithMasses(communities: Community[]): string[] {
+  const days = new Set<string>();
+  communities.forEach((c) => c.masses.forEach((m) => days.add(m.dayOfWeek)));
+  return [...days].sort((a, b) => (DAY_ORDER[a] ?? 7) - (DAY_ORDER[b] ?? 7));
+}
+
+export default function MissasPage() {
+  const [communities, setCommunities] = useState<Community[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [activeDay, setActiveDay] = useState<string>("all");
+
+  useEffect(() => {
+    fetch("/api/missas/public")
+      .then((r) => (r.ok ? r.json() : []))
+      .then(setCommunities)
+      .catch(() => setCommunities([]))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const availableDays = allDaysWithMasses(communities);
+
+  const filtered =
+    activeDay === "all"
+      ? communities
+      : communities.filter((c) =>
+          c.masses.some((m) => m.dayOfWeek === activeDay),
+        );
+
+  const totalMasses = communities.reduce((s, c) => s + c.masses.length, 0);
 
   return (
     <div className="min-h-screen bg-parish-background">
       <PublicNavbar />
 
-      {/* Hero */}
+      {/* ── Hero ─────────────────────────────────────────────────────────────── */}
       <section className="relative bg-parish-text-dark overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-parish-gold/20 via-transparent to-parish-sky/10" />
         <div className="absolute top-0 right-0 w-96 h-96 bg-parish-gold/10 rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none" />
@@ -69,7 +132,9 @@ export default function MissasPage() {
 
         <div className="container mx-auto px-4 py-24 relative">
           <nav className="flex items-center gap-2 text-xs text-white/50 mb-8">
-            <Link href="/" className="hover:text-white/80 transition">Início</Link>
+            <Link href="/" className="hover:text-white/80 transition">
+              Início
+            </Link>
             <ChevronRight className="w-3 h-3" />
             <span className="text-white/70">Missas</span>
           </nav>
@@ -87,20 +152,32 @@ export default function MissasPage() {
               Horários de Missas
             </h1>
             <p className="text-lg text-white/70 leading-relaxed">
-              Participe de nossas celebrações eucarísticas. Todos são bem-vindos
-              à mesa do Senhor.
+              Encontre a celebração mais próxima de você. Todos são bem-vindos à
+              mesa do Senhor.
             </p>
           </div>
 
-          {!loading && missas.length > 0 && (
-            <div className="mt-12 flex flex-wrap gap-6">
+          {!loading && communities.length > 0 && (
+            <div className="mt-12 flex flex-wrap gap-4">
               <div className="bg-white/10 backdrop-blur-sm rounded-xl px-5 py-3 border border-white/10">
-                <p className="text-2xl font-bold text-white">{missas.length}</p>
-                <p className="text-xs text-white/60 mt-0.5">Celebrações semanais</p>
+                <p className="text-2xl font-bold text-white">
+                  {communities.length}
+                </p>
+                <p className="text-xs text-white/60 mt-0.5">Comunidades</p>
               </div>
               <div className="bg-white/10 backdrop-blur-sm rounded-xl px-5 py-3 border border-white/10">
-                <p className="text-2xl font-bold text-white">{Object.keys(groupedMissas).length}</p>
-                <p className="text-xs text-white/60 mt-0.5">Dias de celebração</p>
+                <p className="text-2xl font-bold text-white">{totalMasses}</p>
+                <p className="text-xs text-white/60 mt-0.5">
+                  Celebrações semanais
+                </p>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl px-5 py-3 border border-white/10">
+                <p className="text-2xl font-bold text-white">
+                  {availableDays.length}
+                </p>
+                <p className="text-xs text-white/60 mt-0.5">
+                  Dias de celebração
+                </p>
               </div>
             </div>
           )}
@@ -112,83 +189,109 @@ export default function MissasPage() {
         />
       </section>
 
-      {/* Intro */}
-      <section className="py-16 bg-parish-background">
+      {/* ── Citação ──────────────────────────────────────────────────────────── */}
+      <section className="py-14 bg-parish-background">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
             <div className="w-12 h-1 bg-parish-gold mx-auto mb-6 rounded-full" />
             <p className="text-lg text-parish-text-light leading-relaxed">
-              &ldquo;A Eucaristia é a fonte e o cume de toda a vida cristã. Todos são chamados
-              a reunir-se ao redor da mesa do Senhor para celebrar juntos o mistério da fé.&rdquo;
+              &ldquo;A Eucaristia é a fonte e o cume de toda a vida cristã.
+              Todos são chamados a reunir-se ao redor da mesa do Senhor para
+              celebrar juntos o mistério da fé.&rdquo;
             </p>
-            <p className="text-sm text-parish-gold font-semibold mt-4">— Paróquia São Sebastião</p>
+            <p className="text-sm text-parish-gold font-semibold mt-4">
+              — Paróquia São Sebastião
+            </p>
           </div>
         </div>
       </section>
 
-      {/* Schedule */}
+      {/* ── Filtro por dia ───────────────────────────────────────────────────── */}
+      {!loading && availableDays.length > 1 && (
+        <section className="pb-6 bg-parish-background">
+          <div className="container mx-auto px-4">
+            <div className="flex flex-wrap gap-2 justify-center">
+              <button
+                onClick={() => setActiveDay("all")}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                  activeDay === "all"
+                    ? "bg-parish-navy text-white shadow-md"
+                    : "bg-parish-surface border border-parish-border text-parish-text-light hover:border-parish-navy hover:text-parish-navy"
+                }`}
+              >
+                Todos os dias
+              </button>
+              {availableDays.map((day) => (
+                <button
+                  key={day}
+                  onClick={() => setActiveDay(activeDay === day ? "all" : day)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                    activeDay === day
+                      ? "bg-parish-gold text-white shadow-md"
+                      : "bg-parish-surface border border-parish-border text-parish-text-light hover:border-parish-gold hover:text-parish-gold-dark"
+                  }`}
+                >
+                  {DAY_LABELS[day]}
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── Grid de comunidades ──────────────────────────────────────────────── */}
       <section className="pb-20 bg-parish-background">
-        <div className="container mx-auto px-4 max-w-4xl">
+        <div className="container mx-auto px-4">
           {loading ? (
-            <div className="flex justify-center py-20">
+            <div className="flex justify-center py-24">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-parish-gold" />
             </div>
-          ) : missas.length === 0 ? (
-            <div className="text-center py-20 bg-parish-surface rounded-3xl border border-parish-border">
+          ) : communities.length === 0 ? (
+            <div className="text-center py-20 bg-parish-surface rounded-3xl border border-parish-border max-w-lg mx-auto">
               <div className="w-16 h-16 rounded-2xl bg-parish-gold/10 flex items-center justify-center mx-auto mb-4">
                 <Clock className="w-8 h-8 text-parish-gold" />
               </div>
-              <p className="font-semibold text-parish-text mb-1">Horários em atualização</p>
-              <p className="text-sm text-parish-text-light">Em breve disponibilizaremos os horários das celebrações.</p>
+              <p className="font-semibold text-parish-text mb-1">
+                Horários em atualização
+              </p>
+              <p className="text-sm text-parish-text-light">
+                Em breve disponibilizaremos os horários das celebrações.
+              </p>
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="text-center py-16">
+              <p className="text-parish-text-light">
+                Nenhuma comunidade possui missa na{" "}
+                <span className="font-semibold text-parish-text">
+                  {DAY_LABELS_FULL[activeDay]}
+                </span>
+                .
+              </p>
+              <button
+                onClick={() => setActiveDay("all")}
+                className="mt-3 text-sm text-parish-gold hover:text-parish-gold-dark transition underline underline-offset-2"
+              >
+                Ver todos os dias
+              </button>
             </div>
           ) : (
-            <div className="space-y-4">
-              {Object.entries(groupedMissas).map(([day, dayMissas]) => (
-                <div key={day} className="bg-parish-surface rounded-2xl border border-parish-border overflow-hidden">
-                  <div className="flex items-center gap-3 px-6 py-4 border-b border-parish-border bg-parish-background">
-                    <div className="w-8 h-8 rounded-lg bg-parish-gold/10 flex items-center justify-center flex-shrink-0">
-                      <Calendar className="w-4 h-4 text-parish-gold" />
-                    </div>
-                    <h3 className="font-playfair font-bold text-lg text-parish-text">
-                      {DAYS_OF_WEEK[day] || day}
-                    </h3>
-                  </div>
-                  <div className="divide-y divide-parish-border">
-                    {dayMissas.map((missa) => (
-                      <div key={missa.id} className="flex items-start gap-4 p-5 hover:bg-parish-background/60 transition">
-                        <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-parish-gold/10 flex items-center justify-center">
-                          <Clock className="w-5 h-5 text-parish-gold" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-3 mb-1.5">
-                            <span className="text-xl font-bold text-parish-text">{missa.time}</span>
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${MASS_TYPES[missa.type]?.color || "bg-parish-primary text-parish-text"}`}>
-                              {MASS_TYPES[missa.type]?.label || missa.type}
-                            </span>
-                          </div>
-                          {missa.location && (
-                            <div className="flex items-center gap-2 text-sm text-parish-text-light mb-1.5">
-                              <MapPin className="w-3.5 h-3.5 text-parish-gold flex-shrink-0" />
-                              <span>{missa.location}</span>
-                            </div>
-                          )}
-                          {missa.observations && (
-                            <div className="flex items-start gap-2 mt-2 bg-parish-gold/5 rounded-lg p-2.5 border border-parish-gold/15">
-                              <Info className="w-3.5 h-3.5 text-parish-gold flex-shrink-0 mt-0.5" />
-                              <span className="text-xs text-parish-text-light">{missa.observations}</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filtered.map((community) => (
+                <CommunityCard
+                  key={community.id}
+                  community={community}
+                  activeDay={activeDay}
+                />
               ))}
             </div>
           )}
+        </div>
+      </section>
 
-          {/* Info cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+      {/* ── Dicas ────────────────────────────────────────────────────────────── */}
+      <section className="py-16 bg-parish-surface border-t border-parish-border">
+        <div className="container mx-auto px-4 max-w-5xl">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
               {
                 icon: Clock,
@@ -212,20 +315,27 @@ export default function MissasPage() {
                 color: "text-green-600",
               },
             ].map(({ icon: Icon, title, text, bg, color }) => (
-              <div key={title} className="bg-parish-surface rounded-2xl border border-parish-border p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-                <div className={`w-12 h-12 rounded-xl ${bg} flex items-center justify-center mb-4`}>
+              <div
+                key={title}
+                className="bg-parish-background rounded-2xl border border-parish-border p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
+              >
+                <div
+                  className={`w-12 h-12 rounded-xl ${bg} flex items-center justify-center mb-4`}
+                >
                   <Icon className={`w-6 h-6 ${color}`} />
                 </div>
                 <h3 className="font-semibold text-parish-text mb-2">{title}</h3>
-                <p className="text-sm text-parish-text-light leading-relaxed">{text}</p>
+                <p className="text-sm text-parish-text-light leading-relaxed">
+                  {text}
+                </p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-16 bg-parish-surface border-t border-parish-border">
+      {/* ── CTA ──────────────────────────────────────────────────────────────── */}
+      <section className="py-16 bg-parish-background border-t border-parish-border">
         <div className="container mx-auto px-4 text-center">
           <h2 className="font-playfair text-2xl font-bold text-parish-text mb-3">
             Venha celebrar conosco!
@@ -246,5 +356,123 @@ export default function MissasPage() {
 
       <PublicFooter />
     </div>
+  );
+}
+
+// ── Componente do card ─────────────────────────────────────────────────────────
+
+function CommunityCard({
+  community,
+  activeDay,
+}: {
+  community: Community;
+  activeDay: string;
+}) {
+  const massesToShow =
+    activeDay === "all"
+      ? community.masses
+      : community.masses.filter((m) => m.dayOfWeek === activeDay);
+
+  const grouped = groupMassesByDay(massesToShow);
+
+  const fullAddress = [
+    community.address,
+    community.neighborhood,
+    community.city,
+    community.state,
+  ]
+    .filter(Boolean)
+    .join(", ");
+
+  return (
+    <article className="group bg-parish-surface rounded-2xl border border-parish-border overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col">
+      {/* Imagem */}
+      <div className="relative aspect-video overflow-hidden bg-parish-navy/10">
+        {community.image ? (
+          <img
+            src={community.image}
+            alt={community.name}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          />
+        ) : (
+          <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-parish-navy to-parish-navy-dark">
+            <Church className="w-12 h-12 text-parish-gold/60 mb-2" />
+            <span className="text-xs text-white/40 font-medium">
+              Comunidade
+            </span>
+          </div>
+        )}
+        {/* Badge de missas */}
+        <div className="absolute bottom-3 right-3 bg-black/50 backdrop-blur-sm text-white text-xs font-semibold px-2.5 py-1 rounded-full">
+          {community.masses.length} missa
+          {community.masses.length !== 1 ? "s" : ""}
+        </div>
+      </div>
+
+      {/* Corpo */}
+      <div className="p-5 flex flex-col flex-1 gap-4">
+        {/* Nome */}
+        <div>
+          <h2 className="font-playfair text-xl font-bold text-parish-text group-hover:text-parish-navy transition-colors leading-snug">
+            {community.name}
+          </h2>
+          {fullAddress && (
+            <div className="flex items-start gap-1.5 mt-1.5">
+              <MapPin className="w-3.5 h-3.5 text-parish-gold flex-shrink-0 mt-0.5" />
+              <span className="text-xs text-parish-text-light leading-relaxed">
+                {fullAddress}
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Horários */}
+        <div className="flex-1 space-y-2.5">
+          {grouped.map(([day, masses]) => (
+            <div key={day}>
+              <div className="flex items-center gap-1.5 mb-1.5">
+                <Calendar className="w-3.5 h-3.5 text-parish-gold" />
+                <span className="text-xs font-semibold text-parish-text uppercase tracking-wide">
+                  {DAY_LABELS_FULL[day]}
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-1.5 pl-5">
+                {masses.map((m) => (
+                  <div key={m.id} className="flex items-center gap-1">
+                    <span className="inline-flex items-center gap-1 bg-parish-background border border-parish-border rounded-lg px-2.5 py-1 text-xs font-semibold text-parish-text">
+                      <Clock className="w-3 h-3 text-parish-gold" />
+                      {m.time}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Rodapé do card */}
+        <div className="flex items-center justify-between pt-2 border-t border-parish-border mt-auto">
+          <Link
+            href={`/comunidades/${community.slug}`}
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-parish-gold hover:text-parish-gold-dark transition-colors"
+          >
+            Ver detalhes
+            <ChevronRight className="w-4 h-4" />
+          </Link>
+          {community.mapUrl && (
+            <a
+              href={community.mapUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-xs text-parish-text-light hover:text-parish-navy transition-colors"
+              title="Ver no mapa"
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+              Mapa
+            </a>
+          )}
+        </div>
+      </div>
+    </article>
   );
 }
