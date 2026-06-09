@@ -149,6 +149,39 @@ export const DAY_OF_WEEK_ORDER: Record<string, number> = {
 
 // \u2500\u2500\u2500 Outras utilidades \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 
+// ─── Upload de imagem ─────────────────────────────────────────────────────────
+
+/**
+ * Redimensiona e comprime uma imagem no browser usando Canvas.
+ * Resultado: JPEG base64, largura máx. 1 200 px, qualidade 78 %.
+ * Garante que a string fique abaixo de ~1 MB para caber no limite da Vercel (4,5 MB).
+ */
+export function compressImage(file: File, maxWidth = 1200, quality = 0.78): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onerror = reject
+    reader.onload = (ev) => {
+      const img = new Image()
+      img.onerror = reject
+      img.onload = () => {
+        let { width, height } = img
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width)
+          width = maxWidth
+        }
+        const canvas = document.createElement('canvas')
+        canvas.width = width
+        canvas.height = height
+        const ctx = canvas.getContext('2d')!
+        ctx.drawImage(img, 0, 0, width, height)
+        resolve(canvas.toDataURL('image/jpeg', quality))
+      }
+      img.src = ev.target?.result as string
+    }
+    reader.readAsDataURL(file)
+  })
+}
+
 export function formatCurrency(amount: number): string {
   return new Intl.NumberFormat(LOCALE, {
     style: 'currency',

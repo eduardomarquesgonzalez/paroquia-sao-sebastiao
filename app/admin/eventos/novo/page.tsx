@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Save, Eye, Upload, X, Calendar, Link as LinkIcon, Globe } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { fromDatetimeLocalCuiaba } from "@/lib/utils";
+import { fromDatetimeLocalCuiaba, compressImage } from "@/lib/utils";
 
 export default function NovoEventoPage() {
   const router = useRouter();
@@ -40,18 +40,18 @@ export default function NovoEventoPage() {
 
   const handleImageClick = () => fileInputRef.current?.click();
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith("image/")) { toast.error("Por favor, selecione uma imagem válida"); return; }
-    if (file.size > 15 * 1024 * 1024) { toast.error("A imagem deve ter no máximo 15MB"); return; }
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64String = reader.result as string;
-      setImagePreview(base64String);
-      setFormData((prev) => ({ ...prev, image: base64String }));
-    };
-    reader.readAsDataURL(file);
+    if (file.size > 20 * 1024 * 1024) { toast.error("A imagem deve ter no máximo 20MB"); return; }
+    try {
+      const compressed = await compressImage(file);
+      setImagePreview(compressed);
+      setFormData((prev) => ({ ...prev, image: compressed }));
+    } catch {
+      toast.error("Erro ao processar a imagem");
+    }
   };
 
   const handleRemoveImage = () => {
@@ -223,7 +223,7 @@ export default function NovoEventoPage() {
               <div onClick={handleImageClick} className="border-2 border-dashed border-parish-border rounded-lg p-6 text-center hover:border-parish-gold transition cursor-pointer">
                 <Upload className="w-8 h-8 text-parish-secondary mx-auto mb-2" />
                 <p className="text-sm text-parish-text-light">Clique para fazer upload</p>
-                <p className="text-xs text-parish-secondary mt-1">PNG, JPG até 15MB</p>
+                <p className="text-xs text-parish-secondary mt-1">PNG, JPG até 20MB — comprimido automaticamente</p>
               </div>
             ) : (
               <div className="relative">
