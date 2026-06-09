@@ -81,8 +81,7 @@ export const asaasProvider: PaymentProvider = {
       : input.method === "CREDIT_CARD" ? "CREDIT_CARD"
       : "DEBIT_CARD"
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const charge = await asaasRequest<any>("/payments", "POST", {
+    const charge = await asaasRequest<Record<string, unknown>>("/payments", "POST", {
       customer:         customerId,
       billingType,
       value:            input.amount,
@@ -93,8 +92,7 @@ export const asaasProvider: PaymentProvider = {
     })
 
     if (input.method === "PIX") {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const pix = await asaasRequest<any>(`/payments/${charge.id}/pixQrCode`, "GET")
+      const pix = await asaasRequest<Record<string, unknown>>(`/payments/${charge.id}/pixQrCode`, "GET")
       return {
         method:    "PIX",
         gatewayId: charge.id as string,
@@ -127,9 +125,8 @@ export const asaasProvider: PaymentProvider = {
   },
 
   parseWebhook(body: unknown): WebhookPayload {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const b = body as any
-    const payment = b?.payment ?? {}
+    const b = body as Record<string, unknown>
+    const payment = (b?.payment ?? {}) as Record<string, unknown>
     return {
       event:      b.event as string,
       gatewayId:  payment.id as string,
