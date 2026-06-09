@@ -69,25 +69,93 @@ const DAY_LABELS_FULL: Record<string, string> = {
 
 const TYPE_STYLES: Record<string, string> = {
   DOMINICAL: "bg-parish-sky-light text-parish-sky-dark",
-  SEMANAL: "bg-parish-primary text-parish-text",
-  ESPECIAL: "bg-parish-gold/15 text-parish-gold-dark",
+  SEMANAL:   "bg-parish-primary text-parish-text",
+  ESPECIAL:  "bg-parish-gold/15 text-parish-gold-dark",
 };
 
 const TYPE_LABELS: Record<string, string> = {
   DOMINICAL: "Dominical",
-  SEMANAL: "Semanal",
-  ESPECIAL: "Especial",
+  SEMANAL:   "Semanal",
+  ESPECIAL:  "Especial",
 };
 
-function groupMassesByDay(masses: Mass[]): [string, Mass[]][] {
-  const map: Record<string, Mass[]> = {};
-  for (const m of masses) {
-    if (!map[m.dayOfWeek]) map[m.dayOfWeek] = [];
-    map[m.dayOfWeek].push(m);
+// Ordem dos dias de semana (excluindo domingo, tratado separadamente)
+const WEEKDAY_ORDER = [
+  "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY",
+];
+
+interface DisplayGroup {
+  label: string;        // ex: "SEGUNDA A SEXTA" ou "DOMINGO"
+  masses: Mass[];       // missas representativas (um dia do grupo)
+  isRange: boolean;     // true quando agrupa múltiplos dias
+}
+
+function massesSig(masses: Mass[]): string {
+  return [...masses]
+    .sort((a, b) => a.time.localeCompare(b.time))
+    .map((m) => `${m.time}|${m.type}`)
+    .join(",");
+}
+
+/**
+ * Agrupa missas de uma comunidade para exibição compacta:
+ * - Domingo: sempre individual
+ * - Dias úteis / Sábado: agrupa runs consecutivos com horários idênticos
+ *   (ex: Seg–Sex com 07:00 e 19:00 → "SEGUNDA A SEXTA")
+ */
+function computeDisplayGroups(allMasses: Mass[]): DisplayGroup[] {
+  const byDay = new Map<string, Mass[]>();
+  for (const m of allMasses) {
+    const arr = byDay.get(m.dayOfWeek) ?? [];
+    arr.push(m);
+    byDay.set(m.dayOfWeek, arr);
   }
-  return Object.entries(map).sort(
-    ([a], [b]) => (DAY_ORDER[a] ?? 7) - (DAY_ORDER[b] ?? 7),
-  );
+
+  const groups: DisplayGroup[] = [];
+
+  // Domingo → sempre individual
+  const sunday = byDay.get("SUNDAY");
+  if (sunday) {
+    groups.push({ label: "DOMINGO", masses: sunday, isRange: false });
+  }
+
+  // Seg–Sáb: agrupa runs consecutivos com mesma assinatura de horários
+  const presentWeekdays = WEEKDAY_ORDER.filter((d) => byDay.has(d));
+  let i = 0;
+  while (i < presentWeekdays.length) {
+    const cur = presentWeekdays[i];
+    const sig = massesSig(byDay.get(cur)!);
+
+    let j = i + 1;
+    while (j < presentWeekdays.length) {
+      const prev = presentWeekdays[j - 1];
+      const next = presentWeekdays[j];
+      if (WEEKDAY_ORDER.indexOf(next) !== WEEKDAY_ORDER.indexOf(prev) + 1) break;
+      if (massesSig(byDay.get(next)!) !== sig) break;
+      j++;
+    }
+
+    const slice = presentWeekdays.slice(i, j);
+    if (slice.length >= 2) {
+      const first = slice[0];
+      const last  = slice[slice.length - 1];
+      groups.push({
+        label: `${DAY_LABELS[first].toUpperCase()} A ${DAY_LABELS[last].toUpperCase()}`,
+        masses: byDay.get(first)!,
+        isRange: true,
+      });
+    } else {
+      groups.push({
+        label: DAY_LABELS_FULL[cur].toUpperCase(),
+        masses: byDay.get(cur)!,
+        isRange: false,
+      });
+    }
+
+    i = j;
+  }
+
+  return groups;
 }
 
 function allDaysWithMasses(communities: Community[]): string[] {
@@ -373,14 +441,9 @@ function CommunityCard({
       ? community.masses
       : community.masses.filter((m) => m.dayOfWeek === activeDay);
 
-  const grouped = groupMassesByDay(massesToShow);
+  const displayGroups = computeDisplayGroups(massesToShow);
 
-  const fullAddress = [
-    community.address,
-    community.neighborhood,
-    community.city,
-    community.state,
-  ]
+  const shortAddress = [community.address, community.neighborhood]
     .filter(Boolean)
     .join(", ");
 
@@ -397,52 +460,78 @@ function CommunityCard({
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-parish-navy to-parish-navy-dark">
             <Church className="w-12 h-12 text-parish-gold/60 mb-2" />
-            <span className="text-xs text-white/40 font-medium">
-              Comunidade
-            </span>
+            <span className="text-xs text-white/40 font-medium">Comunidade</span>
           </div>
         )}
-        {/* Badge de missas */}
         <div className="absolute bottom-3 right-3 bg-black/50 backdrop-blur-sm text-white text-xs font-semibold px-2.5 py-1 rounded-full">
-          {community.masses.length} missa
-          {community.masses.length !== 1 ? "s" : ""}
+          {community.masses.length} missa{community.masses.length !== 1 ? "s" : ""}
         </div>
       </div>
 
       {/* Corpo */}
-      <div className="p-5 flex flex-col flex-1 gap-4">
-        {/* Nome */}
+      <div className="p-5 flex flex-col flex-1 gap-3">
+        {/* Nome + endereço */}
         <div>
           <h2 className="font-playfair text-xl font-bold text-parish-text group-hover:text-parish-navy transition-colors leading-snug">
             {community.name}
           </h2>
-          {fullAddress && (
-            <div className="flex items-start gap-1.5 mt-1.5">
+          {shortAddress && (
+            <div className="flex items-start gap-1.5 mt-1">
               <MapPin className="w-3.5 h-3.5 text-parish-gold flex-shrink-0 mt-0.5" />
-              <span className="text-xs text-parish-text-light leading-relaxed">
-                {fullAddress}
-              </span>
+              <span className="text-xs text-parish-text-light">{shortAddress}</span>
             </div>
           )}
         </div>
 
-        {/* Horários */}
-        <div className="flex-1 space-y-2.5">
-          {grouped.map(([day, masses]) => (
-            <div key={day}>
-              <div className="flex items-center gap-1.5 mb-1.5">
-                <Calendar className="w-3.5 h-3.5 text-parish-gold" />
-                <span className="text-xs font-semibold text-parish-text uppercase tracking-wide">
-                  {DAY_LABELS_FULL[day]}
+        {/* Horários — agrupados por faixa de dias */}
+        <div className="flex-1 space-y-2">
+          {displayGroups.map((group, idx) => (
+            <div
+              key={idx}
+              className="rounded-xl border border-parish-border bg-parish-background overflow-hidden"
+            >
+              {/* Cabeçalho do grupo */}
+              <div
+                className={`flex items-center gap-2 px-3 py-1.5 ${
+                  group.isRange
+                    ? "bg-parish-navy/8 border-b border-parish-navy/10"
+                    : "bg-parish-gold/8 border-b border-parish-gold/15"
+                }`}
+              >
+                <Calendar
+                  className={`w-3 h-3 flex-shrink-0 ${
+                    group.isRange ? "text-parish-navy" : "text-parish-gold"
+                  }`}
+                />
+                <span
+                  className={`text-[10px] font-bold uppercase tracking-wider ${
+                    group.isRange ? "text-parish-navy" : "text-parish-gold-dark"
+                  }`}
+                >
+                  {group.label}
                 </span>
               </div>
-              <div className="flex flex-wrap gap-1.5 pl-5">
-                {masses.map((m) => (
+
+              {/* Horários do grupo */}
+              <div className="px-3 py-2 flex flex-wrap gap-1.5">
+                {group.masses.map((m) => (
                   <div key={m.id} className="flex items-center gap-1">
-                    <span className="inline-flex items-center gap-1 bg-parish-background border border-parish-border rounded-lg px-2.5 py-1 text-xs font-semibold text-parish-text">
+                    <span className="inline-flex items-center gap-1 bg-white border border-parish-border rounded-md px-2 py-0.5 text-xs font-semibold text-parish-text shadow-sm">
                       <Clock className="w-3 h-3 text-parish-gold" />
                       {m.time}
                     </span>
+                    {/* <span
+                      className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${
+                        TYPE_STYLES[m.type] ?? "bg-parish-primary text-parish-text"
+                      }`}
+                    >
+                      {TYPE_LABELS[m.type] ?? m.type}
+                    </span> */}
+                    {m.observations && (
+                      <span title={m.observations} className="cursor-help">
+                        <Info className="w-3.5 h-3.5 text-parish-gold/70" />
+                      </span>
+                    )}
                   </div>
                 ))}
               </div>

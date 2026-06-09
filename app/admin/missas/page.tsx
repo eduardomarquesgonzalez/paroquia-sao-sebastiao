@@ -19,10 +19,15 @@ interface Mass {
   dayOfWeek: string;
   time: string;
   type: string;
-  location: string | null;
   observations: string | null;
   active: boolean;
   createdAt: string;
+  community: {
+    id: string;
+    name: string;
+    neighborhood: string | null;
+    image: string | null;
+  };
 }
 
 const DAYS_OF_WEEK = [
@@ -149,8 +154,9 @@ export default function MissasPage() {
         getDayLabel(missa.dayOfWeek)
           .toLowerCase()
           .includes(searchTerm.toLowerCase()) ||
-        (missa.location &&
-          missa.location.toLowerCase().includes(searchTerm.toLowerCase()));
+        missa.community?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (missa.community?.neighborhood &&
+          missa.community.neighborhood.toLowerCase().includes(searchTerm.toLowerCase()));
 
       const matchesDay = filterDay === "all" || missa.dayOfWeek === filterDay;
       const matchesType = filterType === "all" || missa.type === filterType;
@@ -300,7 +306,7 @@ export default function MissasPage() {
                     Tipo
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-parish-secondary uppercase tracking-wider">
-                    Local
+                    Comunidade
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-parish-secondary uppercase tracking-wider">
                     Status
@@ -342,16 +348,23 @@ export default function MissasPage() {
                         {getTypeLabel(missa.type)}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {missa.location ? (
-                        <div className="flex items-center">
-                          <MapPin className="w-4 h-4 text-parish-secondary mr-2" />
-                          <span className="text-sm text-parish-text-light">
-                            {missa.location}
-                          </span>
+                    <td className="px-6 py-4">
+                      {missa.community ? (
+                        <div className="flex items-center gap-2">
+                          <MapPin className="w-4 h-4 text-parish-secondary flex-shrink-0" />
+                          <div>
+                            <span className="text-sm font-medium text-parish-text">
+                              {missa.community.name}
+                            </span>
+                            {missa.community.neighborhood && (
+                              <span className="text-xs text-parish-text-light block">
+                                {missa.community.neighborhood}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       ) : (
-                        <span className="text-sm text-parish-secondary">-</span>
+                        <span className="text-sm text-parish-secondary">—</span>
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">

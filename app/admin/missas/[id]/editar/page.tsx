@@ -2,25 +2,34 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Save, Clock, Calendar, MapPin, FileText, Trash2 } from "lucide-react";
+import {
+  ArrowLeft, Save, Clock, Calendar, Church, FileText, Trash2,
+} from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 
 const DAYS_OF_WEEK = [
-  { value: "SUNDAY", label: "Domingo" },
-  { value: "MONDAY", label: "Segunda-feira" },
-  { value: "TUESDAY", label: "Terça-feira" },
+  { value: "SUNDAY",    label: "Domingo" },
+  { value: "MONDAY",    label: "Segunda-feira" },
+  { value: "TUESDAY",   label: "Terça-feira" },
   { value: "WEDNESDAY", label: "Quarta-feira" },
-  { value: "THURSDAY", label: "Quinta-feira" },
-  { value: "FRIDAY", label: "Sexta-feira" },
-  { value: "SATURDAY", label: "Sábado" },
+  { value: "THURSDAY",  label: "Quinta-feira" },
+  { value: "FRIDAY",    label: "Sexta-feira" },
+  { value: "SATURDAY",  label: "Sábado" },
 ];
 
 const MASS_TYPES = [
   { value: "DOMINICAL", label: "Dominical", description: "Missa de domingo" },
-  { value: "SEMANAL", label: "Semanal", description: "Missa de dia de semana" },
-  { value: "ESPECIAL", label: "Especial", description: "Celebração especial" },
+  { value: "SEMANAL",   label: "Semanal",   description: "Missa de dia de semana" },
+  { value: "ESPECIAL",  label: "Especial",  description: "Celebração especial" },
 ];
+
+interface Community {
+  id: string;
+  name: string;
+  neighborhood: string | null;
+  active: boolean;
+}
 
 interface EditarMissaPageProps {
   params: { id: string };
@@ -30,32 +39,34 @@ export default function EditarMissaPage({ params }: EditarMissaPageProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
+  const [communities, setCommunities] = useState<Community[]>([]);
   const [formData, setFormData] = useState({
+    communityId: "",
     dayOfWeek: "SUNDAY",
     time: "19:00",
     type: "DOMINICAL",
-    location: "",
     observations: "",
     active: true,
   });
 
-  useEffect(() => { fetchMissa(); }, []);
+  useEffect(() => {
+    Promise.all([fetchMissa(), fetchCommunities()]);
+  }, []);
 
   async function fetchMissa() {
     try {
-      const response = await fetch(`/api/missas?id=${params.id}`);
-      if (!response.ok) throw new Error("Erro ao carregar missa");
-      const data = await response.json();
+      const res = await fetch(`/api/missas?id=${params.id}`);
+      if (!res.ok) throw new Error();
+      const data = await res.json();
       setFormData({
+        communityId: data.communityId ?? "",
         dayOfWeek: data.dayOfWeek,
         time: data.time,
         type: data.type,
-        location: data.location || "",
-        observations: data.observations || "",
+        observations: data.observations ?? "",
         active: data.active,
       });
-    } catch (error) {
-      console.error("Erro ao carregar missa:", error);
+    } catch {
       toast.error("Erro ao carregar missa");
       router.push("/admin/missas");
     } finally {
@@ -63,11 +74,27 @@ export default function EditarMissaPage({ params }: EditarMissaPageProps) {
     }
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  async function fetchCommunities() {
+    try {
+      const res = await fetch("/api/comunidades");
+      if (res.ok) {
+        const data: Community[] = await res.json();
+        setCommunities(data.filter((c) => c.active));
+      }
+    } catch {
+      toast.error("Erro ao carregar comunidades");
+    }
+  }
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
     const { name, value, type } = e.target;
     if (type === "checkbox") {
-      const checked = (e.target as HTMLInputElement).checked;
-      setFormData((prev) => ({ ...prev, [name]: checked }));
+      setFormData((prev) => ({
+        ...prev,
+        [name]: (e.target as HTMLInputElement).checked,
+      }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
@@ -75,23 +102,30 @@ export default function EditarMissaPage({ params }: EditarMissaPageProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.dayOfWeek || !formData.time || !formData.type) { toast.error("Preencha todos os campos obrigatórios"); return; }
+    if (!formData.communityId) { toast.error("Selecione uma comunidade"); return; }
+    if (!formData.dayOfWeek || !formData.time || !formData.type) {
+      toast.error("Preencha todos os campos obrigatórios");
+      return;
+    }
     try {
       setLoading(true);
-      const response = await fetch("/api/missas", {
+      const res = await fetch("/api/missas", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: params.id, ...formData, location: formData.location.trim() || null, observations: formData.observations.trim() || null }),
+        body: JSON.stringify({
+          id: params.id,
+          ...formData,
+          observations: formData.observations.trim() || null,
+        }),
       });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Erro ao atualizar missa");
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Erro ao atualizar missa");
       }
       toast.success("Missa atualizada com sucesso!");
       router.push("/admin/missas");
       router.refresh();
     } catch (error) {
-      console.error("Erro ao atualizar missa:", error);
       toast.error(error instanceof Error ? error.message : "Erro ao atualizar missa");
     } finally {
       setLoading(false);
@@ -101,13 +135,12 @@ export default function EditarMissaPage({ params }: EditarMissaPageProps) {
   const handleDelete = async () => {
     if (!confirm("Tem certeza que deseja excluir esta missa?")) return;
     try {
-      const response = await fetch(`/api/missas?id=${params.id}`, { method: "DELETE" });
-      if (!response.ok) throw new Error("Erro ao excluir");
+      const res = await fetch(`/api/missas?id=${params.id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error();
       toast.success("Missa excluída com sucesso!");
       router.push("/admin/missas");
       router.refresh();
-    } catch (error) {
-      console.error("Erro ao excluir missa:", error);
+    } catch {
       toast.error("Erro ao excluir missa");
     }
   };
@@ -115,7 +148,7 @@ export default function EditarMissaPage({ params }: EditarMissaPageProps) {
   if (loadingData) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-parish-gold"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-parish-gold" />
       </div>
     );
   }
@@ -132,77 +165,167 @@ export default function EditarMissaPage({ params }: EditarMissaPageProps) {
             <p className="text-parish-text-light mt-1">Atualize as informações da celebração</p>
           </div>
         </div>
-        <button onClick={handleDelete} className="px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition flex items-center space-x-2">
+        <button
+          onClick={handleDelete}
+          className="px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition flex items-center space-x-2"
+        >
           <Trash2 className="w-4 h-4" /><span>Excluir</span>
         </button>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Comunidade + Dia + Horário + Tipo */}
         <div className="bg-parish-surface rounded-lg shadow-sm border border-parish-primary p-6">
-          <h2 className="text-lg font-semibold text-parish-text mb-4">Informações Básicas</h2>
+          <h2 className="text-lg font-semibold text-parish-text mb-4">Informações da Missa</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Comunidade */}
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-parish-text-light mb-2">
+                <div className="flex items-center space-x-2">
+                  <Church className="w-4 h-4" /><span>Comunidade *</span>
+                </div>
+              </label>
+              <select
+                name="communityId"
+                value={formData.communityId}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold focus:border-transparent outline-none"
+              >
+                <option value="">Selecione uma comunidade</option>
+                {communities.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}{c.neighborhood ? ` — ${c.neighborhood}` : ""}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-parish-secondary mt-1">
+                Igreja ou comunidade onde a missa é celebrada
+              </p>
+            </div>
+
+            {/* Dia da Semana */}
             <div>
               <label className="block text-sm font-medium text-parish-text-light mb-2">
-                <div className="flex items-center space-x-2"><Calendar className="w-4 h-4" /><span>Dia da Semana *</span></div>
+                <div className="flex items-center space-x-2">
+                  <Calendar className="w-4 h-4" /><span>Dia da Semana *</span>
+                </div>
               </label>
-              <select name="dayOfWeek" value={formData.dayOfWeek} onChange={handleChange} required className="w-full px-4 py-2 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold focus:border-transparent outline-none">
-                {DAYS_OF_WEEK.map((day) => (<option key={day.value} value={day.value}>{day.label}</option>))}
+              <select
+                name="dayOfWeek"
+                value={formData.dayOfWeek}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold focus:border-transparent outline-none"
+              >
+                {DAYS_OF_WEEK.map((d) => (
+                  <option key={d.value} value={d.value}>{d.label}</option>
+                ))}
               </select>
             </div>
 
+            {/* Horário */}
             <div>
               <label className="block text-sm font-medium text-parish-text-light mb-2">
-                <div className="flex items-center space-x-2"><Clock className="w-4 h-4" /><span>Horário *</span></div>
+                <div className="flex items-center space-x-2">
+                  <Clock className="w-4 h-4" /><span>Horário *</span>
+                </div>
               </label>
-              <input type="time" name="time" value={formData.time} onChange={handleChange} required className="w-full px-4 py-2 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold focus:border-transparent outline-none" />
+              <input
+                type="time"
+                name="time"
+                value={formData.time}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold focus:border-transparent outline-none"
+              />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-parish-text-light mb-2">Tipo de Missa *</label>
-              <select name="type" value={formData.type} onChange={handleChange} required className="w-full px-4 py-2 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold focus:border-transparent outline-none">
-                {MASS_TYPES.map((type) => (<option key={type.value} value={type.value}>{type.label} - {type.description}</option>))}
+            {/* Tipo */}
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-parish-text-light mb-2">
+                Tipo de Missa *
+              </label>
+              <select
+                name="type"
+                value={formData.type}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold focus:border-transparent outline-none"
+              >
+                {MASS_TYPES.map((t) => (
+                  <option key={t.value} value={t.value}>
+                    {t.label} — {t.description}
+                  </option>
+                ))}
               </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-parish-text-light mb-2">
-                <div className="flex items-center space-x-2"><MapPin className="w-4 h-4" /><span>Local</span></div>
-              </label>
-              <input type="text" name="location" value={formData.location} onChange={handleChange} placeholder="Ex: Igreja Matriz, Capela..." className="w-full px-4 py-2 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold focus:border-transparent outline-none" />
-              <p className="text-xs text-parish-secondary mt-1">Deixe em branco se for o local padrão</p>
             </div>
           </div>
         </div>
 
+        {/* Observações */}
         <div className="bg-parish-surface rounded-lg shadow-sm border border-parish-primary p-6">
           <h2 className="text-lg font-semibold text-parish-text mb-4">
-            <div className="flex items-center space-x-2"><FileText className="w-5 h-5" /><span>Observações</span></div>
+            <div className="flex items-center space-x-2">
+              <FileText className="w-5 h-5" /><span>Observações</span>
+            </div>
           </h2>
-          <div>
-            <label className="block text-sm font-medium text-parish-text-light mb-2">Observações ou Avisos</label>
-            <textarea name="observations" value={formData.observations} onChange={handleChange} rows={4} placeholder="Ex: Confissões 30 minutos antes, Com canto da Pastoral..." className="w-full px-4 py-2 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold focus:border-transparent outline-none resize-none" />
-            <p className="text-xs text-parish-secondary mt-1">Informações adicionais que serão exibidas no site</p>
-          </div>
+          <textarea
+            name="observations"
+            value={formData.observations}
+            onChange={handleChange}
+            rows={4}
+            placeholder="Ex: Confissões 30 minutos antes, Com canto da Pastoral..."
+            className="w-full px-4 py-2 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold focus:border-transparent outline-none resize-none"
+          />
+          <p className="text-xs text-parish-secondary mt-1">
+            Informações adicionais que serão exibidas no site
+          </p>
         </div>
 
+        {/* Status */}
         <div className="bg-parish-surface rounded-lg shadow-sm border border-parish-primary p-6">
           <h2 className="text-lg font-semibold text-parish-text mb-4">Status</h2>
-          <div className="flex items-center space-x-3">
-            <input type="checkbox" id="active" name="active" checked={formData.active} onChange={handleChange} className="w-4 h-4 text-parish-gold border-parish-border rounded focus:ring-parish-gold" />
-            <label htmlFor="active" className="text-sm text-parish-text-light">Ativar este horário de missa</label>
-          </div>
-          <p className="text-xs text-parish-secondary mt-2">Apenas missas ativas serão exibidas no site público</p>
+          <label className="flex items-center space-x-3 cursor-pointer">
+            <input
+              type="checkbox"
+              id="active"
+              name="active"
+              checked={formData.active}
+              onChange={handleChange}
+              className="w-4 h-4 text-parish-gold border-parish-border rounded focus:ring-parish-gold"
+            />
+            <span className="text-sm text-parish-text-light">
+              Ativar este horário de missa
+            </span>
+          </label>
+          <p className="text-xs text-parish-secondary mt-2">
+            Apenas missas ativas são exibidas no site público
+          </p>
         </div>
 
         <div className="flex items-center justify-end space-x-4">
-          <Link href="/admin/missas" className="px-6 py-2 border border-parish-border text-parish-text-light rounded-lg hover:bg-parish-background transition">
+          <Link
+            href="/admin/missas"
+            className="px-6 py-2 border border-parish-border text-parish-text-light rounded-lg hover:bg-parish-background transition"
+          >
             Cancelar
           </Link>
-          <button type="submit" disabled={loading} className="px-6 py-2 bg-parish-gold text-white rounded-lg hover:bg-parish-gold-dark transition flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed">
+          <button
+            type="submit"
+            disabled={loading}
+            className="px-6 py-2 bg-parish-gold text-white rounded-lg hover:bg-parish-gold-dark transition flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             {loading ? (
-              <><div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div><span>Salvando...</span></>
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                <span>Salvando...</span>
+              </>
             ) : (
-              <><Save className="w-4 h-4" /><span>Salvar Alterações</span></>
+              <>
+                <Save className="w-4 h-4" />
+                <span>Salvar Alterações</span>
+              </>
             )}
           </button>
         </div>
