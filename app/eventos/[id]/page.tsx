@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { Calendar, MapPin, Clock, ArrowLeft, Share2 } from "lucide-react";
+import { Calendar, MapPin, Clock, ArrowLeft, Share2, ExternalLink } from "lucide-react";
 import { formatDateFull, formatTime, formatDate, isEventEnded } from "@/lib/utils";
 
 interface Event {
@@ -14,6 +14,7 @@ interface Event {
   endDate: string | null;
   location: string | null;
   image: string | null;
+  siteUrl: string | null;
   published: boolean;
   createdAt: string;
   createdBy: {
@@ -183,9 +184,40 @@ export default function EventoPage() {
           <div className="bg-gradient-gold rounded-lg p-8 text-center text-white mb-8">
             <h3 className="text-2xl font-bold mb-4">Participe deste Evento!</h3>
             <p className="mb-6 opacity-90">Sua presença é muito importante para nós. Venha participar!</p>
-            <button className="bg-white text-parish-gold-dark px-8 py-3 rounded-lg font-semibold hover:bg-parish-background transition">
-              Adicionar à Agenda
-            </button>
+            <div className="flex flex-wrap gap-3 justify-center">
+              {evento.siteUrl && (
+                <a
+                  href={evento.siteUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 bg-white text-parish-gold-dark px-7 py-3 rounded-lg font-semibold hover:bg-parish-background transition shadow-md"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  Acessar Evento
+                </a>
+              )}
+              <button className={`${evento.siteUrl ? "bg-white/20 hover:bg-white/30 border border-white/40" : "bg-white hover:bg-parish-background"} text-white px-7 py-3 rounded-lg font-semibold transition`}>
+                Adicionar à Agenda
+              </button>
+            </div>
+          </div>
+        )}
+
+        {ended && evento.siteUrl && (
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
+            <div>
+              <p className="font-semibold text-gray-700">Site oficial do evento</p>
+              <p className="text-sm text-gray-500 mt-0.5">O evento foi encerrado, mas o site permanece disponível para consulta.</p>
+            </div>
+            <a
+              href={evento.siteUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-5 py-2.5 border border-gray-300 text-gray-600 rounded-lg font-medium text-sm hover:border-gray-400 hover:text-gray-800 transition flex-shrink-0"
+            >
+              <ExternalLink className="w-4 h-4" />
+              Visitar site
+            </a>
           </div>
         )}
 

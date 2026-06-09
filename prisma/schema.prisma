@@ -11,14 +11,14 @@ datasource db {
 // ─── Enums ─────────────────────────────────────────────────────────────────────
 
 enum Role {
-  SUPER_ADMIN  // Acesso irrestrito ao sistema
-  ADMIN        // Administrador paroquial
-  FINANCE      // Financeiro — dízimos e relatórios
-  SECRETARY    // Secretaria — sacramentos e eventos
-  COORDINATOR  // Coordenadores de movimentos/pastorais
-  DIZIMISTA    // Área exclusiva do dizimista
-  EDITOR       // Deprecated — migrar para SECRETARY
-  USER         // Usuário comum
+  SUPER_ADMIN // Acesso irrestrito ao sistema
+  ADMIN // Administrador paroquial
+  FINANCE // Financeiro — dízimos e relatórios
+  SECRETARY // Secretaria — sacramentos e eventos
+  COORDINATOR // Coordenadores de movimentos/pastorais
+  DIZIMISTA // Área exclusiva do dizimista
+  EDITOR // Deprecated — migrar para SECRETARY
+  USER // Usuário comum
 }
 
 enum UserStatus {
@@ -345,9 +345,9 @@ model Clero {
 // ─── Dizimistas ────────────────────────────────────────────────────────────────
 
 model Dizimista {
-  id           String    @id @default(cuid())
-  userId       String    @unique
-  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   cpf          String?   @unique
   birthDate    DateTime?
@@ -373,25 +373,25 @@ model Dizimista {
 }
 
 model TitheContribution {
-  id          String             @id @default(cuid())
+  id          String    @id @default(cuid())
   dizimistaId String
-  dizimista   Dizimista          @relation(fields: [dizimistaId], references: [id])
+  dizimista   Dizimista @relation(fields: [dizimistaId], references: [id])
 
   amount     Decimal            @db.Decimal(10, 2)
-  competence DateTime           // Primeiro dia do mês de referência
+  competence DateTime // Primeiro dia do mês de referência
   method     PaymentMethod
   status     ContributionStatus @default(PENDING)
 
   gatewayId       String?
   gatewayProvider String?
-  pixQrCode       String?  @db.Text
-  pixCopyPaste    String?  @db.Text
+  pixQrCode       String?   @db.Text
+  pixCopyPaste    String?   @db.Text
   pixExpiration   DateTime?
   boletoUrl       String?
   boletoBarCode   String?
 
   paidAt DateTime?
-  notes  String?  @db.Text
+  notes  String?   @db.Text
 
   receipt TitheReceipt?
 
@@ -423,7 +423,7 @@ model RecurringContribution {
 
   amount     Decimal       @db.Decimal(10, 2)
   method     PaymentMethod
-  dayOfMonth Int           // Dia do mês para cobrança (1–28)
+  dayOfMonth Int // Dia do mês para cobrança (1–28)
   active     Boolean       @default(true)
 
   gatewaySubscriptionId String?
@@ -444,12 +444,12 @@ model RecurringContribution {
 // ─── Auditoria ─────────────────────────────────────────────────────────────────
 
 model AuditLog {
-  id      String  @id @default(cuid())
-  userId  String?
-  user    User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  id     String  @id @default(cuid())
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
 
-  action   String  // CREATE | UPDATE | DELETE | LOGIN | LOGOUT | PAYMENT
-  entity   String  // "User" | "TitheContribution" | "Event" etc.
+  action   String // CREATE | UPDATE | DELETE | LOGIN | LOGOUT | PAYMENT
+  entity   String // "User" | "TitheContribution" | "Event" etc.
   entityId String?
   oldData  Json?
   newData  Json?

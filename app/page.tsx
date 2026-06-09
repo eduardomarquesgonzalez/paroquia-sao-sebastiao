@@ -21,6 +21,7 @@ import CleroCarousel, { CleroSkeletonCard } from "@/components/CleroCarousel";
 import Image from "next/image";
 import logoImg from "@/public/logo.png";
 import { formatDay, formatMonthShort, formatTime, formatWeekday, isEventEnded } from "@/lib/utils";
+import { ExternalLink } from "lucide-react";
 
 interface CommunityPreview {
   id: string;
@@ -50,6 +51,7 @@ interface Event {
   endDate: string | null;
   location: string | null;
   image: string | null;
+  siteUrl: string | null;
 }
 
 interface CleroMember {
@@ -429,15 +431,14 @@ export default function HomePage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {eventos.map((evento, index) => (
-                <Link
+                <div
                   key={evento.id}
-                  href={`/eventos/${evento.id}`}
                   className={`group flex flex-col bg-parish-surface rounded-2xl overflow-hidden border border-parish-border/70 hover:shadow-navy hover:-translate-y-2 transition-all duration-300 animate-on-scroll ${
                     index === 1 ? "stagger-1" : index === 2 ? "stagger-2" : ""
                   }`}
                 >
-                  {/* Image */}
-                  <div className="relative h-52 overflow-hidden flex-shrink-0">
+                  {/* Image — bloco clicável */}
+                  <Link href={`/eventos/${evento.id}`} className="relative h-52 overflow-hidden flex-shrink-0 block">
                     {evento.image ? (
                       <img
                         src={evento.image}
@@ -466,13 +467,15 @@ export default function HomePage() {
                         Próximo
                       </div>
                     )}
-                  </div>
+                  </Link>
 
                   {/* Content */}
                   <div className="flex-1 flex flex-col p-6">
-                    <h3 className="font-playfair text-lg font-bold text-parish-navy-dark group-hover:text-parish-gold transition-colors duration-200 line-clamp-2 mb-2 leading-snug">
-                      {evento.title}
-                    </h3>
+                    <Link href={`/eventos/${evento.id}`} className="block mb-2">
+                      <h3 className="font-playfair text-lg font-bold text-parish-navy-dark group-hover:text-parish-gold transition-colors duration-200 line-clamp-2 leading-snug">
+                        {evento.title}
+                      </h3>
+                    </Link>
                     <p className="text-sm text-parish-text-light line-clamp-2 mb-4 leading-relaxed">
                       {evento.description}
                     </p>
@@ -499,17 +502,34 @@ export default function HomePage() {
                       )}
                     </div>
 
-                    <div className="mt-5 pt-4 border-t border-parish-border flex items-center justify-between">
-                      <span className="text-sm font-semibold text-parish-gold flex items-center gap-1.5 group-hover:gap-2.5 transition-all duration-200">
+                    <div className="mt-5 pt-4 border-t border-parish-border flex items-center justify-between gap-3">
+                      <Link
+                        href={`/eventos/${evento.id}`}
+                        className="text-sm font-semibold text-parish-gold flex items-center gap-1.5 hover:gap-2.5 transition-all duration-200"
+                      >
                         Saiba mais
                         <ArrowRight className="w-3.5 h-3.5" />
-                      </span>
-                      <span className="text-xs text-parish-text-light bg-parish-background px-2.5 py-1 rounded-full">
-                        {getEventMonth(evento.date)}
-                      </span>
+                      </Link>
+
+                      {evento.siteUrl ? (
+                        <a
+                          href={evento.siteUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1.5 text-xs font-medium text-parish-text-light hover:text-parish-gold bg-parish-background hover:bg-parish-gold/8 border border-parish-border hover:border-parish-gold/40 px-2.5 py-1.5 rounded-lg transition-all duration-200"
+                          title="Acessar site oficial do evento"
+                        >
+                          <ExternalLink className="w-3 h-3 flex-shrink-0" />
+                          Site oficial
+                        </a>
+                      ) : (
+                        <span className="text-xs text-parish-text-light bg-parish-background px-2.5 py-1 rounded-full">
+                          {getEventMonth(evento.date)}
+                        </span>
+                      )}
                     </div>
                   </div>
-                </Link>
+                </div>
               ))}
             </div>
           )}

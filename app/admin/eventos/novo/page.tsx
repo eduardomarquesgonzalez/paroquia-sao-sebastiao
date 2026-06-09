@@ -80,7 +80,7 @@ export default function NovoEventoPage() {
       const response = await fetch("/api/eventos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: formData.title, description: formData.description, date: dateTime, endDate: endDateTime, location: formData.location, image: formData.image, published: shouldPublish, order: formData.order }),
+        body: JSON.stringify({ title: formData.title, description: formData.description, date: dateTime, endDate: endDateTime, location: formData.location, siteUrl: formData.siteUrl || null, image: formData.image, published: shouldPublish, order: formData.order }),
       });
       if (!response.ok) throw new Error("Erro ao criar evento");
       toast.success(shouldPublish ? "Evento publicado com sucesso!" : "Rascunho salvo!");
