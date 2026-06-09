@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import {
   LayoutDashboard, FileText, Calendar, Heart, Users, Settings,
-  Church, Clock, Image, Mail, Home, HandHeart, UserCheck, Shield,
+  Church, Clock, Image, Mail, Home, HandHeart, UserCheck, Shield, Megaphone,
 } from "lucide-react";
 import { hasRole } from "@/lib/permissions";
 
@@ -20,7 +20,8 @@ const navigation: NavItem[] = [
   { name: "Dashboard",         href: "/admin",                   icon: LayoutDashboard },
   { name: "Página Inicial",    href: "/admin/home",              icon: Home },
   { name: "Posts",             href: "/admin/posts",             icon: FileText },
-  { name: "Eventos",           href: "/admin/eventos",           icon: Calendar },
+  { name: "Eventos",            href: "/admin/eventos",           icon: Calendar },
+  { name: "Destaques",          href: "/admin/destaques",         icon: Megaphone },
   { name: "Comunidades",       href: "/admin/comunidades",       icon: Church },
   { name: "Projetos Sociais",  href: "/admin/projetos-sociais",  icon: HandHeart },
   { name: "Horários de Missas",href: "/admin/missas",            icon: Clock },

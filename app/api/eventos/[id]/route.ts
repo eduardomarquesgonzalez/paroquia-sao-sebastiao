@@ -90,8 +90,6 @@ export async function PUT(
         image:         data.image || null,
         siteUrl:       data.siteUrl || null,
         published:     data.published || false,
-        featured:      data.featured ?? existingEvento.featured,
-        featuredOrder: data.featuredOrder ?? existingEvento.featuredOrder,
         order:         data.order ?? existingEvento.order,
       },
       include: {

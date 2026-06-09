@@ -67,10 +67,11 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  posts     Post[]
-  events    Event[]
-  dizimista Dizimista?
-  auditLogs AuditLog[]
+  posts      Post[]
+  events     Event[]
+  destaques  Destaque[]
+  dizimista  Dizimista?
+  auditLogs  AuditLog[]
 
   @@index([email])
   @@index([role])
@@ -102,28 +103,45 @@ model Post {
 }
 
 model Event {
-  id            String    @id @default(cuid())
-  title         String
-  description   String    @db.Text
-  date          DateTime
-  endDate       DateTime?
-  location      String?
-  image         String?
-  siteUrl       String?
-  published     Boolean   @default(false)
-  featured      Boolean   @default(false)
-  featuredOrder Int       @default(0)
-  order         Int       @default(0)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id          String    @id @default(cuid())
+  title       String
+  description String    @db.Text
+  date        DateTime
+  endDate     DateTime?
+  location    String?
+  image       String?
+  siteUrl     String?
+  published   Boolean   @default(false)
+  order       Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   createdById String
   createdBy   User   @relation(fields: [createdById], references: [id], onDelete: Cascade)
 
   @@index([date])
   @@index([published])
-  @@index([featured])
   @@index([order])
+}
+
+model Destaque {
+  id        String    @id @default(cuid())
+  title     String?
+  image     String?   @db.Text
+  linkUrl   String?
+  active    Boolean   @default(true)
+  order     Int       @default(0)
+  expiresAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  createdById String
+  createdBy   User   @relation(fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@index([active])
+  @@index([order])
+  @@index([expiresAt])
+  @@map("destaques")
 }
 
 model Community {

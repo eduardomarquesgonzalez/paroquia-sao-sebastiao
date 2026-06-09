@@ -63,12 +63,9 @@ interface Event {
 
 interface Destaque {
   id: string;
-  title: string;
+  title: string | null;
   image: string | null;
-  date: string;
-  endDate: string | null;
-  location: string | null;
-  siteUrl: string | null;
+  linkUrl: string | null;
 }
 
 interface CleroMember {
@@ -218,7 +215,7 @@ export default function HomePage() {
       .catch(() => {})
       .finally(() => setLoadingEventos(false));
 
-    fetch("/api/eventos/destaques")
+    fetch("/api/destaques/public")
       .then((r) => (r.ok ? r.json() : []))
       .then((d) => setDestaques(Array.isArray(d) ? d : []))
       .catch(() => {});
@@ -407,8 +404,10 @@ export default function HomePage() {
 
       {/* ─── DESTAQUES ─── */}
       {destaques.length > 0 && (
-        <section className="destaques-fade-in">
-          <DestaquesCarousel destaques={destaques} />
+        <section className="destaques-fade-in py-6 md:py-8 bg-parish-background">
+          <div className="container mx-auto px-4 lg:px-8">
+            <DestaquesCarousel destaques={destaques} />
+          </div>
         </section>
       )}
 
