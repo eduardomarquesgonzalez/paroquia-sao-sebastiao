@@ -7,7 +7,15 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:seed": "prisma db seed",
+    "db:studio": "prisma studio",
+    "db:reset": "prisma migrate reset",
+    "db:validate": "node -e \"const { PrismaClient } = require('@prisma/client'); const p = new PrismaClient(); p.$connect().then(() => { console.log('✅ Conexão Supabase OK'); return p.$disconnect(); }).catch(e => { console.error('❌ Falha na conexão:', e.message); process.exit(1); })\""
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
