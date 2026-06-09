@@ -9,9 +9,10 @@ import {
 } from "lucide-react"
 
 const NAV = [
-  { href: "/dizimista",          label: "Painel",   icon: LayoutDashboard },
-  { href: "/dizimista/perfil",   label: "Perfil",   icon: User },
-  { href: "/dizimista/historico", label: "Histórico", icon: History },
+  { href: "/dizimista",             label: "Painel",    icon: LayoutDashboard },
+  { href: "/dizimista/perfil",      label: "Perfil",    icon: User },
+  { href: "/dizimista/historico",   label: "Histórico", icon: History },
+  { href: "/dizimista/contribuir",  label: "Contribuir", icon: Heart },
 ]
 
 export default function DizimistaLayout({ children }: { children: React.ReactNode }) {

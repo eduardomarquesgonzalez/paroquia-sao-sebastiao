@@ -1,6 +1,7 @@
-import { NextRequest, NextResponse } from "next/server"
-import { prisma }                   from "@/lib/prisma"
-import crypto                       from "crypto"
+import { NextRequest, NextResponse }            from "next/server"
+import { prisma }                              from "@/lib/prisma"
+import { sendMail, buildPasswordResetEmail }   from "@/lib/email"
+import crypto                                  from "crypto"
 
 // POST /api/auth/forgot-password
 export async function POST(req: NextRequest) {
@@ -29,10 +30,19 @@ export async function POST(req: NextRequest) {
       },
     })
 
-    // TODO: enviar e-mail com o link de redefinição
-    // O link deve ser: process.env.NEXTAUTH_URL + "/auth/reset-password?token=" + token
-    // Integrar com Resend / Nodemailer conforme preferência
-    console.info(`[forgot-password] Token gerado para ${email}: ${token}`)
+    const baseUrl  = process.env.NEXTAUTH_URL ?? "http://localhost:3000"
+    const resetUrl = `${baseUrl}/auth/reset-password?token=${token}`
+
+    try {
+      await sendMail({
+        to:      email,
+        subject: "Redefinição de senha — Paróquia São Sebastião",
+        html:    buildPasswordResetEmail(user.name ?? "Fiel", resetUrl),
+      })
+    } catch (mailErr) {
+      console.error("[forgot-password] Falha ao enviar e-mail:", mailErr)
+      // Não expõe o erro ao cliente; token já foi salvo
+    }
 
     return NextResponse.json({ ok: true })
   } catch (err) {

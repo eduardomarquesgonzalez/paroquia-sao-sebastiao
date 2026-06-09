@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { ArrowLeft, Save, Eye, Upload, X, Trash2, Link as LinkIcon, Globe } from "lucide-react";
+import { ArrowLeft, Save, Eye, Upload, X, Trash2, Link as LinkIcon, Globe, Star } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { toDatetimeLocalCuiaba, fromDatetimeLocalCuiaba, compressImage } from "@/lib/utils";
@@ -16,6 +16,8 @@ interface EventData {
   siteUrl: string;
   image: string;
   published: boolean;
+  featured: boolean;
+  featuredOrder: number;
   order: number;
 }
 
@@ -36,6 +38,8 @@ export default function EditarEventoPage() {
     siteUrl: "",
     image: "",
     published: false,
+    featured: false,
+    featuredOrder: 0,
     order: 0,
   });
   const [imagePreview, setImagePreview] = useState("");
@@ -51,15 +55,17 @@ export default function EditarEventoPage() {
       if (!response.ok) throw new Error("Evento não encontrado");
       const data = await response.json();
       setFormData({
-        title: data.title,
-        description: data.description,
-        date: toDatetimeLocalCuiaba(data.date),
-        endDate: data.endDate ? toDatetimeLocalCuiaba(data.endDate) : "",
-        location: data.location || "",
-        siteUrl: data.siteUrl || "",
-        image: data.image || "",
-        published: data.published,
-        order: data.order ?? 0,
+        title:         data.title,
+        description:   data.description,
+        date:          toDatetimeLocalCuiaba(data.date),
+        endDate:       data.endDate ? toDatetimeLocalCuiaba(data.endDate) : "",
+        location:      data.location || "",
+        siteUrl:       data.siteUrl || "",
+        image:         data.image || "",
+        published:     data.published,
+        featured:      data.featured ?? false,
+        featuredOrder: data.featuredOrder ?? 0,
+        order:         data.order ?? 0,
       });
       if (data.image) {
         setImagePreview(data.image);
@@ -212,7 +218,25 @@ export default function EditarEventoPage() {
                 <Globe className="w-4 h-4" /> Site / Link externo
               </label>
               <input type="url" name="siteUrl" value={formData.siteUrl} onChange={handleChange} placeholder="https://..." className="w-full px-4 py-3 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold focus:border-transparent outline-none" />
-              <p className="text-xs text-parish-secondary mt-1">Link para site externo, inscrições ou mais informações</p>
+              {/* Aviso de URL inválida */}
+              {formData.siteUrl && (() => {
+                try { const u = new URL(formData.siteUrl); return u.protocol !== "http:" && u.protocol !== "https:" } catch { return true }
+              })() && (
+                <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
+                  <span>⚠</span> URL inválida — o banner de destaque não ficará clicável com este link.
+                </p>
+              )}
+              <p className="text-xs text-parish-secondary mt-1">
+                Quando preenchido, o banner de destaque ficará clicável e abrirá este link em nova aba.
+              </p>
+              {/* Preview do status do link no destaque */}
+              {formData.featured && formData.siteUrl && (() => {
+                try { const u = new URL(formData.siteUrl); return u.protocol === "http:" || u.protocol === "https:" } catch { return false }
+              })() && (
+                <div className="mt-2 flex items-center gap-1.5 text-[11px] font-semibold text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-1.5">
+                  <span>✓</span> Banner de destaque com link ativo
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -295,7 +319,7 @@ export default function EditarEventoPage() {
             )}
           </div>
 
-          <div className="bg-parish-surface rounded-lg shadow-sm p-6 border border-parish-primary">
+          <div className="bg-parish-surface rounded-lg shadow-sm p-6 border border-parish-primary space-y-4">
             <label className="flex items-center space-x-3 cursor-pointer">
               <input type="checkbox" name="published" checked={formData.published} onChange={handleChange} className="w-4 h-4 text-parish-gold border-parish-border rounded focus:ring-parish-gold" />
               <div>
@@ -303,6 +327,56 @@ export default function EditarEventoPage() {
                 <p className="text-xs text-parish-secondary">Evento visível no site</p>
               </div>
             </label>
+
+            <div className="border-t border-parish-border pt-4">
+              <label className="flex items-center space-x-3 cursor-pointer">
+                <input type="checkbox" name="featured" checked={formData.featured} onChange={handleChange} className="w-4 h-4 text-parish-gold border-parish-border rounded focus:ring-parish-gold" />
+                <div className="flex items-center gap-2">
+                  <Star className={`w-4 h-4 ${formData.featured ? "text-parish-gold fill-parish-gold" : "text-parish-secondary"}`} />
+                  <div>
+                    <p className="text-sm font-medium text-parish-text-light">Destacar na página inicial</p>
+                    <p className="text-xs text-parish-secondary">Exibir no carrossel de destaques</p>
+                  </div>
+                </div>
+              </label>
+
+              {formData.featured && (
+                <>
+                  {/* Status badge baseado nas datas */}
+                  {(() => {
+                    const now     = new Date()
+                    const start   = formData.date ? new Date(formData.date) : null
+                    const end     = formData.endDate ? new Date(formData.endDate) : start
+                    const expired  = end && end < now
+                    const scheduled = start && start > now
+                    return (
+                      <div className="mt-2 flex items-center gap-2">
+                        <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${
+                          expired   ? "bg-gray-50 text-gray-500 border-gray-200" :
+                          scheduled ? "bg-blue-50 text-blue-600 border-blue-200"  :
+                                      "bg-emerald-50 text-emerald-600 border-emerald-200"
+                        }`}>
+                          {expired ? "Expirado" : scheduled ? "Agendado" : "Ativo"}
+                        </span>
+                        {expired && <span className="text-xs text-red-500">Este destaque não aparecerá no carrossel pois o evento já encerrou</span>}
+                      </div>
+                    )
+                  })()}
+
+                  <div className="mt-3">
+                    <label className="block text-xs text-parish-secondary mb-1.5">Prioridade do destaque</label>
+                    <input
+                      type="number"
+                      min={0}
+                      value={formData.featuredOrder}
+                      onChange={(e) => setFormData((p) => ({ ...p, featuredOrder: Number(e.target.value) }))}
+                      className="w-full px-3 py-2 border border-parish-border rounded-lg text-sm focus:ring-2 focus:ring-parish-gold focus:border-transparent outline-none"
+                    />
+                    <p className="text-xs text-parish-secondary mt-1">Menor número = exibido primeiro</p>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </form>

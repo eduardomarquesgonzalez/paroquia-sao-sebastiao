@@ -1,9 +1,9 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useSession } from "next-auth/react"
-import { User, Save } from "lucide-react"
-import { toast } from "sonner"
+import { useSession }          from "next-auth/react"
+import { User, Save, Loader2 } from "lucide-react"
+import { toast }               from "sonner"
 
 interface ProfileForm {
   name:         string
@@ -17,18 +17,38 @@ interface ProfileForm {
   zipCode:      string
 }
 
+const EMPTY: ProfileForm = {
+  name: "", phone: "", cpf: "", birthDate: "",
+  address: "", neighborhood: "", city: "Cuiabá", state: "MT", zipCode: "",
+}
+
 export default function DizimistaPerfilPage() {
   const { data: session } = useSession()
-  const [loading, setLoading] = useState(false)
-  const [form, setForm] = useState<ProfileForm>({
-    name: "", phone: "", cpf: "", birthDate: "",
-    address: "", neighborhood: "", city: "Cuiabá", state: "MT", zipCode: "",
-  })
+  const [loading,  setLoading]  = useState(false)
+  const [fetching, setFetching] = useState(true)
+  const [form,     setForm]     = useState<ProfileForm>(EMPTY)
 
-  // Pré-preenche nome do token JWT
   useEffect(() => {
-    if (session?.user?.name) setForm((prev) => ({ ...prev, name: session.user.name ?? "" }))
-  }, [session])
+    fetch("/api/dizimista/perfil")
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => {
+        if (!data) return
+        const d = data.dizimista
+        setForm({
+          name:         data.name         ?? "",
+          phone:        data.phone        ?? "",
+          cpf:          data.cpf          ?? "",
+          birthDate:    d?.birthDate ? d.birthDate.slice(0, 10) : "",
+          address:      d?.address        ?? "",
+          neighborhood: d?.neighborhood   ?? "",
+          city:         d?.city           ?? "Cuiabá",
+          state:        d?.state          ?? "MT",
+          zipCode:      d?.zipCode        ?? "",
+        })
+      })
+      .catch(() => toast.error("Erro ao carregar perfil"))
+      .finally(() => setFetching(false))
+  }, [])
 
   const set = (field: keyof ProfileForm, value: string) =>
     setForm((prev) => ({ ...prev, [field]: value }))
@@ -37,22 +57,26 @@ export default function DizimistaPerfilPage() {
     e.preventDefault()
     setLoading(true)
     try {
-      const res = await fetch(`/api/admin/usuarios/${session?.user?.id}`, {
-        method: "PUT",
+      const res = await fetch("/api/dizimista/perfil", {
+        method:  "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name:  form.name  || null,
-          phone: form.phone || null,
-          cpf:   form.cpf   || null,
-        }),
+        body:    JSON.stringify(form),
       })
       if (!res.ok) throw new Error()
-      toast.success("Perfil atualizado!")
+      toast.success("Perfil atualizado com sucesso!")
     } catch {
       toast.error("Erro ao salvar perfil")
     } finally {
       setLoading(false)
     }
+  }
+
+  if (fetching) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="w-8 h-8 text-parish-gold animate-spin" />
+      </div>
+    )
   }
 
   return (
@@ -68,6 +92,7 @@ export default function DizimistaPerfilPage() {
       </div>
 
       <form onSubmit={handleSave} className="space-y-5">
+        {/* Dados pessoais */}
         <div className="bg-parish-surface rounded-xl border border-parish-border p-6 space-y-4">
           <h2 className="text-sm font-semibold text-parish-text">Dados pessoais</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -96,6 +121,7 @@ export default function DizimistaPerfilPage() {
           </div>
         </div>
 
+        {/* Endereço */}
         <div className="bg-parish-surface rounded-xl border border-parish-border p-6 space-y-4">
           <h2 className="text-sm font-semibold text-parish-text">Endereço</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -133,7 +159,7 @@ export default function DizimistaPerfilPage() {
         <div className="flex justify-end">
           <button type="submit" disabled={loading}
             className="flex items-center gap-1.5 px-5 py-2.5 bg-parish-gold text-white rounded-lg text-sm font-semibold hover:bg-parish-gold-dark transition disabled:opacity-50">
-            <Save className="w-4 h-4" />
+            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             {loading ? "Salvando..." : "Salvar perfil"}
           </button>
         </div>

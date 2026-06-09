@@ -82,15 +82,17 @@ export async function PUT(
     const evento = await prisma.event.update({
       where: { id: params.id },
       data: {
-        title: data.title,
-        description: data.description,
-        date: new Date(data.date),
-        endDate: data.endDate ? new Date(data.endDate) : null,
-        location: data.location || null,
-        image: data.image || null,
-        siteUrl: data.siteUrl || null,
-        published: data.published || false,
-        order: data.order ?? existingEvento.order,
+        title:         data.title,
+        description:   data.description,
+        date:          new Date(data.date),
+        endDate:       data.endDate ? new Date(data.endDate) : null,
+        location:      data.location || null,
+        image:         data.image || null,
+        siteUrl:       data.siteUrl || null,
+        published:     data.published || false,
+        featured:      data.featured ?? existingEvento.featured,
+        featuredOrder: data.featuredOrder ?? existingEvento.featuredOrder,
+        order:         data.order ?? existingEvento.order,
       },
       include: {
         createdBy: {

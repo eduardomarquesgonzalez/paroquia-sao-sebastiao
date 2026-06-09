@@ -30,13 +30,24 @@ export default function DizimistaPage() {
 
       {/* Ações rápidas */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <Link href="/dizimista/contribuir"
+          className="bg-parish-gold text-white rounded-xl p-5 flex items-center gap-4 hover:bg-parish-gold-dark transition group sm:col-span-2">
+          <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+            <Heart className="w-5 h-5 text-white fill-white" />
+          </div>
+          <div>
+            <p className="font-semibold text-sm">Contribuir com o dízimo</p>
+            <p className="text-xs text-white/75 mt-0.5">Fazer uma nova contribuição via PIX ou boleto</p>
+          </div>
+        </Link>
+
         <Link href="/dizimista/historico"
           className="bg-parish-surface rounded-xl border border-parish-border p-5 flex items-center gap-4 hover:border-parish-gold transition group">
           <div className="w-10 h-10 bg-parish-gold/10 rounded-lg flex items-center justify-center group-hover:bg-parish-gold/20 transition">
             <History className="w-5 h-5 text-parish-gold" />
           </div>
           <div>
-            <p className="font-semibold text-parish-text text-sm">Histórico de contribuições</p>
+            <p className="font-semibold text-parish-text text-sm">Histórico</p>
             <p className="text-xs text-parish-text-light mt-0.5">Ver todas as suas contribuições</p>
           </div>
         </Link>

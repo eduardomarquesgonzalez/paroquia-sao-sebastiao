@@ -57,16 +57,18 @@ export async function POST(request: Request) {
 
     const evento = await prisma.event.create({
       data: {
-        title: data.title,
-        description: data.description,
-        date: new Date(data.date),
-        endDate: data.endDate ? new Date(data.endDate) : null,
-        location: data.location || null,
-        image: data.image || null,
-        siteUrl: data.siteUrl || null,
-        published: data.published || false,
-        order: data.order ?? 0,
-        createdById: session.user.id,
+        title:        data.title,
+        description:  data.description,
+        date:         new Date(data.date),
+        endDate:      data.endDate ? new Date(data.endDate) : null,
+        location:     data.location || null,
+        image:        data.image || null,
+        siteUrl:      data.siteUrl || null,
+        published:    data.published || false,
+        featured:     data.featured || false,
+        featuredOrder: data.featuredOrder ?? 0,
+        order:        data.order ?? 0,
+        createdById:  session.user.id,
       },
       include: {
         createdBy: {

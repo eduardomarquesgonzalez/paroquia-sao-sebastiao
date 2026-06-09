@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Save, Eye, Upload, X, Calendar, Link as LinkIcon, Globe } from "lucide-react";
+import { ArrowLeft, Save, Eye, Upload, X, Calendar, Link as LinkIcon, Globe, Star } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { fromDatetimeLocalCuiaba, compressImage } from "@/lib/utils";
@@ -22,6 +22,8 @@ export default function NovoEventoPage() {
     siteUrl: "",
     image: "",
     published: false,
+    featured: false,
+    featuredOrder: 0,
     order: 0,
   });
   const [imagePreview, setImagePreview] = useState("");
@@ -80,7 +82,7 @@ export default function NovoEventoPage() {
       const response = await fetch("/api/eventos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: formData.title, description: formData.description, date: dateTime, endDate: endDateTime, location: formData.location, siteUrl: formData.siteUrl || null, image: formData.image, published: shouldPublish, order: formData.order }),
+        body: JSON.stringify({ title: formData.title, description: formData.description, date: dateTime, endDate: endDateTime, location: formData.location, siteUrl: formData.siteUrl || null, image: formData.image, published: shouldPublish, featured: formData.featured, featuredOrder: formData.featuredOrder, order: formData.order }),
       });
       if (!response.ok) throw new Error("Erro ao criar evento");
       toast.success(shouldPublish ? "Evento publicado com sucesso!" : "Rascunho salvo!");
@@ -174,7 +176,17 @@ export default function NovoEventoPage() {
                 <Globe className="w-4 h-4" /> Site / Link externo
               </label>
               <input type="url" name="siteUrl" value={formData.siteUrl} onChange={handleChange} placeholder="https://..." className="w-full px-4 py-3 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold focus:border-transparent outline-none" />
-              <p className="text-xs text-parish-secondary mt-1">Link para site externo, inscrições ou mais informações</p>
+              {/* Aviso de URL inválida */}
+              {formData.siteUrl && (() => {
+                try { const u = new URL(formData.siteUrl); return u.protocol !== "http:" && u.protocol !== "https:" } catch { return true }
+              })() && (
+                <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
+                  <span>⚠</span> URL inválida — o banner de destaque não ficará clicável com este link.
+                </p>
+              )}
+              <p className="text-xs text-parish-secondary mt-1">
+                Quando preenchido, o banner de destaque ficará clicável e abrirá este link em nova aba.
+              </p>
             </div>
           </div>
         </div>
@@ -233,7 +245,7 @@ export default function NovoEventoPage() {
             )}
           </div>
 
-          <div className="bg-parish-surface rounded-lg shadow-sm p-6 border border-parish-primary">
+          <div className="bg-parish-surface rounded-lg shadow-sm p-6 border border-parish-primary space-y-4">
             <label className="flex items-center space-x-3 cursor-pointer">
               <input type="checkbox" name="published" checked={formData.published} onChange={handleChange} className="w-4 h-4 text-parish-gold border-parish-border rounded focus:ring-parish-gold" />
               <div>
@@ -241,6 +253,32 @@ export default function NovoEventoPage() {
                 <p className="text-xs text-parish-secondary">Tornar o evento visível no site</p>
               </div>
             </label>
+
+            <div className="border-t border-parish-border pt-4">
+              <label className="flex items-center space-x-3 cursor-pointer">
+                <input type="checkbox" name="featured" checked={formData.featured} onChange={handleChange} className="w-4 h-4 text-parish-gold border-parish-border rounded focus:ring-parish-gold" />
+                <div className="flex items-center gap-2">
+                  <Star className={`w-4 h-4 ${formData.featured ? "text-parish-gold fill-parish-gold" : "text-parish-secondary"}`} />
+                  <div>
+                    <p className="text-sm font-medium text-parish-text-light">Destacar na página inicial</p>
+                    <p className="text-xs text-parish-secondary">Exibir no carrossel de destaques</p>
+                  </div>
+                </div>
+              </label>
+              {formData.featured && (
+                <div className="mt-3">
+                  <label className="block text-xs text-parish-secondary mb-1.5">Prioridade do destaque</label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={formData.featuredOrder}
+                    onChange={(e) => setFormData((p) => ({ ...p, featuredOrder: Number(e.target.value) }))}
+                    className="w-full px-3 py-2 border border-parish-border rounded-lg text-sm focus:ring-2 focus:ring-parish-gold focus:border-transparent outline-none"
+                  />
+                  <p className="text-xs text-parish-secondary mt-1">Menor número = exibido primeiro</p>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="bg-parish-sky-light rounded-lg p-4 border border-parish-sky-light">

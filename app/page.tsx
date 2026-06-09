@@ -16,11 +16,18 @@ import {
   Users,
 } from "lucide-react";
 import CarouselFaixas from "@/components/CarouselFaixas";
+import DestaquesCarousel from "@/components/DestaquesCarousel";
 import ComunidadesCarousel from "@/components/ComunidadesCarousel";
 import CleroCarousel, { CleroSkeletonCard } from "@/components/CleroCarousel";
 import Image from "next/image";
 import logoImg from "@/public/logo.png";
-import { formatDay, formatMonthShort, formatTime, formatWeekday, isEventEnded } from "@/lib/utils";
+import {
+  formatDay,
+  formatMonthShort,
+  formatTime,
+  formatWeekday,
+  isEventEnded,
+} from "@/lib/utils";
 import { ExternalLink } from "lucide-react";
 
 interface CommunityPreview {
@@ -51,6 +58,16 @@ interface Event {
   endDate: string | null;
   location: string | null;
   image: string | null;
+  siteUrl: string | null;
+}
+
+interface Destaque {
+  id: string;
+  title: string;
+  image: string | null;
+  date: string;
+  endDate: string | null;
+  location: string | null;
   siteUrl: string | null;
 }
 
@@ -148,6 +165,7 @@ function SkeletonCard() {
 export default function HomePage() {
   const [comunidades, setComunidades] = useState<CommunityPreview[]>([]);
   const [eventos, setEventos] = useState<Event[]>([]);
+  const [destaques, setDestaques] = useState<Destaque[]>([]);
   const [clero, setClero] = useState<CleroMember[]>([]);
   const [loadingComunidades, setLoadingComunidades] = useState(true);
   const [loadingEventos, setLoadingEventos] = useState(true);
@@ -165,7 +183,7 @@ export default function HomePage() {
         day: "2-digit",
         month: "short",
         year: "numeric",
-      })
+      }),
     );
   }, []);
 
@@ -194,9 +212,16 @@ export default function HomePage() {
 
     fetch("/api/eventos/public")
       .then((r) => r.json())
-      .then((d: Event[]) => setEventos(d.filter((e) => !isEventEnded(e)).slice(0, 3)))
+      .then((d: Event[]) =>
+        setEventos(d.filter((e) => !isEventEnded(e)).slice(0, 3)),
+      )
       .catch(() => {})
       .finally(() => setLoadingEventos(false));
+
+    fetch("/api/eventos/destaques")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((d) => setDestaques(Array.isArray(d) ? d : []))
+      .catch(() => {});
 
     fetch("/api/home-hero")
       .then((r) => r.json())
@@ -261,7 +286,7 @@ export default function HomePage() {
                 href="/auth/login"
                 className="hidden sm:inline-flex px-4 py-2 text-sm font-semibold bg-parish-navy text-white rounded-lg hover:bg-parish-navy-dark transition-colors duration-200"
               >
-                Área Admin
+                Login
               </Link>
               <button
                 onClick={() => setMenuOpen((v) => !v)}
@@ -380,6 +405,13 @@ export default function HomePage() {
         </CarouselFaixas>
       </section>
 
+      {/* ─── DESTAQUES ─── */}
+      {destaques.length > 0 && (
+        <section className="destaques-fade-in">
+          <DestaquesCarousel destaques={destaques} />
+        </section>
+      )}
+
       {/* ─── PRÓXIMOS EVENTOS ─── */}
       <section
         id="eventos"
@@ -438,7 +470,10 @@ export default function HomePage() {
                   }`}
                 >
                   {/* Image — bloco clicável */}
-                  <Link href={`/eventos/${evento.id}`} className="relative h-52 overflow-hidden flex-shrink-0 block">
+                  <Link
+                    href={`/eventos/${evento.id}`}
+                    className="relative h-52 overflow-hidden flex-shrink-0 block"
+                  >
                     {evento.image ? (
                       <img
                         src={evento.image}
@@ -541,7 +576,11 @@ export default function HomePage() {
         <section className="py-24 bg-parish-navy relative overflow-hidden">
           <div
             className="absolute inset-0 opacity-[0.04] pointer-events-none"
-            style={{ backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.15) 1px, transparent 1px)", backgroundSize: "28px 28px" }}
+            style={{
+              backgroundImage:
+                "radial-gradient(circle, rgba(255,255,255,0.15) 1px, transparent 1px)",
+              backgroundSize: "28px 28px",
+            }}
           />
           <div className="absolute top-0 left-0 w-96 h-96 bg-parish-gold/8 rounded-full -translate-y-1/2 -translate-x-1/3 blur-3xl pointer-events-none" />
           <div className="absolute bottom-0 right-0 w-80 h-80 bg-white/4 rounded-full translate-y-1/2 translate-x-1/3 blur-3xl pointer-events-none" />

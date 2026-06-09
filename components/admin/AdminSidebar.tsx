@@ -27,7 +27,7 @@ const navigation: NavItem[] = [
   { name: "Sacramentos",       href: "/admin/sacramentos",       icon: Church },
   { name: "Clero",             href: "/admin/clero",             icon: UserCheck },
   { name: "Movimentos",        href: "/admin/movimentos",        icon: Users },
-  { name: "Doações",           href: "/admin/doacoes",           icon: Heart,     minRole: "FINANCE" },
+  { name: "Dizimistas",        href: "/admin/dizimistas",        icon: Heart,     minRole: "FINANCE" },
   { name: "Galeria",           href: "/admin/galeria",           icon: Image },
   { name: "Newsletter",        href: "/admin/newsletter",        icon: Mail },
   { name: "Usuários",          href: "/admin/usuarios",          icon: Shield,    minRole: "ADMIN" },

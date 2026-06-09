@@ -10,6 +10,7 @@ import {
   Calendar,
   MapPin,
   Clock,
+  Star,
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -24,6 +25,7 @@ interface Event {
   location: string | null;
   image: string | null;
   published: boolean;
+  featured: boolean;
   createdAt: string;
 }
 
@@ -118,18 +120,14 @@ export default function EventosPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <div className="bg-parish-surface rounded-lg shadow-sm p-4 border border-parish-primary">
-          <p className="text-sm text-parish-text-light">Total de Eventos</p>
-          <p className="text-2xl font-bold text-parish-text mt-1">
-            {eventos.length}
-          </p>
+          <p className="text-sm text-parish-text-light">Total</p>
+          <p className="text-2xl font-bold text-parish-text mt-1">{eventos.length}</p>
         </div>
         <div className="bg-parish-surface rounded-lg shadow-sm p-4 border border-parish-primary">
           <p className="text-sm text-parish-text-light">Próximos</p>
-          <p className="text-2xl font-bold text-green-600 mt-1">
-            {upcomingEvents}
-          </p>
+          <p className="text-2xl font-bold text-green-600 mt-1">{upcomingEvents}</p>
         </div>
         <div className="bg-parish-surface rounded-lg shadow-sm p-4 border border-parish-primary">
           <p className="text-sm text-parish-text-light">Encerrados</p>
@@ -137,8 +135,15 @@ export default function EventosPage() {
         </div>
         <div className="bg-parish-surface rounded-lg shadow-sm p-4 border border-parish-primary">
           <p className="text-sm text-parish-text-light">Rascunhos</p>
-          <p className="text-2xl font-bold text-orange-600 mt-1">
-            {eventos.filter((e) => !e.published).length}
+          <p className="text-2xl font-bold text-orange-600 mt-1">{eventos.filter((e) => !e.published).length}</p>
+        </div>
+        <div className="col-span-2 md:col-span-1 bg-parish-surface rounded-lg shadow-sm p-4 border border-parish-gold/40">
+          <div className="flex items-center gap-1.5">
+            <Star className="w-3.5 h-3.5 text-parish-gold fill-parish-gold" />
+            <p className="text-sm text-parish-text-light">Em Destaque</p>
+          </div>
+          <p className="text-2xl font-bold text-parish-gold mt-1">
+            {eventos.filter((e) => e.featured && e.published && !isEnded(e)).length}
           </p>
         </div>
       </div>
@@ -213,7 +218,7 @@ export default function EventosPage() {
               <div className="p-4">
                 {/* Status Badge */}
                 <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     {evento.published ? (
                       <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                         Publicado
@@ -230,6 +235,11 @@ export default function EventosPage() {
                       </span>
                     )}
                   </div>
+                  {evento.featured && (
+                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold bg-parish-gold/10 text-parish-gold border border-parish-gold/30">
+                      <Star className="w-3 h-3 fill-parish-gold" /> Destaque
+                    </span>
+                  )}
                 </div>
 
                 {/* Title */}

@@ -102,24 +102,27 @@ model Post {
 }
 
 model Event {
-  id          String    @id @default(cuid())
-  title       String
-  description String    @db.Text
-  date        DateTime
-  endDate     DateTime?
-  location    String?
-  image       String?
-  siteUrl     String?
-  published   Boolean   @default(false)
-  order       Int       @default(0)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id            String    @id @default(cuid())
+  title         String
+  description   String    @db.Text
+  date          DateTime
+  endDate       DateTime?
+  location      String?
+  image         String?
+  siteUrl       String?
+  published     Boolean   @default(false)
+  featured      Boolean   @default(false)
+  featuredOrder Int       @default(0)
+  order         Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   createdById String
   createdBy   User   @relation(fields: [createdById], references: [id], onDelete: Cascade)
 
   @@index([date])
   @@index([published])
+  @@index([featured])
   @@index([order])
 }
 

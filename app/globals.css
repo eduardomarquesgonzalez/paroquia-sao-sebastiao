@@ -55,6 +55,15 @@
   /* Stagger delays for sibling cards */
   .stagger-1 { transition-delay: 80ms; }
   .stagger-2 { transition-delay: 160ms; }
+
+  /* Fade-in para section de destaques (sem esperar scroll) */
+  .destaques-fade-in {
+    animation: destaquesFadeIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  @keyframes destaquesFadeIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
   .stagger-3 { transition-delay: 240ms; }
 
   /* Gold accent separator */

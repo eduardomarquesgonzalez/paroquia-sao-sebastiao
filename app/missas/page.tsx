@@ -520,14 +520,7 @@ function CommunityCard({
                       <Clock className="w-3 h-3 text-parish-gold" />
                       {m.time}
                     </span>
-                    {/* <span
-                      className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${
-                        TYPE_STYLES[m.type] ?? "bg-parish-primary text-parish-text"
-                      }`}
-                    >
-                      {TYPE_LABELS[m.type] ?? m.type}
-                    </span> */}
-                    {m.observations && (
+                      {m.observations && (
                       <span title={m.observations} className="cursor-help">
                         <Info className="w-3.5 h-3.5 text-parish-gold/70" />
                       </span>
