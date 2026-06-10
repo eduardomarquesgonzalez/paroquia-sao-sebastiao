@@ -15,6 +15,9 @@ import {
   Sparkles,
   Users,
   HandHeart,
+  Heart,
+  BookOpen,
+  ClipboardList,
 } from "lucide-react";
 import CarouselFaixas from "@/components/CarouselFaixas";
 import DestaquesCarousel from "@/components/DestaquesCarousel";
@@ -85,6 +88,27 @@ interface CleroMember {
   role: string;
   photo: string | null;
   currentRole: string | null;
+}
+
+interface AtividadePublica {
+  id: string;
+  nome: string;
+  slug: string;
+  descricao: string;
+  tipo: string;
+  imagem: string | null;
+  cor: string | null;
+  textoBotao: string | null;
+  linkExterno: string | null;
+  aceitaInscricoes: boolean;
+  formulario: {
+    id: string;
+    ativo: boolean;
+    vagas: number | null;
+    dataInicio: string | null;
+    dataFim: string | null;
+    _count: { inscricoes: number };
+  } | null;
 }
 
 const NAV_LINKS = [
@@ -176,6 +200,8 @@ export default function HomePage() {
   const [destaques, setDestaques] = useState<Destaque[]>([]);
   const [clero, setClero] = useState<CleroMember[]>([]);
   const [projetosSociais, setProjetosSociais] = useState<SocialProject[]>([]);
+  const [atividades, setAtividades] = useState<AtividadePublica[]>([]);
+  const [loadingAtividades, setLoadingAtividades] = useState(true);
   const [loadingComunidades, setLoadingComunidades] = useState(true);
   const [loadingEventos, setLoadingEventos] = useState(true);
   const [loadingClero, setLoadingClero] = useState(true);
@@ -249,6 +275,12 @@ export default function HomePage() {
       .then((d) => setProjetosSociais(Array.isArray(d) ? d.slice(0, 3) : []))
       .catch(() => {})
       .finally(() => setLoadingProjetos(false));
+
+    fetch("/api/atividades/public")
+      .then((r) => r.json())
+      .then((d) => setAtividades(Array.isArray(d) ? d : []))
+      .catch(() => {})
+      .finally(() => setLoadingAtividades(false));
   }, []);
 
   const getEventDay = formatDay;
@@ -668,95 +700,206 @@ export default function HomePage() {
             </p>
           </div>
 
-          {/* Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-on-scroll">
-            {/* Card Missas */}
-            <Link
-              href="/missas"
-              className="group relative h-80 rounded-2xl overflow-hidden block shadow-navy hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-parish-navy-dark via-parish-navy to-parish-navy-light" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/35 to-black/20 z-10 group-hover:from-black/65 transition-all duration-500" />
-              <div
-                className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-700 ease-out"
-                style={{ backgroundImage: "url('/santamissa.jpg')" }}
-              />
-              <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-6 text-center">
-                <div className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-parish-gold/30 transition-all duration-300">
-                  <Church className="w-7 h-7 text-white" />
-                </div>
-                <h3 className="font-playfair text-2xl font-bold text-white mb-2 leading-tight">
-                  Missas
-                </h3>
-                <p className="text-white/65 text-sm leading-relaxed max-w-[200px]">
-                  Horários de celebrações da semana
-                </p>
-                <div className="mt-5 flex items-center gap-2 text-parish-gold text-sm font-semibold">
-                  <span>Ver horários</span>
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </div>
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-parish-gold scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
-              </div>
-            </Link>
+          {/* Cards dinâmicos */}
+          {loadingAtividades ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-on-scroll">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-80 rounded-2xl bg-white/10 animate-pulse" />
+              ))}
+            </div>
+          ) : atividades.length > 0 ? (
+            <div className={`grid grid-cols-1 gap-6 animate-on-scroll ${
+              atividades.length === 1
+                ? "md:grid-cols-1 max-w-sm mx-auto"
+                : atividades.length === 2
+                ? "md:grid-cols-2 max-w-2xl mx-auto"
+                : "md:grid-cols-2 lg:grid-cols-3"
+            }`}>
+              {atividades.map((a) => {
+                const href = a.linkExterno ?? `/atividades/${a.slug}`;
+                const tipoGradient: Record<string, string> = {
+                  MOVIMENTO: "from-blue-900 via-blue-800 to-blue-700",
+                  PASTORAL: "from-rose-900 via-rose-800 to-rose-700",
+                  MINISTERIO: "from-indigo-900 via-indigo-800 to-indigo-700",
+                  CURSO: "from-amber-900 via-amber-800 to-amber-700",
+                  CATEQUESE: "from-emerald-900 via-emerald-800 to-emerald-700",
+                  PROJETO_SOCIAL: "from-purple-900 via-purple-800 to-purple-700",
+                  OUTRO: "from-parish-navy-dark via-parish-navy to-parish-navy-light",
+                };
+                const tipoLabel: Record<string, string> = {
+                  MOVIMENTO: "Movimento",
+                  PASTORAL: "Pastoral",
+                  MINISTERIO: "Ministério",
+                  CURSO: "Curso",
+                  CATEQUESE: "Catequese",
+                  PROJETO_SOCIAL: "Projeto Social",
+                  OUTRO: "Atividade",
+                };
+                const tipoIcon: Record<string, React.ElementType> = {
+                  MOVIMENTO: Users,
+                  PASTORAL: Heart,
+                  MINISTERIO: Church,
+                  CURSO: BookOpen,
+                  CATEQUESE: BookOpen,
+                  PROJETO_SOCIAL: HandHeart,
+                  OUTRO: Sparkles,
+                };
+                const IconComp = tipoIcon[a.tipo] ?? Sparkles;
+                const gradient = tipoGradient[a.tipo] ?? tipoGradient.OUTRO;
 
-            {/* Card Sacramentos */}
-            <Link
-              href="/sacramentos"
-              className="group relative h-80 rounded-2xl overflow-hidden block shadow-navy hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-parish-navy-dark via-parish-navy to-parish-navy-light" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/35 to-black/20 z-10 group-hover:from-black/65 transition-all duration-500" />
-              <div
-                className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-700 ease-out"
-                style={{ backgroundImage: "url('/sacramentos.jpg')" }}
-              />
-              <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-6 text-center">
-                <div className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-parish-gold/30 transition-all duration-300">
-                  <Sparkles className="w-7 h-7 text-white" />
-                </div>
-                <h3 className="font-playfair text-2xl font-bold text-white mb-2 leading-tight">
-                  Sacramentos
-                </h3>
-                <p className="text-white/65 text-sm leading-relaxed max-w-[200px]">
-                  Batismo, casamento e demais sacramentos
-                </p>
-                <div className="mt-5 flex items-center gap-2 text-parish-gold text-sm font-semibold">
-                  <span>Saiba mais</span>
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </div>
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-parish-gold scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
-              </div>
-            </Link>
+                // Calcular status de vagas
+                let vagasStatus: "aberta" | "ultimas" | "esgotada" | null = null;
+                if (a.aceitaInscricoes && a.formulario?.ativo) {
+                  const inscritos = a.formulario._count.inscricoes;
+                  const vagas = a.formulario.vagas;
+                  if (vagas !== null) {
+                    const restantes = vagas - inscritos;
+                    if (restantes <= 0) vagasStatus = "esgotada";
+                    else if (restantes <= Math.ceil(vagas * 0.2)) vagasStatus = "ultimas";
+                    else vagasStatus = "aberta";
+                  } else {
+                    vagasStatus = "aberta";
+                  }
+                }
 
-            {/* Card Movimentos / Pastorais */}
-            <Link
-              href="/movimentos"
-              className="group relative h-80 rounded-2xl overflow-hidden block shadow-navy hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-parish-navy-dark via-parish-navy to-parish-navy-light" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/35 to-black/20 z-10 group-hover:from-black/65 transition-all duration-500" />
-              <div
-                className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-700 ease-out"
-                style={{ backgroundImage: "url('/pastorais.jpg')" }}
-              />
-              <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-6 text-center">
-                <div className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-parish-gold/30 transition-all duration-300">
-                  <Users className="w-7 h-7 text-white" />
+                return (
+                  <Link
+                    key={a.id}
+                    href={href}
+                    target={a.linkExterno ? "_blank" : undefined}
+                    rel={a.linkExterno ? "noopener noreferrer" : undefined}
+                    className="group relative h-80 rounded-2xl overflow-hidden block shadow-navy hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
+                  >
+                    {/* Background */}
+                    <div className={`absolute inset-0 bg-gradient-to-br ${gradient}`} />
+                    {/* Overlay escuro para legibilidade */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/25 z-10 group-hover:from-black/70 transition-all duration-500" />
+                    {/* Imagem */}
+                    {a.imagem && (
+                      <div
+                        className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-700 ease-out"
+                        style={{ backgroundImage: `url('${a.imagem}')` }}
+                      />
+                    )}
+                    {/* Cor sólida (quando há cor mas não imagem) */}
+                    {!a.imagem && a.cor && (
+                      <div className="absolute inset-0" style={{ background: a.cor }} />
+                    )}
+
+                    {/* Badge tipo */}
+                    <div className="absolute top-4 left-4 z-30">
+                      <span className="inline-block px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider bg-white/20 backdrop-blur-sm text-white rounded-full border border-white/25">
+                        {tipoLabel[a.tipo] ?? "Atividade"}
+                      </span>
+                    </div>
+
+                    {/* Badge vagas */}
+                    {vagasStatus && (
+                      <div className="absolute top-4 right-4 z-30">
+                        {vagasStatus === "esgotada" ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-bold bg-red-500/90 text-white rounded-full">
+                            Vagas esgotadas
+                          </span>
+                        ) : vagasStatus === "ultimas" ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-bold bg-amber-500/90 text-white rounded-full">
+                            Últimas vagas
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-bold bg-green-500/90 text-white rounded-full">
+                            <ClipboardList className="w-3 h-3" /> Inscrições abertas
+                          </span>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Content */}
+                    <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-6 text-center">
+                      <div className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-parish-gold/30 transition-all duration-300">
+                        <IconComp className="w-7 h-7 text-white" />
+                      </div>
+                      <h3 className="font-playfair text-2xl font-bold text-white mb-2 leading-tight drop-shadow-lg">
+                        {a.nome}
+                      </h3>
+                      <p className="text-white/75 text-sm leading-relaxed max-w-[220px] line-clamp-2 drop-shadow">
+                        {a.descricao}
+                      </p>
+                      <div className="mt-5 flex items-center gap-2 text-parish-gold text-sm font-semibold">
+                        <span>{a.textoBotao || (vagasStatus && vagasStatus !== "esgotada" ? "Inscreva-se" : "Saiba mais")}</span>
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                      <div className="absolute bottom-0 left-0 right-0 h-1 bg-parish-gold scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          ) : (
+            /* Fallback estático quando não há atividades cadastradas */
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-on-scroll">
+              <Link
+                href="/missas"
+                className="group relative h-80 rounded-2xl overflow-hidden block shadow-navy hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-parish-navy-dark via-parish-navy to-parish-navy-light" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/25 z-10 group-hover:from-black/70 transition-all duration-500" />
+                <div className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-700 ease-out" style={{ backgroundImage: "url('/santamissa.jpg')" }} />
+                <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-6 text-center">
+                  <div className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-parish-gold/30 transition-all duration-300">
+                    <Church className="w-7 h-7 text-white" />
+                  </div>
+                  <h3 className="font-playfair text-2xl font-bold text-white mb-2 leading-tight">Missas</h3>
+                  <p className="text-white/75 text-sm leading-relaxed max-w-[200px]">Horários de celebrações da semana</p>
+                  <div className="mt-5 flex items-center gap-2 text-parish-gold text-sm font-semibold">
+                    <span>Ver horários</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-parish-gold scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
                 </div>
-                <h3 className="font-playfair text-2xl font-bold text-white mb-2 leading-tight">
-                  Pastorais e Movimentos
-                </h3>
-                <p className="text-white/65 text-sm leading-relaxed max-w-[200px]">
-                  Pastorais e movimentos da paróquia
-                </p>
-                <div className="mt-5 flex items-center gap-2 text-parish-gold text-sm font-semibold">
-                  <span>Conheça</span>
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </Link>
+
+              <Link
+                href="/sacramentos"
+                className="group relative h-80 rounded-2xl overflow-hidden block shadow-navy hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-parish-navy-dark via-parish-navy to-parish-navy-light" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/25 z-10 group-hover:from-black/70 transition-all duration-500" />
+                <div className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-700 ease-out" style={{ backgroundImage: "url('/sacramentos.jpg')" }} />
+                <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-6 text-center">
+                  <div className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-parish-gold/30 transition-all duration-300">
+                    <Sparkles className="w-7 h-7 text-white" />
+                  </div>
+                  <h3 className="font-playfair text-2xl font-bold text-white mb-2 leading-tight">Sacramentos</h3>
+                  <p className="text-white/75 text-sm leading-relaxed max-w-[200px]">Batismo, casamento e demais sacramentos</p>
+                  <div className="mt-5 flex items-center gap-2 text-parish-gold text-sm font-semibold">
+                    <span>Saiba mais</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-parish-gold scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
                 </div>
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-parish-gold scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
-              </div>
-            </Link>
-          </div>
+              </Link>
+
+              <Link
+                href="/movimentos"
+                className="group relative h-80 rounded-2xl overflow-hidden block shadow-navy hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-parish-navy-dark via-parish-navy to-parish-navy-light" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/25 z-10 group-hover:from-black/70 transition-all duration-500" />
+                <div className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-700 ease-out" style={{ backgroundImage: "url('/pastorais.jpg')" }} />
+                <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-6 text-center">
+                  <div className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-parish-gold/30 transition-all duration-300">
+                    <Users className="w-7 h-7 text-white" />
+                  </div>
+                  <h3 className="font-playfair text-2xl font-bold text-white mb-2 leading-tight">Pastorais e Movimentos</h3>
+                  <p className="text-white/75 text-sm leading-relaxed max-w-[200px]">Pastorais e movimentos da paróquia</p>
+                  <div className="mt-5 flex items-center gap-2 text-parish-gold text-sm font-semibold">
+                    <span>Conheça</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-parish-gold scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+                </div>
+              </Link>
+            </div>
+          )}
         </div>
       </section>
 

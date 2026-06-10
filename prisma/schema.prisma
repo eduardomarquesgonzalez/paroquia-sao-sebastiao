@@ -47,6 +47,35 @@ enum ContributionStatus {
   REFUNDED
 }
 
+enum AtividadeTipo {
+  MOVIMENTO
+  PASTORAL
+  MINISTERIO
+  CURSO
+  CATEQUESE
+  PROJETO_SOCIAL
+  OUTRO
+}
+
+enum TipoCampo {
+  TEXTO
+  EMAIL
+  TELEFONE
+  CPF
+  DATA
+  SELECT
+  CHECKBOX
+  RADIO
+  TEXTAREA
+  ARQUIVO
+}
+
+enum StatusInscricao {
+  PENDENTE
+  APROVADO
+  CANCELADO
+}
+
 // ─── Usuários / Auth ───────────────────────────────────────────────────────────
 
 model User {
@@ -486,4 +515,92 @@ model AuditLog {
   @@index([action])
   @@index([createdAt])
   @@map("audit_logs")
+}
+
+// ─── Atividades & Inscrições ───────────────────────────────────────────────────
+
+model Atividade {
+  id                String        @id @default(cuid())
+  nome              String
+  slug              String        @unique
+  descricao         String        @db.Text
+  descricaoCompleta String?       @db.Text
+  tipo              AtividadeTipo @default(OUTRO)
+  imagem            String?       @db.Text
+  textoBotao        String?
+  linkExterno       String?
+  cor               String?
+  local             String?
+  responsavel       String?
+  contato           String?
+  horarios          String[]
+  aceitaInscricoes  Boolean       @default(false)
+  active            Boolean       @default(true)
+  order             Int           @default(0)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  formulario FormularioInscricao?
+
+  @@index([active])
+  @@index([tipo])
+  @@index([order])
+  @@map("atividades")
+}
+
+model FormularioInscricao {
+  id          String    @id @default(cuid())
+  atividadeId String    @unique
+  atividade   Atividade @relation(fields: [atividadeId], references: [id], onDelete: Cascade)
+
+  titulo     String
+  descricao  String?   @db.Text
+  vagas      Int?
+  dataInicio DateTime?
+  dataFim    DateTime?
+  ativo      Boolean   @default(true)
+
+  campos     CampoFormulario[]
+  inscricoes Inscricao[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("formularios_inscricao")
+}
+
+model CampoFormulario {
+  id           String              @id @default(cuid())
+  formularioId String
+  formulario   FormularioInscricao @relation(fields: [formularioId], references: [id], onDelete: Cascade)
+
+  label       String
+  tipo        TipoCampo
+  obrigatorio Boolean  @default(false)
+  placeholder String?
+  instrucao   String?
+  opcoes      String[]
+  order       Int      @default(0)
+
+  @@index([formularioId])
+  @@map("campos_formulario")
+}
+
+model Inscricao {
+  id           String              @id @default(cuid())
+  formularioId String
+  formulario   FormularioInscricao @relation(fields: [formularioId], references: [id])
+
+  status    StatusInscricao @default(PENDENTE)
+  respostas Json
+  nome      String?
+  email     String?
+  telefone  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([formularioId])
+  @@index([status])
+  @@map("inscricoes")
 }

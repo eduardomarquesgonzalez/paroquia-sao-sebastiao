@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import {
   LayoutDashboard, FileText, Calendar, Heart, Users, Settings,
   Church, Clock, Image, Mail, Home, HandHeart, UserCheck, Shield, Megaphone,
+  Compass, ClipboardList,
 } from "lucide-react";
 import { hasRole } from "@/lib/permissions";
 
@@ -22,6 +23,8 @@ const navigation: NavItem[] = [
   { name: "Posts",             href: "/admin/posts",             icon: FileText },
   { name: "Eventos",            href: "/admin/eventos",           icon: Calendar },
   { name: "Destaques",          href: "/admin/destaques",         icon: Megaphone },
+  { name: "Atividades",        href: "/admin/atividades",        icon: Compass },
+  { name: "Inscrições",        href: "/admin/inscricoes",        icon: ClipboardList },
   { name: "Comunidades",       href: "/admin/comunidades",       icon: Church },
   { name: "Projetos Sociais",  href: "/admin/projetos-sociais",  icon: HandHeart },
   { name: "Horários de Missas",href: "/admin/missas",            icon: Clock },
