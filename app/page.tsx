@@ -14,6 +14,7 @@ import {
   Church,
   Sparkles,
   Users,
+  HandHeart,
 } from "lucide-react";
 import CarouselFaixas from "@/components/CarouselFaixas";
 import DestaquesCarousel from "@/components/DestaquesCarousel";
@@ -66,6 +67,16 @@ interface Destaque {
   title: string | null;
   image: string | null;
   linkUrl: string | null;
+}
+
+interface SocialProject {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  image: string | null;
+  location: string | null;
+  audience: string | null;
 }
 
 interface CleroMember {
@@ -164,9 +175,11 @@ export default function HomePage() {
   const [eventos, setEventos] = useState<Event[]>([]);
   const [destaques, setDestaques] = useState<Destaque[]>([]);
   const [clero, setClero] = useState<CleroMember[]>([]);
+  const [projetosSociais, setProjetosSociais] = useState<SocialProject[]>([]);
   const [loadingComunidades, setLoadingComunidades] = useState(true);
   const [loadingEventos, setLoadingEventos] = useState(true);
   const [loadingClero, setLoadingClero] = useState(true);
+  const [loadingProjetos, setLoadingProjetos] = useState(true);
   const [hero, setHero] = useState<HomeHero | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [hoje, setHoje] = useState("");
@@ -230,6 +243,12 @@ export default function HomePage() {
       .then((d) => setClero(Array.isArray(d) ? d : []))
       .catch(() => {})
       .finally(() => setLoadingClero(false));
+
+    fetch("/api/projetos-sociais")
+      .then((r) => r.json())
+      .then((d) => setProjetosSociais(Array.isArray(d) ? d.slice(0, 3) : []))
+      .catch(() => {})
+      .finally(() => setLoadingProjetos(false));
   }, []);
 
   const getEventDay = formatDay;
@@ -786,6 +805,112 @@ export default function HomePage() {
           )}
         </div>
       </section>
+
+      {/* ─── PROJETOS SOCIAIS ─── */}
+      {(loadingProjetos || projetosSociais.length > 0) && (
+        <section className="py-24 bg-parish-background relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-[420px] h-[420px] bg-parish-gold/5 rounded-full -translate-y-1/2 -translate-x-1/3 blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-parish-navy/4 rounded-full translate-y-1/2 translate-x-1/3 blur-3xl pointer-events-none" />
+
+          <div className="container mx-auto px-4 lg:px-8 relative">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-14 animate-on-scroll">
+              <div>
+                <SectionLabel>Compromisso Social</SectionLabel>
+                <h2 className="font-playfair text-3xl md:text-4xl font-bold text-parish-navy-dark leading-tight">
+                  Projetos Sociais
+                </h2>
+                <p className="text-parish-text-light mt-2 text-sm md:text-base max-w-md">
+                  Transformando vidas através da fé e da solidariedade
+                </p>
+              </div>
+              <Link
+                href="/projetos-sociais"
+                className="group inline-flex items-center gap-2 px-5 py-2.5 border border-parish-navy/20 text-parish-navy rounded-lg text-sm font-semibold hover:bg-parish-navy hover:text-white hover:border-parish-navy transition-all duration-200 flex-shrink-0"
+              >
+                Ver todos os projetos
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              </Link>
+            </div>
+
+            {/* Cards */}
+            {loadingProjetos ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <SkeletonCard />
+                <SkeletonCard />
+                <SkeletonCard />
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {projetosSociais.map((projeto, index) => (
+                  <div
+                    key={projeto.id}
+                    className={`group flex flex-col bg-parish-surface rounded-2xl overflow-hidden border border-parish-border/70 hover:shadow-navy hover:-translate-y-2 transition-all duration-300 animate-on-scroll ${
+                      index === 1 ? "stagger-1" : index === 2 ? "stagger-2" : ""
+                    }`}
+                  >
+                    {/* Imagem */}
+                    <Link
+                      href={`/projetos-sociais/${projeto.slug}`}
+                      className="relative h-52 overflow-hidden flex-shrink-0 block"
+                    >
+                      {projeto.image ? (
+                        <img
+                          src={projeto.image}
+                          alt={projeto.name}
+                          loading="lazy"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-parish-gold/20 to-parish-navy/30 flex items-center justify-center">
+                          <HandHeart className="w-14 h-14 text-parish-gold/40" />
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-parish-navy-dark/50 via-transparent to-transparent" />
+
+                      {/* Badge */}
+                      <div className="absolute top-4 left-4 bg-parish-gold text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow">
+                        Projeto Social
+                      </div>
+                    </Link>
+
+                    {/* Conteúdo */}
+                    <div className="flex-1 flex flex-col p-6">
+                      <Link href={`/projetos-sociais/${projeto.slug}`} className="block mb-2">
+                        <h3 className="font-playfair text-lg font-bold text-parish-navy-dark group-hover:text-parish-gold transition-colors duration-200 line-clamp-2 leading-snug">
+                          {projeto.name}
+                        </h3>
+                      </Link>
+                      <p className="text-sm text-parish-text-light line-clamp-3 mb-4 leading-relaxed flex-1">
+                        {projeto.description}
+                      </p>
+
+                      {projeto.location && (
+                        <div className="flex items-center gap-2 text-xs text-parish-text-light mb-4">
+                          <div className="w-6 h-6 rounded-md bg-parish-gold/10 flex items-center justify-center flex-shrink-0">
+                            <MapPin className="w-3.5 h-3.5 text-parish-gold" />
+                          </div>
+                          <span className="line-clamp-1">{projeto.location}</span>
+                        </div>
+                      )}
+
+                      <div className="pt-4 border-t border-parish-border">
+                        <Link
+                          href={`/projetos-sociais/${projeto.slug}`}
+                          className="text-sm font-semibold text-parish-gold flex items-center gap-1.5 hover:gap-2.5 transition-all duration-200"
+                        >
+                          Saiba mais
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* ─── FOOTER ─── */}
       <footer className="bg-parish-navy-dark text-white">
