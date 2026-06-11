@@ -97,8 +97,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Vagas esgotadas" }, { status: 400 })
     }
 
-    // Extrair nome/email/telefone das respostas
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let respostas: Record<string, any> = {}
     if (data.respostas) {
       respostas = typeof data.respostas === "string" ? JSON.parse(data.respostas) : data.respostas
