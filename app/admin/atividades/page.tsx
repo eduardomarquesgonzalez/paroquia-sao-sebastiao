@@ -5,7 +5,7 @@ import Link from "next/link"
 import { toast } from "sonner"
 import {
   Plus, Edit, Trash2, Compass, ToggleLeft, ToggleRight,
-  ClipboardList, Users, Heart, Church, BookOpen, HandHeart, Sparkles,
+  ClipboardList, Users, Heart, Church, BookOpen, HandHeart, Sparkles, Navigation,
 } from "lucide-react"
 
 interface Atividade {
@@ -18,6 +18,8 @@ interface Atividade {
   cor: string | null
   active: boolean
   aceitaInscricoes: boolean
+  showInNavbar: boolean
+  navbarOrder: number
   order: number
   formulario: {
     id: string
@@ -239,15 +241,21 @@ export default function AtividadesAdminPage() {
                     </span>
                   </div>
 
-                  {/* Inscrições badge */}
-                  {a.aceitaInscricoes && (
-                    <div className="absolute top-2 right-2">
+                  {/* Badges superiores direitos */}
+                  <div className="absolute top-2 right-2 flex flex-col items-end gap-1">
+                    {a.showInNavbar && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-parish-navy text-white shadow">
+                        <Navigation className="w-3 h-3" />
+                        Navbar
+                      </span>
+                    )}
+                    {a.aceitaInscricoes && (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-parish-gold text-white shadow">
                         <ClipboardList className="w-3 h-3" />
                         {inscricoesCount}
                       </span>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
 
                 {/* Content */}

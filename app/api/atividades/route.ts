@@ -76,6 +76,8 @@ export async function POST(request: Request) {
         contato: data.contato || null,
         horarios: data.horarios || [],
         aceitaInscricoes: data.aceitaInscricoes ?? false,
+        showInNavbar: data.showInNavbar ?? false,
+        navbarOrder: data.navbarOrder ?? 0,
         active: data.active ?? true,
         order: data.order ?? 0,
       },

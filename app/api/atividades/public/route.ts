@@ -18,6 +18,8 @@ export async function GET() {
         linkExterno: true,
         cor: true,
         aceitaInscricoes: true,
+        showInNavbar: true,
+        navbarOrder: true,
         formulario: {
           select: {
             id: true,

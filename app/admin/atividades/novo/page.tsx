@@ -37,6 +37,8 @@ export default function NovaAtividadePage() {
     responsavel: "",
     contato: "",
     aceitaInscricoes: false,
+    showInNavbar: false,
+    navbarOrder: 0,
     active: true,
     order: 0,
     imagem: "",
@@ -347,6 +349,34 @@ export default function NovaAtividadePage() {
                 <p className="text-xs text-parish-secondary">Exibir na área pública do site</p>
               </div>
             </label>
+          </div>
+
+          {/* Navbar */}
+          <div className="bg-parish-surface rounded-lg shadow-sm p-6 border border-parish-primary space-y-5">
+            <h3 className="text-sm font-semibold text-parish-text-light uppercase tracking-wide">Menu de Navegação</h3>
+
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input type="checkbox" name="showInNavbar" checked={form.showInNavbar} onChange={handleChange}
+                className="w-4 h-4 mt-0.5 text-parish-gold border-parish-border rounded focus:ring-parish-gold" />
+              <div>
+                <p className="text-sm font-medium text-parish-text">Exibir na navbar</p>
+                <p className="text-xs text-parish-secondary">Adiciona esta atividade ao menu de navegação do site</p>
+              </div>
+            </label>
+
+            {form.showInNavbar && (
+              <div>
+                <label className={labelClass}>Ordem na navbar</label>
+                <input
+                  type="number"
+                  value={form.navbarOrder}
+                  onChange={(e) => setForm((p) => ({ ...p, navbarOrder: Number(e.target.value) }))}
+                  min={0}
+                  className={inputClass}
+                />
+                <p className="text-xs text-parish-secondary mt-1">Menor número = aparece primeiro no menu</p>
+              </div>
+            )}
           </div>
         </div>
       </form>

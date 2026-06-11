@@ -18,6 +18,7 @@ import {
   Heart,
   BookOpen,
   ClipboardList,
+  ChevronDown,
 } from "lucide-react";
 import CarouselFaixas from "@/components/CarouselFaixas";
 import DestaquesCarousel from "@/components/DestaquesCarousel";
@@ -101,6 +102,8 @@ interface AtividadePublica {
   textoBotao: string | null;
   linkExterno: string | null;
   aceitaInscricoes: boolean;
+  showInNavbar: boolean;
+  navbarOrder: number;
   formulario: {
     id: string;
     ativo: boolean;
@@ -111,11 +114,14 @@ interface AtividadePublica {
   } | null;
 }
 
-const NAV_LINKS = [
+const NAV_LINKS_BEFORE = [
   { href: "/", label: "Início" },
   { href: "/eventos", label: "Eventos" },
   { href: "/comunidades", label: "Comunidades" },
   { href: "/projetos-sociais", label: "Projetos Sociais" },
+];
+
+const NAV_LINKS_AFTER = [
   { href: "/missas", label: "Missas" },
   { href: "/contato", label: "Contato" },
 ];
@@ -208,6 +214,8 @@ export default function HomePage() {
   const [loadingProjetos, setLoadingProjetos] = useState(true);
   const [hero, setHero] = useState<HomeHero | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [navDropdownOpen, setNavDropdownOpen] = useState(false);
+  const [mobileAtivOpen, setMobileAtivOpen] = useState(false);
   const [hoje, setHoje] = useState("");
 
   /* Data local de Cuiabá para exibição no hero */
@@ -288,7 +296,10 @@ export default function HomePage() {
   const getEventTime = formatTime;
   const getEventWeekday = formatWeekday;
 
-  const closeMenu = useCallback(() => setMenuOpen(false), []);
+  const closeMenu = useCallback(() => {
+    setMenuOpen(false);
+    setMobileAtivOpen(false);
+  }, []);
 
   return (
     <div className="min-h-screen bg-parish-background">
@@ -317,11 +328,53 @@ export default function HomePage() {
 
             {/* Desktop nav */}
             <div className="hidden lg:flex items-center gap-1">
-              {NAV_LINKS.map((link) => (
+              {NAV_LINKS_BEFORE.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="px-3.5 py-2 text-sm font-medium text-parish-text rounded-lg"
+                  className="px-3.5 py-2 text-sm font-medium text-parish-text hover:text-parish-gold rounded-lg hover:bg-parish-gold/6 transition-all duration-200"
+                >
+                  {link.label}
+                </Link>
+              ))}
+
+              {/* Dropdown dinâmico de atividades */}
+              {atividades.filter((a) => a.showInNavbar).length > 0 && (
+                <div className="relative">
+                  <button
+                    onClick={() => setNavDropdownOpen((v) => !v)}
+                    onBlur={() => setTimeout(() => setNavDropdownOpen(false), 150)}
+                    className="inline-flex items-center gap-1 px-3.5 py-2 text-sm font-medium text-parish-text hover:text-parish-gold rounded-lg hover:bg-parish-gold/6 transition-all duration-200"
+                  >
+                    Atividades
+                    <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${navDropdownOpen ? "rotate-180" : ""}`} />
+                  </button>
+                  <div className={`absolute top-full left-1/2 -translate-x-1/2 mt-2 w-52 bg-white border border-parish-border rounded-xl shadow-lg py-1.5 z-50 transition-all duration-150 origin-top ${navDropdownOpen ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"}`}>
+                    <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-l border-t border-parish-border rotate-45" />
+                    {atividades
+                      .filter((a) => a.showInNavbar)
+                      .sort((a, b) => a.navbarOrder - b.navbarOrder)
+                      .map((a) => (
+                        <Link
+                          key={a.id}
+                          href={a.linkExterno || `/atividades/${a.slug}`}
+                          target={a.linkExterno ? "_blank" : undefined}
+                          rel={a.linkExterno ? "noopener noreferrer" : undefined}
+                          onClick={() => setNavDropdownOpen(false)}
+                          className="block px-4 py-2 text-sm text-parish-text hover:text-parish-gold hover:bg-parish-gold/6 transition-all"
+                        >
+                          {a.nome}
+                        </Link>
+                      ))}
+                  </div>
+                </div>
+              )}
+
+              {NAV_LINKS_AFTER.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="px-3.5 py-2 text-sm font-medium text-parish-text hover:text-parish-gold rounded-lg hover:bg-parish-gold/6 transition-all duration-200"
                 >
                   {link.label}
                 </Link>
@@ -353,20 +406,64 @@ export default function HomePage() {
           {/* Mobile menu */}
           <div
             className={`lg:hidden overflow-hidden transition-all duration-300 ease-in-out ${
-              menuOpen ? "max-h-96 pb-4" : "max-h-0"
+              menuOpen ? "max-h-[600px] pb-4" : "max-h-0"
             }`}
           >
             <div className="border-t border-parish-border/40 pt-3 space-y-0.5">
-              {NAV_LINKS.map((link) => (
+              {NAV_LINKS_BEFORE.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
                   onClick={closeMenu}
-                  className="block px-4 py-2.5 text-sm font-medium text-parish-text rounded-lg"
+                  className="block px-4 py-2.5 text-sm font-medium text-parish-text hover:text-parish-gold hover:bg-parish-gold/6 rounded-lg transition-all"
                 >
                   {link.label}
                 </Link>
               ))}
+
+              {/* Atividades no mobile */}
+              {atividades.filter((a) => a.showInNavbar).length > 0 && (
+                <div>
+                  <button
+                    onClick={() => setMobileAtivOpen((v) => !v)}
+                    className="w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium text-parish-text hover:text-parish-gold hover:bg-parish-gold/6 rounded-lg transition-all"
+                  >
+                    <span>Atividades</span>
+                    <ChevronDown className={`w-4 h-4 text-parish-secondary transition-transform duration-200 ${mobileAtivOpen ? "rotate-180" : ""}`} />
+                  </button>
+                  <div className={`overflow-hidden transition-all duration-200 ${mobileAtivOpen ? "max-h-80" : "max-h-0"}`}>
+                    <div className="pl-4 border-l-2 border-parish-gold/30 ml-4 mt-0.5 space-y-0.5">
+                      {atividades
+                        .filter((a) => a.showInNavbar)
+                        .sort((a, b) => a.navbarOrder - b.navbarOrder)
+                        .map((a) => (
+                          <Link
+                            key={a.id}
+                            href={a.linkExterno || `/atividades/${a.slug}`}
+                            target={a.linkExterno ? "_blank" : undefined}
+                            rel={a.linkExterno ? "noopener noreferrer" : undefined}
+                            onClick={closeMenu}
+                            className="block px-3 py-2 text-sm text-parish-text-light hover:text-parish-gold hover:bg-parish-gold/6 rounded-lg transition-all"
+                          >
+                            {a.nome}
+                          </Link>
+                        ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {NAV_LINKS_AFTER.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={closeMenu}
+                  className="block px-4 py-2.5 text-sm font-medium text-parish-text hover:text-parish-gold hover:bg-parish-gold/6 rounded-lg transition-all"
+                >
+                  {link.label}
+                </Link>
+              ))}
+
               <div className="pt-2 border-t border-parish-border/40">
                 <Link
                   href="/auth/login"
@@ -716,7 +813,7 @@ export default function HomePage() {
                 : "md:grid-cols-2 lg:grid-cols-3"
             }`}>
               {atividades.map((a) => {
-                const href = a.linkExterno ?? `/atividades/${a.slug}`;
+                const href = a.linkExterno || `/atividades/${a.slug}`;
                 const tipoGradient: Record<string, string> = {
                   MOVIMENTO: "from-blue-900 via-blue-800 to-blue-700",
                   PASTORAL: "from-rose-900 via-rose-800 to-rose-700",

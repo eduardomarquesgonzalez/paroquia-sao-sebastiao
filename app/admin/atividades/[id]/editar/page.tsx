@@ -72,7 +72,8 @@ export default function EditarAtividadePage() {
   const [form, setForm] = useState({
     nome: "", tipo: "MOVIMENTO", descricao: "", descricaoCompleta: "",
     cor: "", textoBotao: "", linkExterno: "", local: "", responsavel: "",
-    contato: "", aceitaInscricoes: false, active: true, order: 0, imagem: "",
+    contato: "", aceitaInscricoes: false, showInNavbar: false, navbarOrder: 0,
+    active: true, order: 0, imagem: "",
   })
   const [horarios, setHorarios] = useState<string[]>([])
   const [formulario, setFormulario] = useState<Formulario>({
@@ -99,6 +100,8 @@ export default function EditarAtividadePage() {
         responsavel: data.responsavel ?? "",
         contato: data.contato ?? "",
         aceitaInscricoes: data.aceitaInscricoes ?? false,
+        showInNavbar: data.showInNavbar ?? false,
+        navbarOrder: data.navbarOrder ?? 0,
         active: data.active ?? true,
         order: data.order ?? 0,
         imagem: data.imagem ?? "",
@@ -670,6 +673,34 @@ export default function EditarAtividadePage() {
                 <p className="text-xs text-parish-secondary">Exibir no site</p>
               </div>
             </label>
+          </div>
+
+          {/* Navbar */}
+          <div className="bg-parish-surface rounded-lg shadow-sm p-6 border border-parish-primary space-y-5">
+            <h3 className="text-sm font-semibold text-parish-text-light uppercase tracking-wide">Menu de Navegação</h3>
+
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input type="checkbox" name="showInNavbar" checked={form.showInNavbar} onChange={handleChange}
+                className="w-4 h-4 mt-0.5 text-parish-gold border-parish-border rounded" />
+              <div>
+                <p className="text-sm font-medium text-parish-text">Exibir na navbar</p>
+                <p className="text-xs text-parish-secondary">Adiciona ao menu de navegação do site</p>
+              </div>
+            </label>
+
+            {form.showInNavbar && (
+              <div>
+                <label className={labelClass}>Ordem na navbar</label>
+                <input
+                  type="number"
+                  value={form.navbarOrder}
+                  min={0}
+                  onChange={(e) => setForm((p) => ({ ...p, navbarOrder: Number(e.target.value) }))}
+                  className={inputClass}
+                />
+                <p className="text-xs text-parish-secondary mt-1">Menor número = aparece primeiro no menu</p>
+              </div>
+            )}
           </div>
         </div>
       </form>
