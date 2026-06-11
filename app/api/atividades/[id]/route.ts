@@ -12,7 +12,8 @@ export async function GET(
     const atividade = await prisma.atividade.findFirst({
       where: { OR: [{ id: params.id }, { slug: params.id }] },
       include: {
-        formulario: {
+        formularios: {
+          orderBy: { order: "asc" },
           include: {
             campos: { orderBy: { order: "asc" } },
             _count: {

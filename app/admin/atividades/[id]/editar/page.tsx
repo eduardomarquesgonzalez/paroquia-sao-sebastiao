@@ -6,7 +6,8 @@ import Link from "next/link"
 import { toast } from "sonner"
 import {
   ArrowLeft, Save, Upload, X, Link as LinkIcon, Plus, Trash2,
-  ChevronUp, ChevronDown, Edit2, Check, ClipboardList,
+  ClipboardList, ChevronRight, ToggleLeft, ToggleRight, Users,
+  Calendar, ExternalLink,
 } from "lucide-react"
 import { compressImage } from "@/lib/utils"
 
@@ -20,40 +21,15 @@ const TIPOS = [
   { value: "OUTRO", label: "Outro" },
 ]
 
-const TIPOS_CAMPO = [
-  { value: "TEXTO", label: "Texto" },
-  { value: "EMAIL", label: "E-mail" },
-  { value: "TELEFONE", label: "Telefone" },
-  { value: "CPF", label: "CPF" },
-  { value: "DATA", label: "Data" },
-  { value: "SELECT", label: "Lista suspensa" },
-  { value: "CHECKBOX", label: "Caixas de seleção" },
-  { value: "RADIO", label: "Botões de opção" },
-  { value: "TEXTAREA", label: "Texto longo" },
-  { value: "ARQUIVO", label: "Arquivo" },
-]
-
-interface Campo {
-  id?: string
-  label: string
-  tipo: string
-  obrigatorio: boolean
-  placeholder: string
-  instrucao: string
-  opcoes: string[]
-  order: number
-  _editando?: boolean
-}
-
-interface Formulario {
-  id?: string
+interface FormularioResumo {
+  id: string
+  slug: string
   titulo: string
-  descricao: string
-  vagas: string
-  dataInicio: string
-  dataFim: string
   ativo: boolean
-  campos: Campo[]
+  vagas: number | null
+  dataInicio: string | null
+  dataFim: string | null
+  _count: { inscricoes: number }
 }
 
 export default function EditarAtividadePage() {
@@ -64,10 +40,10 @@ export default function EditarAtividadePage() {
 
   const [loading, setLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isSavingForm, setIsSavingForm] = useState(false)
   const [imageMode, setImageMode] = useState<"upload" | "url">("upload")
   const [imagePreview, setImagePreview] = useState("")
   const [imageUrl, setImageUrl] = useState("")
+  const [formularios, setFormularios] = useState<FormularioResumo[]>([])
 
   const [form, setForm] = useState({
     nome: "", tipo: "MOVIMENTO", descricao: "", descricaoCompleta: "",
@@ -76,17 +52,15 @@ export default function EditarAtividadePage() {
     active: true, order: 0, imagem: "",
   })
   const [horarios, setHorarios] = useState<string[]>([])
-  const [formulario, setFormulario] = useState<Formulario>({
-    titulo: "", descricao: "", vagas: "", dataInicio: "", dataFim: "",
-    ativo: true, campos: [],
-  })
-  const [campoEditando, setCampoEditando] = useState<number | null>(null)
 
   const loadAtividade = useCallback(async () => {
     try {
-      const res = await fetch(`/api/atividades/${id}`)
-      if (!res.ok) throw new Error()
-      const data = await res.json()
+      const [atRes, formRes] = await Promise.all([
+        fetch(`/api/atividades/${id}`),
+        fetch(`/api/atividades/${id}/formularios`),
+      ])
+      if (!atRes.ok) throw new Error()
+      const data = await atRes.json()
 
       setForm({
         nome: data.nome ?? "",
@@ -116,27 +90,10 @@ export default function EditarAtividadePage() {
           setImageMode("upload")
         }
       }
-      if (data.formulario) {
-        const f = data.formulario
-        setFormulario({
-          titulo: f.titulo ?? "",
-          descricao: f.descricao ?? "",
-          vagas: f.vagas != null ? String(f.vagas) : "",
-          dataInicio: f.dataInicio ? f.dataInicio.slice(0, 16) : "",
-          dataFim: f.dataFim ? f.dataFim.slice(0, 16) : "",
-          ativo: f.ativo ?? true,
-          campos: (f.campos ?? []).map((c: Campo) => ({
-            id: c.id,
-            label: c.label,
-            tipo: c.tipo,
-            obrigatorio: c.obrigatorio,
-            placeholder: c.placeholder ?? "",
-            instrucao: c.instrucao ?? "",
-            opcoes: c.opcoes ?? [],
-            order: c.order,
-            _editando: false,
-          })),
-        })
+
+      if (formRes.ok) {
+        const fData = await formRes.json()
+        setFormularios(fData)
       }
     } catch {
       toast.error("Erro ao carregar atividade")
@@ -213,72 +170,26 @@ export default function EditarAtividadePage() {
     } catch { toast.error("Erro ao excluir") }
   }
 
-  // ─── Form Builder ─────────────────────────────────────────────────────────────
-
-  const addCampo = () => {
-    setFormulario((prev) => ({
-      ...prev,
-      campos: [
-        ...prev.campos,
-        {
-          label: "", tipo: "TEXTO", obrigatorio: false,
-          placeholder: "", instrucao: "", opcoes: [],
-          order: prev.campos.length, _editando: true,
-        },
-      ],
-    }))
-    setCampoEditando(formulario.campos.length)
-  }
-
-  const updateCampo = (i: number, field: string, value: unknown) => {
-    setFormulario((prev) => ({
-      ...prev,
-      campos: prev.campos.map((c, idx) => (idx === i ? { ...c, [field]: value } : c)),
-    }))
-  }
-
-  const removeCampo = (i: number) => {
-    setFormulario((prev) => ({
-      ...prev,
-      campos: prev.campos.filter((_, idx) => idx !== i).map((c, idx) => ({ ...c, order: idx })),
-    }))
-    if (campoEditando === i) setCampoEditando(null)
-  }
-
-  const moveCampo = (i: number, dir: "up" | "down") => {
-    const campos = [...formulario.campos]
-    const j = dir === "up" ? i - 1 : i + 1
-    if (j < 0 || j >= campos.length) return;
-    [campos[i], campos[j]] = [campos[j], campos[i]]
-    setFormulario((prev) => ({ ...prev, campos: campos.map((c, idx) => ({ ...c, order: idx })) }))
-  }
-
-  const handleSaveFormulario = async () => {
-    if (!formulario.titulo) { toast.error("Título do formulário é obrigatório"); return }
-    setIsSavingForm(true)
+  const handleToggleFormulario = async (formularioId: string, ativo: boolean) => {
     try {
-      const res = await fetch(`/api/atividades/${id}/formulario`, {
+      await fetch(`/api/atividades/${id}/formularios/${formularioId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          titulo: formulario.titulo,
-          descricao: formulario.descricao || null,
-          vagas: formulario.vagas ? Number(formulario.vagas) : null,
-          dataInicio: formulario.dataInicio || null,
-          dataFim: formulario.dataFim || null,
-          ativo: formulario.ativo,
-          campos: formulario.campos.map((c, i) => ({
-            label: c.label, tipo: c.tipo, obrigatorio: c.obrigatorio,
-            placeholder: c.placeholder || null, instrucao: c.instrucao || null,
-            opcoes: c.opcoes, order: i,
-          })),
-        }),
+        body: JSON.stringify({ ativo: !ativo }),
       })
-      if (!res.ok) throw new Error()
-      toast.success("Formulário salvo!")
-      setCampoEditando(null)
-    } catch { toast.error("Erro ao salvar formulário") }
-    finally { setIsSavingForm(false) }
+      setFormularios((prev) =>
+        prev.map((f) => (f.id === formularioId ? { ...f, ativo: !ativo } : f))
+      )
+    } catch { toast.error("Erro ao atualizar formulário") }
+  }
+
+  const handleDeleteFormulario = async (formularioId: string) => {
+    if (!confirm("Excluir este formulário? Todas as inscrições vinculadas serão perdidas.")) return
+    try {
+      await fetch(`/api/atividades/${id}/formularios/${formularioId}`, { method: "DELETE" })
+      setFormularios((prev) => prev.filter((f) => f.id !== formularioId))
+      toast.success("Formulário excluído")
+    } catch { toast.error("Erro ao excluir formulário") }
   }
 
   const inputClass = "w-full px-4 py-3 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold focus:border-transparent outline-none text-parish-text bg-white"
@@ -291,8 +202,6 @@ export default function EditarAtividadePage() {
       </div>
     )
   }
-
-  const tiposComOpcoes = ["SELECT", "CHECKBOX", "RADIO"]
 
   return (
     <div className="space-y-6">
@@ -308,6 +217,13 @@ export default function EditarAtividadePage() {
           </div>
         </div>
         <div className="flex items-center gap-3">
+          <Link
+            href={`/atividades/${id}`}
+            target="_blank"
+            className="px-4 py-2 border border-parish-border text-parish-text-light rounded-lg hover:bg-parish-background transition text-sm flex items-center gap-1.5"
+          >
+            <ExternalLink className="w-3.5 h-3.5" /> Ver no site
+          </Link>
           <button onClick={handleDelete}
             className="px-4 py-2 border border-red-200 text-red-500 rounded-lg hover:bg-red-50 transition text-sm">
             Excluir
@@ -399,189 +315,104 @@ export default function EditarAtividadePage() {
             </div>
           </div>
 
-          {/* Formulário de Inscrições */}
+          {/* Formulários de Inscrição */}
           {form.aceitaInscricoes && (
             <div className="bg-parish-surface rounded-lg shadow-sm border border-parish-primary overflow-hidden">
               <div className="bg-parish-navy px-6 py-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <ClipboardList className="w-5 h-5 text-parish-gold" />
-                  <h3 className="text-white font-semibold">Formulário de Inscrições</h3>
+                  <div>
+                    <h3 className="text-white font-semibold">Formulários de Inscrição</h3>
+                    <p className="text-white/60 text-xs">{formularios.length} formulário(s) criado(s)</p>
+                  </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={handleSaveFormulario}
-                  disabled={isSavingForm}
-                  className="flex items-center gap-2 px-4 py-1.5 bg-parish-gold text-white rounded-lg text-sm font-semibold hover:bg-parish-gold-dark transition disabled:opacity-50"
+                <Link
+                  href={`/admin/atividades/${id}/formularios/novo`}
+                  className="flex items-center gap-2 px-4 py-1.5 bg-parish-gold text-white rounded-lg text-sm font-semibold hover:bg-parish-gold-dark transition"
                 >
-                  <Save className="w-3.5 h-3.5" />
-                  {isSavingForm ? "Salvando..." : "Salvar Formulário"}
-                </button>
+                  <Plus className="w-3.5 h-3.5" /> Novo formulário
+                </Link>
               </div>
 
-              <div className="p-6 space-y-5">
-                {/* Dados do formulário */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="md:col-span-2">
-                    <label className={labelClass}>Título do formulário *</label>
-                    <input type="text" value={formulario.titulo}
-                      onChange={(e) => setFormulario((p) => ({ ...p, titulo: e.target.value }))}
-                      placeholder="Ex: Inscrição para o Grupo de Jovens" className={inputClass} />
+              <div className="p-6">
+                {formularios.length === 0 ? (
+                  <div className="text-center py-8 bg-parish-background rounded-lg border border-dashed border-parish-border">
+                    <ClipboardList className="w-8 h-8 text-parish-secondary mx-auto mb-2" />
+                    <p className="text-sm text-parish-secondary mb-3">
+                      Nenhum formulário criado ainda.
+                    </p>
+                    <Link
+                      href={`/admin/atividades/${id}/formularios/novo`}
+                      className="inline-flex items-center gap-1.5 text-sm text-parish-gold hover:text-parish-gold-dark font-medium"
+                    >
+                      <Plus className="w-4 h-4" /> Criar primeiro formulário
+                    </Link>
                   </div>
-                  <div className="md:col-span-2">
-                    <label className={labelClass}>Descrição do formulário</label>
-                    <textarea value={formulario.descricao}
-                      onChange={(e) => setFormulario((p) => ({ ...p, descricao: e.target.value }))}
-                      rows={2} placeholder="Instruções para o inscrito..." className={inputClass} />
-                  </div>
-                  <div>
-                    <label className={labelClass}>Vagas máximas (vazio = ilimitado)</label>
-                    <input type="number" value={formulario.vagas} min={0}
-                      onChange={(e) => setFormulario((p) => ({ ...p, vagas: e.target.value }))}
-                      placeholder="Ex: 30" className={inputClass} />
-                  </div>
-                  <div>
-                    <label className={labelClass}>Formulário ativo</label>
-                    <label className="flex items-center gap-2 mt-2 cursor-pointer">
-                      <input type="checkbox" checked={formulario.ativo}
-                        onChange={(e) => setFormulario((p) => ({ ...p, ativo: e.target.checked }))}
-                        className="w-4 h-4 text-parish-gold border-parish-border rounded" />
-                      <span className="text-sm text-parish-text">Aceitar inscrições agora</span>
-                    </label>
-                  </div>
-                  <div>
-                    <label className={labelClass}>Data de início</label>
-                    <input type="datetime-local" value={formulario.dataInicio}
-                      onChange={(e) => setFormulario((p) => ({ ...p, dataInicio: e.target.value }))}
-                      className={inputClass} />
-                  </div>
-                  <div>
-                    <label className={labelClass}>Data de encerramento</label>
-                    <input type="datetime-local" value={formulario.dataFim}
-                      onChange={(e) => setFormulario((p) => ({ ...p, dataFim: e.target.value }))}
-                      className={inputClass} />
-                  </div>
-                </div>
-
-                {/* Form Builder */}
-                <div className="border-t border-parish-border pt-5">
-                  <div className="flex items-center justify-between mb-4">
-                    <h4 className="text-sm font-semibold text-parish-text">Campos do formulário</h4>
-                    <button type="button" onClick={addCampo}
-                      className="flex items-center gap-1.5 text-sm text-parish-gold hover:text-parish-gold-dark transition font-medium">
-                      <Plus className="w-4 h-4" /> Adicionar campo
-                    </button>
-                  </div>
-
-                  {formulario.campos.length === 0 && (
-                    <div className="text-center py-8 bg-parish-background rounded-lg border border-dashed border-parish-border">
-                      <ClipboardList className="w-8 h-8 text-parish-secondary mx-auto mb-2" />
-                      <p className="text-sm text-parish-secondary">Nenhum campo adicionado</p>
-                      <button type="button" onClick={addCampo}
-                        className="mt-2 text-sm text-parish-gold hover:underline">
-                        Adicionar primeiro campo
-                      </button>
-                    </div>
-                  )}
-
+                ) : (
                   <div className="space-y-3">
-                    {formulario.campos.map((campo, i) => (
-                      <div key={i} className="border border-parish-border rounded-lg overflow-hidden bg-white">
-                        {/* Campo header */}
-                        <div className="flex items-center justify-between px-4 py-3 bg-parish-background">
-                          <div className="flex items-center gap-2 min-w-0">
-                            <span className="text-xs text-parish-secondary font-mono bg-white border border-parish-border px-2 py-0.5 rounded">{i + 1}</span>
-                            <span className="text-sm font-medium text-parish-text truncate">
-                              {campo.label || "(sem label)"}
+                    {formularios.map((f) => (
+                      <div key={f.id} className="flex items-center gap-4 p-4 border border-parish-border rounded-lg bg-white hover:border-parish-gold/30 transition">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-medium text-parish-text truncate">{f.titulo}</span>
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                              f.ativo ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
+                            }`}>
+                              {f.ativo ? "Ativo" : "Inativo"}
                             </span>
-                            {campo.obrigatorio && (
-                              <span className="text-[10px] font-bold text-red-500 bg-red-50 border border-red-200 px-1.5 py-0.5 rounded-full">
-                                Obrigatório
+                          </div>
+                          <div className="flex items-center gap-3 mt-1 text-xs text-parish-secondary">
+                            <span className="font-mono">/{f.slug}</span>
+                            <span className="flex items-center gap-1">
+                              <Users className="w-3 h-3" />
+                              {f._count.inscricoes} inscrito(s)
+                            </span>
+                            {f.vagas && (
+                              <span>de {f.vagas} vagas</span>
+                            )}
+                            {f.dataFim && (
+                              <span className="flex items-center gap-1">
+                                <Calendar className="w-3 h-3" />
+                                até {new Date(f.dataFim).toLocaleDateString("pt-BR")}
                               </span>
                             )}
-                            <span className="text-[10px] text-parish-secondary bg-white border border-parish-border px-2 py-0.5 rounded">
-                              {TIPOS_CAMPO.find((t) => t.value === campo.tipo)?.label ?? campo.tipo}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-1 flex-shrink-0">
-                            <button type="button" onClick={() => moveCampo(i, "up")} disabled={i === 0}
-                              className="p-1 text-parish-secondary hover:text-parish-text disabled:opacity-30 transition">
-                              <ChevronUp className="w-4 h-4" />
-                            </button>
-                            <button type="button" onClick={() => moveCampo(i, "down")} disabled={i === formulario.campos.length - 1}
-                              className="p-1 text-parish-secondary hover:text-parish-text disabled:opacity-30 transition">
-                              <ChevronDown className="w-4 h-4" />
-                            </button>
-                            <button type="button" onClick={() => setCampoEditando(campoEditando === i ? null : i)}
-                              className={`p-1 rounded transition ${campoEditando === i ? "text-parish-gold" : "text-parish-secondary hover:text-parish-text"}`}>
-                              {campoEditando === i ? <Check className="w-4 h-4" /> : <Edit2 className="w-4 h-4" />}
-                            </button>
-                            <button type="button" onClick={() => removeCampo(i)}
-                              className="p-1 text-red-400 hover:text-red-600 transition">
-                              <X className="w-4 h-4" />
-                            </button>
                           </div>
                         </div>
-
-                        {/* Campo editor (inline) */}
-                        {campoEditando === i && (
-                          <div className="p-4 space-y-4 border-t border-parish-border">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <div>
-                                <label className={labelClass}>Label *</label>
-                                <input type="text" value={campo.label}
-                                  onChange={(e) => updateCampo(i, "label", e.target.value)}
-                                  placeholder="Ex: Nome completo"
-                                  className="w-full px-3 py-2 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold outline-none text-sm" />
-                              </div>
-                              <div>
-                                <label className={labelClass}>Tipo *</label>
-                                <select value={campo.tipo}
-                                  onChange={(e) => updateCampo(i, "tipo", e.target.value)}
-                                  className="w-full px-3 py-2 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold outline-none text-sm">
-                                  {TIPOS_CAMPO.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
-                                </select>
-                              </div>
-                              <div>
-                                <label className={labelClass}>Placeholder</label>
-                                <input type="text" value={campo.placeholder}
-                                  onChange={(e) => updateCampo(i, "placeholder", e.target.value)}
-                                  placeholder="Texto de exemplo..."
-                                  className="w-full px-3 py-2 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold outline-none text-sm" />
-                              </div>
-                              <div>
-                                <label className={labelClass}>Instrução / dica</label>
-                                <input type="text" value={campo.instrucao}
-                                  onChange={(e) => updateCampo(i, "instrucao", e.target.value)}
-                                  placeholder="Ajuda ao usuário..."
-                                  className="w-full px-3 py-2 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold outline-none text-sm" />
-                              </div>
-                            </div>
-
-                            {tiposComOpcoes.includes(campo.tipo) && (
-                              <div>
-                                <label className={labelClass}>Opções (uma por linha)</label>
-                                <textarea
-                                  value={campo.opcoes.join("\n")}
-                                  onChange={(e) => updateCampo(i, "opcoes", e.target.value.split("\n"))}
-                                  rows={4}
-                                  placeholder={"Opção 1\nOpção 2\nOpção 3"}
-                                  className="w-full px-3 py-2 border border-parish-border rounded-lg focus:ring-2 focus:ring-parish-gold outline-none text-sm font-mono"
-                                />
-                              </div>
-                            )}
-
-                            <label className="flex items-center gap-2 cursor-pointer">
-                              <input type="checkbox" checked={campo.obrigatorio}
-                                onChange={(e) => updateCampo(i, "obrigatorio", e.target.checked)}
-                                className="w-4 h-4 text-parish-gold border-parish-border rounded" />
-                              <span className="text-sm text-parish-text">Campo obrigatório</span>
-                            </label>
-                          </div>
-                        )}
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => handleToggleFormulario(f.id, f.ativo)}
+                            className={`p-1.5 rounded-lg transition ${f.ativo ? "text-green-600 hover:bg-green-50" : "text-gray-400 hover:bg-gray-50"}`}
+                            title={f.ativo ? "Desativar" : "Ativar"}
+                          >
+                            {f.ativo ? <ToggleRight className="w-5 h-5" /> : <ToggleLeft className="w-5 h-5" />}
+                          </button>
+                          <Link
+                            href={`/admin/atividades/${id}/formularios/${f.id}/editar`}
+                            className="p-1.5 text-parish-text-light hover:text-parish-text hover:bg-parish-background rounded-lg transition"
+                            title="Editar"
+                          >
+                            <ChevronRight className="w-5 h-5" />
+                          </Link>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteFormulario(f.id)}
+                            className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                            title="Excluir"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
                     ))}
+                    <Link
+                      href={`/admin/atividades/${id}/formularios`}
+                      className="flex items-center justify-center gap-2 py-2.5 border border-dashed border-parish-border rounded-lg text-sm text-parish-text-light hover:text-parish-gold hover:border-parish-gold transition"
+                    >
+                      <ClipboardList className="w-4 h-4" /> Gerenciar todos os formulários
+                    </Link>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           )}
@@ -662,7 +493,7 @@ export default function EditarAtividadePage() {
                 className="w-4 h-4 mt-0.5 text-parish-gold border-parish-border rounded" />
               <div>
                 <p className="text-sm font-medium text-parish-text">Aceitar inscrições</p>
-                <p className="text-xs text-parish-secondary">Habilita formulário de inscrição</p>
+                <p className="text-xs text-parish-secondary">Habilita módulo de formulários</p>
               </div>
             </label>
             <label className="flex items-start gap-3 cursor-pointer">

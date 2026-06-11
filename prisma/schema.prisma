@@ -68,6 +68,7 @@ enum TipoCampo {
   RADIO
   TEXTAREA
   ARQUIVO
+  NUMERO
 }
 
 enum StatusInscricao {
@@ -542,7 +543,7 @@ model Atividade {
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
 
-  formulario FormularioInscricao?
+  formularios FormularioInscricao[]
 
   @@index([active])
   @@index([tipo])
@@ -553,15 +554,19 @@ model Atividade {
 
 model FormularioInscricao {
   id          String    @id @default(cuid())
-  atividadeId String    @unique
+  atividadeId String
   atividade   Atividade @relation(fields: [atividadeId], references: [id], onDelete: Cascade)
 
-  titulo     String
-  descricao  String?   @db.Text
-  vagas      Int?
-  dataInicio DateTime?
-  dataFim    DateTime?
-  ativo      Boolean   @default(true)
+  slug                String    @unique
+  titulo              String
+  descricao           String?   @db.Text
+  mensagemConfirmacao String?   @db.Text
+  aceitaArquivos      Boolean   @default(false)
+  vagas               Int?
+  dataInicio          DateTime?
+  dataFim             DateTime?
+  ativo               Boolean   @default(true)
+  order               Int       @default(0)
 
   campos     CampoFormulario[]
   inscricoes Inscricao[]
@@ -569,6 +574,8 @@ model FormularioInscricao {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([atividadeId])
+  @@index([slug])
   @@map("formularios_inscricao")
 }
 
@@ -599,11 +606,14 @@ model Inscricao {
   nome      String?
   email     String?
   telefone  String?
+  protocolo String?         @unique
+  documentos String[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([formularioId])
   @@index([status])
+  @@index([protocolo])
   @@map("inscricoes")
 }

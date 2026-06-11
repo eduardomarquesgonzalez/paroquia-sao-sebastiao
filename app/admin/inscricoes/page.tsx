@@ -15,6 +15,7 @@ interface InscricaoItem {
   nome: string | null
   email: string | null
   telefone: string | null
+  protocolo: string | null
   status: "PENDENTE" | "APROVADO" | "CANCELADO"
   createdAt: string
   respostas: Record<string, unknown>
@@ -111,9 +112,19 @@ function InscricaoModal({
               <p className="text-sm font-semibold text-gray-800 mt-0.5">{inscricao.formulario.atividade.nome}</p>
             </div>
             <div>
+              <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Formulário</p>
+              <p className="text-sm text-gray-700 mt-0.5">{inscricao.formulario.titulo}</p>
+            </div>
+            <div>
               <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Data</p>
               <p className="text-sm text-gray-700 mt-0.5">{formatDate(inscricao.createdAt)}</p>
             </div>
+            {inscricao.protocolo && (
+              <div>
+                <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Protocolo</p>
+                <p className="text-sm font-mono font-semibold text-gray-800 mt-0.5">{inscricao.protocolo}</p>
+              </div>
+            )}
             {inscricao.nome && (
               <div>
                 <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Nome</p>
@@ -328,11 +339,11 @@ export default function InscricoesAdminPage() {
             <span className="hidden sm:inline">Exportar CSV</span>
           </button>
           <Link
-            href="/admin/atividades"
+            href="/admin/inscricoes/nova"
             className="flex items-center gap-2 px-4 py-2 bg-parish-gold text-white rounded-lg hover:bg-parish-gold-dark transition text-sm"
           >
             <ClipboardList className="w-4 h-4" />
-            <span>Atividades</span>
+            <span>Nova inscrição</span>
           </Link>
         </div>
       </div>
@@ -482,6 +493,9 @@ export default function InscricoesAdminPage() {
                           {inscricao.formulario.atividade.nome}
                         </p>
                         <p className="text-xs text-parish-secondary">{inscricao.formulario.titulo}</p>
+                        {inscricao.protocolo && (
+                          <p className="text-[10px] font-mono text-parish-secondary/60 mt-0.5">{inscricao.protocolo}</p>
+                        )}
                       </td>
                       <td className="px-4 py-3 text-parish-text-light whitespace-nowrap">
                         {formatDate(inscricao.createdAt)}

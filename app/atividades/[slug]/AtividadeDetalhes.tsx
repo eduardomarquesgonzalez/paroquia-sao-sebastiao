@@ -1,36 +1,24 @@
 "use client"
 
-import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import {
   ArrowLeft, MapPin, Clock, Phone, User, Users, Heart, Church,
-  BookOpen, HandHeart, Sparkles, ClipboardList, CheckCircle2,
-  AlertCircle, Calendar, ChevronRight, Loader2,
+  BookOpen, HandHeart, Sparkles, ClipboardList, ChevronRight,
+  AlertCircle, Calendar, CheckCircle2, ArrowRight,
 } from "lucide-react"
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
-interface CampoFormulario {
+interface FormularioResumo {
   id: string
-  label: string
-  tipo: string
-  obrigatorio: boolean
-  placeholder: string | null
-  instrucao: string | null
-  opcoes: string[]
-  order: number
-}
-
-interface Formulario {
-  id: string
+  slug: string
   titulo: string
   descricao: string | null
   vagas: number | null
   dataInicio: string | null
   dataFim: string | null
   ativo: boolean
-  campos: CampoFormulario[]
   _count: { inscricoes: number }
 }
 
@@ -51,7 +39,7 @@ interface Atividade {
   horarios: string[]
   aceitaInscricoes: boolean
   active: boolean
-  formulario: Formulario | null
+  formularios: FormularioResumo[]
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -86,161 +74,112 @@ const TIPO_ICON: Record<string, React.ElementType> = {
   OUTRO: Sparkles,
 }
 
-function getVagasStatus(formulario: Formulario | null) {
-  if (!formulario || !formulario.ativo) return null
-  const inscritos = formulario._count.inscricoes
-  const vagas = formulario.vagas
-  if (vagas === null) return { tipo: "aberta" as const, texto: "Inscrições abertas", inscritos }
-  const restantes = vagas - inscritos
-  if (restantes <= 0) return { tipo: "esgotada" as const, texto: "Vagas esgotadas", inscritos, restantes: 0, vagas }
-  if (restantes <= Math.ceil(vagas * 0.2)) return { tipo: "ultimas" as const, texto: `Últimas vagas (${restantes} restantes)`, inscritos, restantes, vagas }
-  return { tipo: "aberta" as const, texto: `${restantes} vagas disponíveis`, inscritos, restantes, vagas }
+function getVagasInfo(f: FormularioResumo) {
+  const inscritos = f._count.inscricoes
+  if (!f.vagas) return { tipo: "aberta" as const, texto: "Inscrições abertas", inscritos }
+  const restantes = f.vagas - inscritos
+  if (restantes <= 0) return { tipo: "esgotada" as const, texto: "Vagas esgotadas", inscritos, restantes: 0, total: f.vagas }
+  if (restantes <= Math.ceil(f.vagas * 0.2))
+    return { tipo: "ultimas" as const, texto: `Últimas ${restantes} vagas`, inscritos, restantes, total: f.vagas }
+  return { tipo: "aberta" as const, texto: `${restantes} vagas`, inscritos, restantes, total: f.vagas }
 }
 
-function isInscricoesAbertas(formulario: Formulario | null): boolean {
-  if (!formulario || !formulario.ativo) return false
+function isAberto(f: FormularioResumo): boolean {
+  if (!f.ativo) return false
   const now = new Date()
-  if (formulario.dataInicio && now < new Date(formulario.dataInicio)) return false
-  if (formulario.dataFim && now > new Date(formulario.dataFim)) return false
-  const status = getVagasStatus(formulario)
-  if (!status || status.tipo === "esgotada") return false
-  return true
+  if (f.dataInicio && now < new Date(f.dataInicio)) return false
+  if (f.dataFim && now > new Date(f.dataFim)) return false
+  const info = getVagasInfo(f)
+  return info.tipo !== "esgotada"
 }
 
-// ─── Campo Dinâmico ───────────────────────────────────────────────────────────
+// ─── Card de Formulário ───────────────────────────────────────────────────────
 
-function CampoDinamico({
-  campo,
-  value,
-  onChange,
-}: {
-  campo: CampoFormulario
-  value: string | string[]
-  onChange: (v: string | string[]) => void
-}) {
-  const base =
-    "w-full px-4 py-2.5 rounded-xl border border-gray-200 text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-parish-gold/40 focus:border-parish-gold transition bg-white"
+function FormularioCard({ formulario, atividadeSlug }: { formulario: FormularioResumo; atividadeSlug: string }) {
+  const aberto = isAberto(formulario)
+  const vagas = getVagasInfo(formulario)
 
-  switch (campo.tipo) {
-    case "TEXTAREA":
-      return (
-        <textarea
-          rows={4}
-          value={value as string}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={campo.placeholder ?? ""}
-          required={campo.obrigatorio}
-          className={`${base} resize-none`}
-        />
-      )
-    case "SELECT":
-      return (
-        <select
-          value={value as string}
-          onChange={(e) => onChange(e.target.value)}
-          required={campo.obrigatorio}
-          className={base}
-        >
-          <option value="">Selecione...</option>
-          {campo.opcoes.map((op) => (
-            <option key={op} value={op}>{op}</option>
-          ))}
-        </select>
-      )
-    case "CHECKBOX":
-      return (
-        <div className="space-y-2">
-          {campo.opcoes.map((op) => (
-            <label key={op} className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={(value as string[]).includes(op)}
-                onChange={(e) => {
-                  const arr = value as string[]
-                  onChange(e.target.checked ? [...arr, op] : arr.filter((v) => v !== op))
-                }}
-                className="w-4 h-4 accent-parish-gold"
-              />
-              <span className="text-sm text-gray-700">{op}</span>
-            </label>
-          ))}
+  return (
+    <div className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
+      <div className="p-5 md:p-6">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap mb-2">
+              <span className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-full ${
+                vagas.tipo === "esgotada"
+                  ? "bg-red-100 text-red-700"
+                  : vagas.tipo === "ultimas"
+                  ? "bg-amber-100 text-amber-700"
+                  : aberto
+                  ? "bg-green-100 text-green-700"
+                  : "bg-gray-100 text-gray-600"
+              }`}>
+                {aberto ? <CheckCircle2 className="w-3 h-3" /> : <AlertCircle className="w-3 h-3" />}
+                {vagas.tipo === "esgotada" ? "Vagas esgotadas" :
+                 !aberto ? "Inscrições encerradas" :
+                 vagas.texto}
+              </span>
+            </div>
+            <h3 className="font-semibold text-gray-900 text-base group-hover:text-parish-navy transition-colors">
+              {formulario.titulo}
+            </h3>
+            {formulario.descricao && (
+              <p className="text-gray-500 text-sm mt-1 line-clamp-2">{formulario.descricao}</p>
+            )}
+            <div className="flex items-center gap-4 mt-3 text-xs text-gray-400">
+              {formulario.dataInicio && (
+                <span className="flex items-center gap-1">
+                  <Calendar className="w-3.5 h-3.5" />
+                  {new Date(formulario.dataInicio).toLocaleDateString("pt-BR")}
+                  {formulario.dataFim && ` até ${new Date(formulario.dataFim).toLocaleDateString("pt-BR")}`}
+                </span>
+              )}
+              {formulario.vagas && (
+                <span className="flex items-center gap-1">
+                  <Users className="w-3.5 h-3.5" />
+                  {vagas.inscritos}/{formulario.vagas}
+                </span>
+              )}
+            </div>
+          </div>
+          <div className="flex-shrink-0">
+            {aberto ? (
+              <Link
+                href={`/atividades/${atividadeSlug}/${formulario.slug}`}
+                className="inline-flex items-center gap-2 px-4 py-2.5 bg-parish-gold text-white text-sm font-semibold rounded-xl hover:bg-parish-gold-dark transition-all shadow-sm hover:shadow-md"
+              >
+                Inscrever-se
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            ) : (
+              <Link
+                href={`/atividades/${atividadeSlug}/${formulario.slug}`}
+                className="inline-flex items-center gap-2 px-4 py-2.5 border border-gray-200 text-gray-500 text-sm rounded-xl hover:bg-gray-50 transition-all"
+              >
+                Ver detalhes
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            )}
+          </div>
         </div>
-      )
-    case "RADIO":
-      return (
-        <div className="space-y-2">
-          {campo.opcoes.map((op) => (
-            <label key={op} className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="radio"
-                name={campo.id}
-                value={op}
-                checked={value === op}
-                onChange={() => onChange(op)}
-                required={campo.obrigatorio}
-                className="w-4 h-4 accent-parish-gold"
+
+        {/* Barra de progresso de vagas */}
+        {formulario.vagas && vagas.total && (
+          <div className="mt-4">
+            <div className="w-full bg-gray-100 rounded-full h-1.5">
+              <div
+                className={`h-1.5 rounded-full transition-all ${
+                  vagas.tipo === "esgotada" ? "bg-red-500" :
+                  vagas.tipo === "ultimas" ? "bg-amber-500" : "bg-green-500"
+                }`}
+                style={{ width: `${Math.min(100, (vagas.inscritos / vagas.total) * 100)}%` }}
               />
-              <span className="text-sm text-gray-700">{op}</span>
-            </label>
-          ))}
-        </div>
-      )
-    case "EMAIL":
-      return (
-        <input
-          type="email"
-          value={value as string}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={campo.placeholder ?? "seu@email.com"}
-          required={campo.obrigatorio}
-          className={base}
-        />
-      )
-    case "TELEFONE":
-      return (
-        <input
-          type="tel"
-          value={value as string}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={campo.placeholder ?? "(00) 00000-0000"}
-          required={campo.obrigatorio}
-          className={base}
-        />
-      )
-    case "DATA":
-      return (
-        <input
-          type="date"
-          value={value as string}
-          onChange={(e) => onChange(e.target.value)}
-          required={campo.obrigatorio}
-          className={base}
-        />
-      )
-    case "CPF":
-      return (
-        <input
-          type="text"
-          value={value as string}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={campo.placeholder ?? "000.000.000-00"}
-          required={campo.obrigatorio}
-          className={base}
-          maxLength={14}
-        />
-      )
-    default:
-      return (
-        <input
-          type="text"
-          value={value as string}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={campo.placeholder ?? ""}
-          required={campo.obrigatorio}
-          className={base}
-        />
-      )
-  }
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
 }
 
 // ─── Componente Principal ─────────────────────────────────────────────────────
@@ -248,73 +187,10 @@ function CampoDinamico({
 export default function AtividadeDetalhes({ atividade }: { atividade: Atividade }) {
   const router = useRouter()
 
-  const [showForm, setShowForm] = useState(false)
-  const [respostas, setRespostas] = useState<Record<string, string | string[]>>(() => {
-    if (!atividade.formulario?.campos) return {}
-    const init: Record<string, string | string[]> = {}
-    atividade.formulario.campos.forEach((c) => {
-      init[c.id] = c.tipo === "CHECKBOX" ? [] : ""
-    })
-    return init
-  })
-  const [submitting, setSubmitting] = useState(false)
-  const [sucesso, setSucesso] = useState(false)
-  const [erroEnvio, setErroEnvio] = useState("")
-  const [vagasAtualizadas, setVagasAtualizadas] = useState(
-    atividade.formulario?._count.inscricoes ?? 0
-  )
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!atividade.formulario) return
-    setSubmitting(true)
-    setErroEnvio("")
-    try {
-      const campos = atividade.formulario.campos
-      let nome = ""
-      let email = ""
-      let telefone = ""
-      campos.forEach((c) => {
-        const val = respostas[c.id]
-        if (!nome && c.tipo === "TEXTO" && c.label.toLowerCase().includes("nome")) nome = val as string
-        if (!email && c.tipo === "EMAIL") email = val as string
-        if (!telefone && c.tipo === "TELEFONE") telefone = val as string
-      })
-
-      const res = await fetch("/api/inscricoes", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          formularioId: atividade.formulario.id,
-          respostas,
-          nome: nome || null,
-          email: email || null,
-          telefone: telefone || null,
-        }),
-      })
-      const body = await res.json()
-      if (!res.ok) {
-        setErroEnvio(body.error || "Erro ao enviar inscrição")
-        return
-      }
-      setSucesso(true)
-      setShowForm(false)
-      setVagasAtualizadas((v) => v + 1)
-    } catch {
-      setErroEnvio("Erro de conexão. Tente novamente.")
-    } finally {
-      setSubmitting(false)
-    }
-  }
-
-  const formularioComVagas: Formulario | null = atividade.formulario
-    ? { ...atividade.formulario, _count: { inscricoes: vagasAtualizadas } }
-    : null
-
   const IconComp = TIPO_ICON[atividade.tipo] ?? Sparkles
   const gradient = TIPO_GRADIENT[atividade.tipo] ?? TIPO_GRADIENT.OUTRO
-  const vagasStatus = getVagasStatus(formularioComVagas)
-  const inscricoesAbertas = isInscricoesAbertas(formularioComVagas)
+  const formulariosAtivos = atividade.formularios.filter(isAberto)
+  const formulariosEncerrados = atividade.formularios.filter((f) => !isAberto(f))
 
   return (
     <>
@@ -351,15 +227,9 @@ export default function AtividadeDetalhes({ atividade }: { atividade: Atividade 
               <span className="inline-block px-3 py-1 text-xs font-bold uppercase tracking-wider bg-white/20 backdrop-blur-sm text-white rounded-full border border-white/25">
                 {TIPO_LABEL[atividade.tipo]}
               </span>
-              {vagasStatus && (
-                <span className={`inline-block px-3 py-1 text-xs font-bold rounded-full ${
-                  vagasStatus.tipo === "esgotada"
-                    ? "bg-red-500/90 text-white"
-                    : vagasStatus.tipo === "ultimas"
-                    ? "bg-amber-500/90 text-white"
-                    : "bg-green-500/90 text-white"
-                }`}>
-                  {vagasStatus.texto}
+              {formulariosAtivos.length > 0 && (
+                <span className="inline-block px-3 py-1 text-xs font-bold rounded-full bg-green-500/90 text-white">
+                  {formulariosAtivos.length === 1 ? "Inscrições abertas" : `${formulariosAtivos.length} inscrições abertas`}
                 </span>
               )}
             </div>
@@ -411,126 +281,49 @@ export default function AtividadeDetalhes({ atividade }: { atividade: Atividade 
               </div>
             )}
 
-            {/* Formulário de Inscrição */}
-            {atividade.aceitaInscricoes && atividade.formulario && (
-              <div id="inscricao" className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <div className="bg-gradient-to-r from-parish-navy to-parish-navy-dark px-6 py-5">
-                  <div className="flex items-center gap-3">
-                    <ClipboardList className="w-5 h-5 text-parish-gold" />
-                    <h2 className="font-playfair text-xl font-bold text-white">
-                      {atividade.formulario.titulo}
-                    </h2>
+            {/* Formulários / Inscrições */}
+            {atividade.aceitaInscricoes && atividade.formularios.length > 0 && (
+              <div id="inscricoes" className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <ClipboardList className="w-5 h-5 text-parish-gold" />
+                  <h2 className="font-playfair text-xl font-bold text-gray-800">
+                    Inscrições disponíveis
+                  </h2>
+                </div>
+
+                {formulariosAtivos.length > 0 && (
+                  <div className="space-y-3">
+                    {formulariosAtivos.map((f) => (
+                      <FormularioCard key={f.id} formulario={f} atividadeSlug={atividade.slug} />
+                    ))}
                   </div>
-                  {atividade.formulario.descricao && (
-                    <p className="text-white/70 text-sm mt-2">
-                      {atividade.formulario.descricao}
+                )}
+
+                {formulariosEncerrados.length > 0 && (
+                  <div className="mt-4 space-y-3">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+                      Encerradas
                     </p>
-                  )}
-                </div>
+                    {formulariosEncerrados.map((f) => (
+                      <FormularioCard key={f.id} formulario={f} atividadeSlug={atividade.slug} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
 
-                <div className="p-6 md:p-8">
-                  {sucesso && (
-                    <div className="flex items-start gap-4 bg-green-50 border border-green-200 text-green-800 rounded-xl p-5">
-                      <CheckCircle2 className="w-6 h-6 text-green-500 flex-shrink-0 mt-0.5" />
-                      <div>
-                        <p className="font-semibold">Inscrição realizada com sucesso!</p>
-                        <p className="text-sm mt-1 text-green-700">
-                          Sua inscrição foi recebida e está em análise. Aguarde o contato da paróquia.
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  {!inscricoesAbertas && !sucesso && (
-                    <div className="text-center py-6">
-                      {vagasStatus?.tipo === "esgotada" ? (
-                        <div className="flex flex-col items-center gap-3">
-                          <AlertCircle className="w-12 h-12 text-red-400" />
-                          <p className="font-semibold text-gray-700">Vagas esgotadas</p>
-                          <p className="text-sm text-gray-500">Todas as vagas foram preenchidas.</p>
-                        </div>
-                      ) : (
-                        <div className="flex flex-col items-center gap-3">
-                          <Calendar className="w-12 h-12 text-gray-400" />
-                          <p className="font-semibold text-gray-700">Inscrições encerradas</p>
-                          <p className="text-sm text-gray-500">
-                            {atividade.formulario.dataFim && new Date() > new Date(atividade.formulario.dataFim)
-                              ? "O prazo de inscrições foi encerrado."
-                              : "As inscrições ainda não foram abertas."}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {inscricoesAbertas && !sucesso && (
-                    <>
-                      {!showForm ? (
-                        <div className="text-center py-4">
-                          <p className="text-gray-500 text-sm mb-6">
-                            Preencha o formulário abaixo para se inscrever.
-                          </p>
-                          <button
-                            onClick={() => setShowForm(true)}
-                            className="inline-flex items-center gap-2 px-8 py-3 bg-parish-gold text-white rounded-xl font-semibold hover:bg-parish-gold-dark transition-all duration-200 shadow-md hover:shadow-lg"
-                          >
-                            <ClipboardList className="w-5 h-5" />
-                            {atividade.textoBotao || "Inscreva-se agora"}
-                          </button>
-                        </div>
-                      ) : (
-                        <form onSubmit={handleSubmit} className="space-y-6">
-                          {erroEnvio && (
-                            <div className="flex items-center gap-3 bg-red-50 border border-red-200 text-red-700 rounded-xl p-4 text-sm">
-                              <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                              {erroEnvio}
-                            </div>
-                          )}
-
-                          {atividade.formulario.campos.map((campo) => (
-                            <div key={campo.id}>
-                              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                {campo.label}
-                                {campo.obrigatorio && <span className="text-red-500 ml-1">*</span>}
-                              </label>
-                              <CampoDinamico
-                                campo={campo}
-                                value={respostas[campo.id] ?? (campo.tipo === "CHECKBOX" ? [] : "")}
-                                onChange={(val) =>
-                                  setRespostas((prev) => ({ ...prev, [campo.id]: val }))
-                                }
-                              />
-                              {campo.instrucao && (
-                                <p className="text-xs text-gray-500 mt-1.5">{campo.instrucao}</p>
-                              )}
-                            </div>
-                          ))}
-
-                          <div className="flex items-center gap-4 pt-2">
-                            <button
-                              type="submit"
-                              disabled={submitting}
-                              className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-parish-gold text-white rounded-xl font-semibold hover:bg-parish-gold-dark transition disabled:opacity-60 shadow-md"
-                            >
-                              {submitting ? (
-                                <><Loader2 className="w-5 h-5 animate-spin" /> Enviando...</>
-                              ) : (
-                                <><CheckCircle2 className="w-5 h-5" /> Confirmar inscrição</>
-                              )}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setShowForm(false)}
-                              className="px-5 py-3.5 border border-gray-300 text-gray-600 rounded-xl hover:bg-gray-50 transition text-sm"
-                            >
-                              Cancelar
-                            </button>
-                          </div>
-                        </form>
-                      )}
-                    </>
-                  )}
-                </div>
+            {/* Link externo */}
+            {atividade.linkExterno && !atividade.aceitaInscricoes && (
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <a
+                  href={atividade.linkExterno}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-parish-gold text-white rounded-xl font-semibold hover:bg-parish-gold-dark transition shadow-md"
+                >
+                  {atividade.textoBotao || "Saiba mais"}
+                  <ArrowRight className="w-4 h-4" />
+                </a>
               </div>
             )}
           </div>
@@ -600,61 +393,40 @@ export default function AtividadeDetalhes({ atividade }: { atividade: Atividade 
               )}
             </div>
 
-            {/* Status de vagas */}
-            {atividade.aceitaInscricoes && formularioComVagas && (
+            {/* Resumo de inscrições */}
+            {atividade.aceitaInscricoes && atividade.formularios.length > 0 && (
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                 <h3 className="font-semibold text-gray-800 text-sm uppercase tracking-wide mb-4">
-                  Status das Inscrições
+                  Inscrições
                 </h3>
-                {vagasStatus ? (
-                  <div className="space-y-3">
-                    <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold ${
-                      vagasStatus.tipo === "esgotada"
-                        ? "bg-red-100 text-red-700"
-                        : vagasStatus.tipo === "ultimas"
-                        ? "bg-amber-100 text-amber-700"
-                        : "bg-green-100 text-green-700"
-                    }`}>
-                      {vagasStatus.tipo === "esgotada" ? "Vagas esgotadas" :
-                       vagasStatus.tipo === "ultimas" ? "Últimas vagas" : "Inscrições abertas"}
-                    </div>
-
-                    {vagasStatus.vagas !== undefined && (
-                      <>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div
-                            className={`h-2 rounded-full transition-all ${
-                              vagasStatus.tipo === "esgotada" ? "bg-red-500" :
-                              vagasStatus.tipo === "ultimas" ? "bg-amber-500" : "bg-green-500"
-                            }`}
-                            style={{ width: `${Math.min(100, (vagasStatus.inscritos / vagasStatus.vagas) * 100)}%` }}
-                          />
-                        </div>
-                        <div className="flex justify-between text-xs text-gray-500">
-                          <span>{vagasStatus.inscritos} inscritos</span>
-                          <span>{vagasStatus.vagas} vagas total</span>
-                        </div>
-                      </>
-                    )}
-
-                    {!vagasStatus.vagas && (
-                      <p className="text-sm text-gray-500">{vagasStatus.inscritos} inscritos</p>
-                    )}
-                  </div>
-                ) : (
-                  <p className="text-sm text-gray-500">Inscrições não disponíveis no momento.</p>
-                )}
-
-                {inscricoesAbertas && !sucesso && (
-                  <button
-                    onClick={() => {
-                      setShowForm(true)
-                      document.getElementById("inscricao")?.scrollIntoView({ behavior: "smooth" })
-                    }}
-                    className="mt-4 w-full py-3 bg-parish-gold text-white rounded-xl font-semibold hover:bg-parish-gold-dark transition text-sm"
+                <div className="space-y-2">
+                  {atividade.formularios.map((f) => {
+                    const aberto = isAberto(f)
+                    return (
+                      <Link
+                        key={f.id}
+                        href={`/atividades/${atividade.slug}/${f.slug}`}
+                        className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0 hover:text-parish-navy transition group"
+                      >
+                        <span className="text-sm text-gray-700 group-hover:text-parish-navy truncate pr-2">
+                          {f.titulo}
+                        </span>
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${
+                          aberto ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
+                        }`}>
+                          {aberto ? "Aberto" : "Encerrado"}
+                        </span>
+                      </Link>
+                    )
+                  })}
+                </div>
+                {formulariosAtivos.length > 0 && (
+                  <Link
+                    href={`/atividades/${atividade.slug}/${formulariosAtivos[0].slug}`}
+                    className="mt-4 block w-full text-center py-3 bg-parish-gold text-white rounded-xl font-semibold hover:bg-parish-gold-dark transition text-sm"
                   >
                     {atividade.textoBotao || "Inscreva-se"}
-                  </button>
+                  </Link>
                 )}
               </div>
             )}

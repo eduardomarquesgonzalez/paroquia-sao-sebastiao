@@ -20,9 +20,14 @@ export async function GET() {
         aceitaInscricoes: true,
         showInNavbar: true,
         navbarOrder: true,
-        formulario: {
+        formularios: {
+          where: { ativo: true },
+          orderBy: { order: "asc" },
           select: {
             id: true,
+            slug: true,
+            titulo: true,
+            descricao: true,
             ativo: true,
             vagas: true,
             dataInicio: true,

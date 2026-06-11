@@ -102,6 +102,8 @@ export async function POST(request: Request) {
       respostas = typeof data.respostas === "string" ? JSON.parse(data.respostas) : data.respostas
     }
 
+    const protocolo = `PSS-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`
+
     const inscricao = await prisma.inscricao.create({
       data: {
         formularioId: data.formularioId,
@@ -110,6 +112,8 @@ export async function POST(request: Request) {
         email: (data.email as string) || null,
         telefone: (data.telefone as string) || null,
         status: "PENDENTE",
+        protocolo,
+        documentos: (data.documentos as string[]) ?? [],
       },
     })
 

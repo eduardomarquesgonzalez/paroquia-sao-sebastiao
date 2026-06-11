@@ -14,9 +14,10 @@ export default async function AtividadePublicaPage({
   const atividade = await prisma.atividade.findFirst({
     where: { OR: [{ id: slug }, { slug }] },
     include: {
-      formulario: {
+      formularios: {
+        where: { ativo: true },
+        orderBy: { order: "asc" },
         include: {
-          campos: { orderBy: { order: "asc" } },
           _count: {
             select: {
               inscricoes: { where: { status: { not: "CANCELADO" } } },
@@ -48,28 +49,17 @@ export default async function AtividadePublicaPage({
     horarios: atividade.horarios,
     aceitaInscricoes: atividade.aceitaInscricoes,
     active: atividade.active,
-    formulario: atividade.formulario
-      ? {
-          id: atividade.formulario.id,
-          titulo: atividade.formulario.titulo,
-          descricao: atividade.formulario.descricao,
-          vagas: atividade.formulario.vagas,
-          dataInicio: atividade.formulario.dataInicio?.toISOString() ?? null,
-          dataFim: atividade.formulario.dataFim?.toISOString() ?? null,
-          ativo: atividade.formulario.ativo,
-          campos: atividade.formulario.campos.map((c) => ({
-            id: c.id,
-            label: c.label,
-            tipo: c.tipo as string,
-            obrigatorio: c.obrigatorio,
-            placeholder: c.placeholder,
-            instrucao: c.instrucao,
-            opcoes: c.opcoes,
-            order: c.order,
-          })),
-          _count: { inscricoes: atividade.formulario._count.inscricoes },
-        }
-      : null,
+    formularios: atividade.formularios.map((f) => ({
+      id: f.id,
+      slug: f.slug,
+      titulo: f.titulo,
+      descricao: f.descricao,
+      vagas: f.vagas,
+      dataInicio: f.dataInicio?.toISOString() ?? null,
+      dataFim: f.dataFim?.toISOString() ?? null,
+      ativo: f.ativo,
+      _count: { inscricoes: f._count.inscricoes },
+    })),
   }
 
   return (

@@ -5,29 +5,38 @@ import { prisma } from "@/lib/prisma"
 import { hasRole } from "@/lib/permissions"
 import { slugify } from "@/lib/utils"
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions)
     if (!session) return NextResponse.json({ error: "Não autorizado" }, { status: 401 })
 
+    const { searchParams } = new URL(request.url)
+    const includeFormularios = searchParams.get("includeFormularios") === "true"
+
     const atividades = await prisma.atividade.findMany({
       orderBy: [{ order: "asc" }, { nome: "asc" }],
       include: {
-        formulario: {
-          select: {
-            id: true,
-            titulo: true,
-            ativo: true,
-            vagas: true,
-            dataInicio: true,
-            dataFim: true,
-            _count: {
+        formularios: includeFormularios
+          ? {
+              orderBy: { order: "asc" },
               select: {
-                inscricoes: { where: { status: { not: "CANCELADO" } } },
+                id: true,
+                slug: true,
+                titulo: true,
+                ativo: true,
+                vagas: true,
+                _count: {
+                  select: {
+                    inscricoes: { where: { status: { not: "CANCELADO" } } },
+                  },
+                },
               },
+            }
+          : {
+              orderBy: { order: "asc" },
+              select: { id: true, titulo: true, ativo: true },
+              take: 1,
             },
-          },
-        },
       },
     })
 
