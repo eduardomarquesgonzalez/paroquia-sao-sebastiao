@@ -4,6 +4,8 @@ import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { hasRole } from "@/lib/permissions"
 
+export const dynamic = "force-dynamic"
+
 function toSlug(text: string): string {
   return text
     .normalize("NFD")

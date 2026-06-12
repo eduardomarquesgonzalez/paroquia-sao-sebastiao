@@ -4,6 +4,8 @@ import { authOptions }              from "@/lib/auth"
 import { prisma }                   from "@/lib/prisma"
 import { hasRole }                  from "@/lib/permissions"
 
+export const dynamic = "force-dynamic"
+
 // GET /api/admin/dizimistas/[id]
 export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
   try {

@@ -4,6 +4,8 @@ import { authOptions }              from "@/lib/auth"
 import { prisma }                   from "@/lib/prisma"
 import { getPaymentProvider }       from "@/lib/payment"
 
+export const dynamic = "force-dynamic"
+
 // POST /api/dizimista/contribuicao — cria contribuição e gera cobrança no gateway
 export async function POST(req: NextRequest) {
   try {

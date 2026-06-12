@@ -6,6 +6,8 @@ import { requireRole, handlePermissionError } from "@/lib/permissions"
 import { audit }                    from "@/lib/audit"
 import bcrypt                       from "bcrypt"
 
+export const dynamic = "force-dynamic"
+
 // GET /api/admin/usuarios — lista com paginação e filtros
 export async function GET(req: NextRequest) {
   try {

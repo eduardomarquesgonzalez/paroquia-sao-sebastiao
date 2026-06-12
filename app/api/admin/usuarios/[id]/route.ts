@@ -6,6 +6,8 @@ import { requireRole, hasRole, handlePermissionError } from "@/lib/permissions"
 import { audit }                    from "@/lib/audit"
 import bcrypt                       from "bcrypt"
 
+export const dynamic = "force-dynamic"
+
 type Ctx = { params: { id: string } }
 
 // GET /api/admin/usuarios/[id]
