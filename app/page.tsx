@@ -104,14 +104,16 @@ interface AtividadePublica {
   aceitaInscricoes: boolean;
   showInNavbar: boolean;
   navbarOrder: number;
-  formulario: {
+  formularios: {
     id: string;
+    slug: string;
+    titulo: string;
     ativo: boolean;
     vagas: number | null;
     dataInicio: string | null;
     dataFim: string | null;
     _count: { inscricoes: number };
-  } | null;
+  }[];
 }
 
 const NAV_LINKS_BEFORE = [
@@ -844,11 +846,14 @@ export default function HomePage() {
                 const IconComp = tipoIcon[a.tipo] ?? Sparkles;
                 const gradient = tipoGradient[a.tipo] ?? tipoGradient.OUTRO;
 
-                // Calcular status de vagas
+                // Calcular status de vagas — usa o primeiro formulário ativo
                 let vagasStatus: "aberta" | "ultimas" | "esgotada" | null = null;
-                if (a.aceitaInscricoes && a.formulario?.ativo) {
-                  const inscritos = a.formulario._count.inscricoes;
-                  const vagas = a.formulario.vagas;
+                const formularioAtivo = a.aceitaInscricoes
+                  ? a.formularios.find((f) => f.ativo)
+                  : undefined;
+                if (formularioAtivo) {
+                  const inscritos = formularioAtivo._count.inscricoes;
+                  const vagas = formularioAtivo.vagas;
                   if (vagas !== null) {
                     const restantes = vagas - inscritos;
                     if (restantes <= 0) vagasStatus = "esgotada";

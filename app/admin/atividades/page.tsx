@@ -21,12 +21,11 @@ interface Atividade {
   showInNavbar: boolean
   navbarOrder: number
   order: number
-  formulario: {
+  formularios: {
     id: string
+    titulo: string
     ativo: boolean
-    vagas: number | null
-    _count: { inscricoes: number }
-  } | null
+  }[]
 }
 
 const TIPO_LABELS: Record<string, string> = {
@@ -113,10 +112,8 @@ export default function AtividadesAdminPage() {
 
   const total = atividades.length
   const ativos = atividades.filter((a) => a.active).length
-  const comInscricoes = atividades.filter((a) => a.aceitaInscricoes && a.formulario?.ativo).length
-  const totalInscricoes = atividades.reduce(
-    (sum, a) => sum + (a.formulario?._count.inscricoes ?? 0), 0
-  )
+  const comInscricoes = atividades.filter((a) => a.aceitaInscricoes && a.formularios.some((f) => f.ativo)).length
+  const totalInscricoes = 0
 
   if (loading) {
     return (
@@ -209,7 +206,7 @@ export default function AtividadesAdminPage() {
           {atividades.map((a) => {
             const IconComp = TIPO_ICON[a.tipo] ?? Sparkles
             const gradient = TIPO_GRADIENT[a.tipo] ?? TIPO_GRADIENT.OUTRO
-            const inscricoesCount = a.formulario?._count.inscricoes ?? 0
+            const formAtivos = a.formularios.filter((f) => f.ativo).length
 
             return (
               <div
@@ -249,10 +246,10 @@ export default function AtividadesAdminPage() {
                         Navbar
                       </span>
                     )}
-                    {a.aceitaInscricoes && (
+                    {a.aceitaInscricoes && a.formularios.length > 0 && (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-parish-gold text-white shadow">
                         <ClipboardList className="w-3 h-3" />
-                        {inscricoesCount}
+                        {a.formularios.length} form.
                       </span>
                     )}
                   </div>
