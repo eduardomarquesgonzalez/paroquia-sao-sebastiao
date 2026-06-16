@@ -167,9 +167,22 @@ export default function InscricaoManualPage() {
               />
             </div>
             <div className="space-y-2 max-h-64 overflow-y-auto">
-              {atividadesFiltradas.length === 0 && (
+              {atividadesFiltradas.length === 0 && atividades.length === 0 && (
+                <div className="text-center py-4 space-y-2">
+                  <p className="text-sm text-parish-secondary">
+                    Nenhuma atividade possui formulários criados.
+                  </p>
+                  <a
+                    href="/admin/atividades"
+                    className="text-xs text-parish-gold hover:underline"
+                  >
+                    Criar formulário em uma atividade →
+                  </a>
+                </div>
+              )}
+              {atividadesFiltradas.length === 0 && atividades.length > 0 && (
                 <p className="text-center text-sm text-parish-secondary py-4">
-                  Nenhuma atividade com formulários disponíveis.
+                  Nenhuma atividade encontrada para "{buscaAtividade}".
                 </p>
               )}
               {atividadesFiltradas.map((a) => (

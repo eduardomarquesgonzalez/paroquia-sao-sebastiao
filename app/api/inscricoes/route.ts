@@ -104,6 +104,54 @@ export async function POST(request: Request) {
       respostas = typeof data.respostas === "string" ? JSON.parse(data.respostas) : data.respostas
     }
 
+    // ── Validação de inscrição duplicada ────────────────────────────────────────
+    const email = (data.email as string) || null
+
+    if (email) {
+      const duplicadoEmail = await prisma.inscricao.findFirst({
+        where: {
+          formularioId: data.formularioId,
+          email: { equals: email, mode: "insensitive" },
+          status: { not: "CANCELADO" },
+        },
+      })
+      if (duplicadoEmail) {
+        return NextResponse.json(
+          { error: "Já existe uma inscrição com este e-mail neste formulário." },
+          { status: 409 }
+        )
+      }
+    }
+
+    // Verificar duplicidade por CPF nas respostas (campo do tipo CPF)
+    const cpfResposta = Object.values(respostas).find(
+      (v) => typeof v === "string" && /^\d{3}\.?\d{3}\.?\d{3}-?\d{2}$/.test(v.trim())
+    ) as string | undefined
+
+    if (cpfResposta) {
+      const cpfNormalizado = cpfResposta.replace(/\D/g, "")
+      const inscricoesExistentes = await prisma.inscricao.findMany({
+        where: {
+          formularioId: data.formularioId,
+          status: { not: "CANCELADO" },
+        },
+        select: { respostas: true },
+      })
+      const cpfDuplicado = inscricoesExistentes.some((i) => {
+        const r = i.respostas as Record<string, string>
+        return Object.values(r).some(
+          (v) => typeof v === "string" && v.replace(/\D/g, "") === cpfNormalizado
+        )
+      })
+      if (cpfDuplicado) {
+        return NextResponse.json(
+          { error: "Já existe uma inscrição com este CPF neste formulário." },
+          { status: 409 }
+        )
+      }
+    }
+    // ────────────────────────────────────────────────────────────────────────────
+
     const protocolo = `PSS-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`
 
     const inscricao = await prisma.inscricao.create({

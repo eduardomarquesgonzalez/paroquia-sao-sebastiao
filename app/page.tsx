@@ -248,49 +248,27 @@ export default function HomePage() {
     return () => obs.disconnect();
   }, [loadingEventos, loadingComunidades]);
 
-  /* Data fetching */
+  /* Data fetching — único request para todos os dados da home */
   useEffect(() => {
-    fetch("/api/comunidades/public")
+    fetch("/api/home", { cache: "no-store" })
       .then((r) => r.json())
-      .then((d) => setComunidades(Array.isArray(d) ? d.slice(0, 6) : []))
+      .then((d) => {
+        if (d.hero)            setHero(d.hero)
+        if (d.comunidades)     setComunidades(d.comunidades.slice(0, 6))
+        if (d.eventos)         setEventos((d.eventos as Event[]).filter((e) => !isEventEnded(e)).slice(0, 3))
+        if (d.destaques)       setDestaques(d.destaques)
+        if (d.clero)           setClero(d.clero)
+        if (d.projetosSociais) setProjetosSociais(d.projetosSociais)
+        if (d.atividades)      setAtividades(d.atividades)
+      })
       .catch(() => {})
-      .finally(() => setLoadingComunidades(false));
-
-    fetch("/api/eventos/public")
-      .then((r) => r.json())
-      .then((d: Event[]) =>
-        setEventos(d.filter((e) => !isEventEnded(e)).slice(0, 3)),
-      )
-      .catch(() => {})
-      .finally(() => setLoadingEventos(false));
-
-    fetch("/api/destaques/public")
-      .then((r) => (r.ok ? r.json() : []))
-      .then((d) => setDestaques(Array.isArray(d) ? d : []))
-      .catch(() => {});
-
-    fetch("/api/home-hero")
-      .then((r) => r.json())
-      .then((d: HomeHero) => setHero(d))
-      .catch(() => {});
-
-    fetch("/api/clero/public")
-      .then((r) => r.json())
-      .then((d) => setClero(Array.isArray(d) ? d : []))
-      .catch(() => {})
-      .finally(() => setLoadingClero(false));
-
-    fetch("/api/projetos-sociais")
-      .then((r) => r.json())
-      .then((d) => setProjetosSociais(Array.isArray(d) ? d.slice(0, 3) : []))
-      .catch(() => {})
-      .finally(() => setLoadingProjetos(false));
-
-    fetch("/api/atividades/public")
-      .then((r) => r.json())
-      .then((d) => setAtividades(Array.isArray(d) ? d : []))
-      .catch(() => {})
-      .finally(() => setLoadingAtividades(false));
+      .finally(() => {
+        setLoadingComunidades(false)
+        setLoadingEventos(false)
+        setLoadingClero(false)
+        setLoadingProjetos(false)
+        setLoadingAtividades(false)
+      })
   }, []);
 
   const getEventDay = formatDay;
