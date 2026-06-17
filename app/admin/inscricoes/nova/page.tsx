@@ -182,7 +182,7 @@ export default function InscricaoManualPage() {
               )}
               {atividadesFiltradas.length === 0 && atividades.length > 0 && (
                 <p className="text-center text-sm text-parish-secondary py-4">
-                  Nenhuma atividade encontrada para "{buscaAtividade}".
+                  Nenhuma atividade encontrada para &ldquo;{buscaAtividade}&rdquo;.
                 </p>
               )}
               {atividadesFiltradas.map((a) => (

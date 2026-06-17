@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
         );
       }
 
-      return NextResponse.json(missa);
+      return NextResponse.json(missa, );
     }
 
     // Listar todas as missas com comunidades
@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
       orderBy: [{ dayOfWeek: "asc" }, { time: "asc" }],
     });
 
-    return NextResponse.json(missas);
+    return NextResponse.json(missas, );
   } catch (error) {
     console.error("Erro ao buscar missas:", error);
     return NextResponse.json(

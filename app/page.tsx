@@ -250,7 +250,7 @@ export default function HomePage() {
 
   /* Data fetching — único request para todos os dados da home */
   useEffect(() => {
-    fetch("/api/home", { cache: "no-store" })
+    fetch("/api/home")
       .then((r) => r.json())
       .then((d) => {
         if (d.hero)            setHero(d.hero)

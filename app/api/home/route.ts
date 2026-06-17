@@ -92,8 +92,7 @@ export async function GET() {
       ])
 
     return NextResponse.json(
-      { hero, comunidades, eventos, destaques, clero, projetosSociais, atividades },
-      { headers: { "Cache-Control": "no-store" } }
+      { hero, comunidades, eventos, destaques, clero, projetosSociais, atividades }
     )
   } catch (error) {
     console.error("[GET /api/home]", error)
