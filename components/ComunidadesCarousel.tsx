@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { MapPin, Clock, Church, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { formatDayOfWeek, DAY_OF_WEEK_ORDER } from "@/lib/utils";
 
 interface Mass {
   id: string;
@@ -21,25 +22,16 @@ interface Community {
   masses: Mass[];
 }
 
-const DAY_ORDER: Record<string, number> = {
-  domingo: 0, segunda: 1, "segunda-feira": 1,
-  terça: 2, terca: 2, "terça-feira": 2,
-  quarta: 3, "quarta-feira": 3,
-  quinta: 4, "quinta-feira": 4,
-  sexta: 5, "sexta-feira": 5,
-  sábado: 6, sabado: 6,
-};
-
 function getFirstMasses(masses: Mass[], max = 2): string {
   if (!masses.length) return "";
   const sorted = [...masses].sort(
     (a, b) =>
-      (DAY_ORDER[a.dayOfWeek.toLowerCase()] ?? 9) -
-      (DAY_ORDER[b.dayOfWeek.toLowerCase()] ?? 9)
+      (DAY_OF_WEEK_ORDER[a.dayOfWeek.toLowerCase()] ?? 9) -
+      (DAY_OF_WEEK_ORDER[b.dayOfWeek.toLowerCase()] ?? 9)
   );
   const formatted = sorted
     .slice(0, max)
-    .map((m) => `${m.dayOfWeek.charAt(0).toUpperCase() + m.dayOfWeek.slice(1)} ${m.time}`);
+    .map((m) => `${formatDayOfWeek(m.dayOfWeek)} ${m.time}`);
   const extra = masses.length - max;
   return formatted.join(" · ") + (extra > 0 ? ` +${extra}` : "");
 }

@@ -23,6 +23,7 @@ import {
 import CarouselFaixas from "@/components/CarouselFaixas";
 import DestaquesCarousel from "@/components/DestaquesCarousel";
 import ComunidadesCarousel from "@/components/ComunidadesCarousel";
+import LiturgiaDiaria from "@/components/home/LiturgiaDiaria";
 import CleroCarousel, { CleroSkeletonCard } from "@/components/CleroCarousel";
 import Image from "next/image";
 import logoImg from "@/public/logo.png";
@@ -253,22 +254,25 @@ export default function HomePage() {
     fetch("/api/home")
       .then((r) => r.json())
       .then((d) => {
-        if (d.hero)            setHero(d.hero)
-        if (d.comunidades)     setComunidades(d.comunidades.slice(0, 6))
-        if (d.eventos)         setEventos((d.eventos as Event[]).filter((e) => !isEventEnded(e)).slice(0, 3))
-        if (d.destaques)       setDestaques(d.destaques)
-        if (d.clero)           setClero(d.clero)
-        if (d.projetosSociais) setProjetosSociais(d.projetosSociais)
-        if (d.atividades)      setAtividades(d.atividades)
+        if (d.hero) setHero(d.hero);
+        if (d.comunidades) setComunidades(d.comunidades.slice(0, 6));
+        if (d.eventos)
+          setEventos(
+            (d.eventos as Event[]).filter((e) => !isEventEnded(e)).slice(0, 3),
+          );
+        if (d.destaques) setDestaques(d.destaques);
+        if (d.clero) setClero(d.clero);
+        if (d.projetosSociais) setProjetosSociais(d.projetosSociais);
+        if (d.atividades) setAtividades(d.atividades);
       })
       .catch(() => {})
       .finally(() => {
-        setLoadingComunidades(false)
-        setLoadingEventos(false)
-        setLoadingClero(false)
-        setLoadingProjetos(false)
-        setLoadingAtividades(false)
-      })
+        setLoadingComunidades(false);
+        setLoadingEventos(false);
+        setLoadingClero(false);
+        setLoadingProjetos(false);
+        setLoadingAtividades(false);
+      });
   }, []);
 
   const getEventDay = formatDay;
@@ -323,13 +327,19 @@ export default function HomePage() {
                 <div className="relative">
                   <button
                     onClick={() => setNavDropdownOpen((v) => !v)}
-                    onBlur={() => setTimeout(() => setNavDropdownOpen(false), 150)}
+                    onBlur={() =>
+                      setTimeout(() => setNavDropdownOpen(false), 150)
+                    }
                     className="inline-flex items-center gap-1 px-3.5 py-2 text-sm font-medium text-parish-text hover:text-parish-gold rounded-lg hover:bg-parish-gold/6 transition-all duration-200"
                   >
                     Atividades
-                    <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${navDropdownOpen ? "rotate-180" : ""}`} />
+                    <ChevronDown
+                      className={`w-3.5 h-3.5 transition-transform duration-200 ${navDropdownOpen ? "rotate-180" : ""}`}
+                    />
                   </button>
-                  <div className={`absolute top-full left-1/2 -translate-x-1/2 mt-2 w-52 bg-white border border-parish-border rounded-xl shadow-lg py-1.5 z-50 transition-all duration-150 origin-top ${navDropdownOpen ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"}`}>
+                  <div
+                    className={`absolute top-full left-1/2 -translate-x-1/2 mt-2 w-52 bg-white border border-parish-border rounded-xl shadow-lg py-1.5 z-50 transition-all duration-150 origin-top ${navDropdownOpen ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"}`}
+                  >
                     <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-l border-t border-parish-border rotate-45" />
                     {atividades
                       .filter((a) => a.showInNavbar)
@@ -339,7 +349,9 @@ export default function HomePage() {
                           key={a.id}
                           href={a.linkExterno || `/atividades/${a.slug}`}
                           target={a.linkExterno ? "_blank" : undefined}
-                          rel={a.linkExterno ? "noopener noreferrer" : undefined}
+                          rel={
+                            a.linkExterno ? "noopener noreferrer" : undefined
+                          }
                           onClick={() => setNavDropdownOpen(false)}
                           className="block px-4 py-2 text-sm text-parish-text hover:text-parish-gold hover:bg-parish-gold/6 transition-all"
                         >
@@ -409,9 +421,13 @@ export default function HomePage() {
                     className="w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium text-parish-text hover:text-parish-gold hover:bg-parish-gold/6 rounded-lg transition-all"
                   >
                     <span>Atividades</span>
-                    <ChevronDown className={`w-4 h-4 text-parish-secondary transition-transform duration-200 ${mobileAtivOpen ? "rotate-180" : ""}`} />
+                    <ChevronDown
+                      className={`w-4 h-4 text-parish-secondary transition-transform duration-200 ${mobileAtivOpen ? "rotate-180" : ""}`}
+                    />
                   </button>
-                  <div className={`overflow-hidden transition-all duration-200 ${mobileAtivOpen ? "max-h-80" : "max-h-0"}`}>
+                  <div
+                    className={`overflow-hidden transition-all duration-200 ${mobileAtivOpen ? "max-h-80" : "max-h-0"}`}
+                  >
                     <div className="pl-4 border-l-2 border-parish-gold/30 ml-4 mt-0.5 space-y-0.5">
                       {atividades
                         .filter((a) => a.showInNavbar)
@@ -421,7 +437,9 @@ export default function HomePage() {
                             key={a.id}
                             href={a.linkExterno || `/atividades/${a.slug}`}
                             target={a.linkExterno ? "_blank" : undefined}
-                            rel={a.linkExterno ? "noopener noreferrer" : undefined}
+                            rel={
+                              a.linkExterno ? "noopener noreferrer" : undefined
+                            }
                             onClick={closeMenu}
                             className="block px-3 py-2 text-sm text-parish-text-light hover:text-parish-gold hover:bg-parish-gold/6 rounded-lg transition-all"
                           >
@@ -697,6 +715,8 @@ export default function HomePage() {
           )}
         </div>
       </section>
+      {/* ─── LITURGIA DIÁRIA ─── */}
+      <LiturgiaDiaria />
 
       {/* ─── CLERO ─── */}
       {(loadingClero || clero.length > 0) && (
@@ -781,17 +801,22 @@ export default function HomePage() {
           {loadingAtividades ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-on-scroll">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-80 rounded-2xl bg-white/10 animate-pulse" />
+                <div
+                  key={i}
+                  className="h-80 rounded-2xl bg-white/10 animate-pulse"
+                />
               ))}
             </div>
           ) : atividades.length > 0 ? (
-            <div className={`grid grid-cols-1 gap-6 animate-on-scroll ${
-              atividades.length === 1
-                ? "md:grid-cols-1 max-w-sm mx-auto"
-                : atividades.length === 2
-                ? "md:grid-cols-2 max-w-2xl mx-auto"
-                : "md:grid-cols-2 lg:grid-cols-3"
-            }`}>
+            <div
+              className={`grid grid-cols-1 gap-6 animate-on-scroll ${
+                atividades.length === 1
+                  ? "md:grid-cols-1 max-w-sm mx-auto"
+                  : atividades.length === 2
+                    ? "md:grid-cols-2 max-w-2xl mx-auto"
+                    : "md:grid-cols-2 lg:grid-cols-3"
+              }`}
+            >
               {atividades.map((a) => {
                 const href = a.linkExterno || `/atividades/${a.slug}`;
                 const tipoGradient: Record<string, string> = {
@@ -800,8 +825,10 @@ export default function HomePage() {
                   MINISTERIO: "from-indigo-900 via-indigo-800 to-indigo-700",
                   CURSO: "from-amber-900 via-amber-800 to-amber-700",
                   CATEQUESE: "from-emerald-900 via-emerald-800 to-emerald-700",
-                  PROJETO_SOCIAL: "from-purple-900 via-purple-800 to-purple-700",
-                  OUTRO: "from-parish-navy-dark via-parish-navy to-parish-navy-light",
+                  PROJETO_SOCIAL:
+                    "from-purple-900 via-purple-800 to-purple-700",
+                  OUTRO:
+                    "from-parish-navy-dark via-parish-navy to-parish-navy-light",
                 };
                 const tipoLabel: Record<string, string> = {
                   MOVIMENTO: "Movimento",
@@ -825,7 +852,8 @@ export default function HomePage() {
                 const gradient = tipoGradient[a.tipo] ?? tipoGradient.OUTRO;
 
                 // Calcular status de vagas — usa o primeiro formulário ativo
-                let vagasStatus: "aberta" | "ultimas" | "esgotada" | null = null;
+                let vagasStatus: "aberta" | "ultimas" | "esgotada" | null =
+                  null;
                 const formularioAtivo = a.aceitaInscricoes
                   ? a.formularios.find((f) => f.ativo)
                   : undefined;
@@ -835,7 +863,8 @@ export default function HomePage() {
                   if (vagas !== null) {
                     const restantes = vagas - inscritos;
                     if (restantes <= 0) vagasStatus = "esgotada";
-                    else if (restantes <= Math.ceil(vagas * 0.2)) vagasStatus = "ultimas";
+                    else if (restantes <= Math.ceil(vagas * 0.2))
+                      vagasStatus = "ultimas";
                     else vagasStatus = "aberta";
                   } else {
                     vagasStatus = "aberta";
@@ -851,7 +880,9 @@ export default function HomePage() {
                     className="group relative h-80 rounded-2xl overflow-hidden block shadow-navy hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
                   >
                     {/* Background */}
-                    <div className={`absolute inset-0 bg-gradient-to-br ${gradient}`} />
+                    <div
+                      className={`absolute inset-0 bg-gradient-to-br ${gradient}`}
+                    />
                     {/* Overlay escuro para legibilidade */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/25 z-10 group-hover:from-black/70 transition-all duration-500" />
                     {/* Imagem */}
@@ -863,7 +894,10 @@ export default function HomePage() {
                     )}
                     {/* Cor sólida (quando há cor mas não imagem) */}
                     {!a.imagem && a.cor && (
-                      <div className="absolute inset-0" style={{ background: a.cor }} />
+                      <div
+                        className="absolute inset-0"
+                        style={{ background: a.cor }}
+                      />
                     )}
 
                     {/* Badge tipo */}
@@ -886,7 +920,8 @@ export default function HomePage() {
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-bold bg-green-500/90 text-white rounded-full">
-                            <ClipboardList className="w-3 h-3" /> Inscrições abertas
+                            <ClipboardList className="w-3 h-3" /> Inscrições
+                            abertas
                           </span>
                         )}
                       </div>
@@ -904,7 +939,12 @@ export default function HomePage() {
                         {a.descricao}
                       </p>
                       <div className="mt-5 flex items-center gap-2 text-parish-gold text-sm font-semibold">
-                        <span>{a.textoBotao || (vagasStatus && vagasStatus !== "esgotada" ? "Inscreva-se" : "Saiba mais")}</span>
+                        <span>
+                          {a.textoBotao ||
+                            (vagasStatus && vagasStatus !== "esgotada"
+                              ? "Inscreva-se"
+                              : "Saiba mais")}
+                        </span>
                         <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                       </div>
                       <div className="absolute bottom-0 left-0 right-0 h-1 bg-parish-gold scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
@@ -922,13 +962,20 @@ export default function HomePage() {
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-parish-navy-dark via-parish-navy to-parish-navy-light" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/25 z-10 group-hover:from-black/70 transition-all duration-500" />
-                <div className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-700 ease-out" style={{ backgroundImage: "url('/santamissa.jpg')" }} />
+                <div
+                  className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-700 ease-out"
+                  style={{ backgroundImage: "url('/santamissa.jpg')" }}
+                />
                 <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-6 text-center">
                   <div className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-parish-gold/30 transition-all duration-300">
                     <Church className="w-7 h-7 text-white" />
                   </div>
-                  <h3 className="font-playfair text-2xl font-bold text-white mb-2 leading-tight">Missas</h3>
-                  <p className="text-white/75 text-sm leading-relaxed max-w-[200px]">Horários de celebrações da semana</p>
+                  <h3 className="font-playfair text-2xl font-bold text-white mb-2 leading-tight">
+                    Missas
+                  </h3>
+                  <p className="text-white/75 text-sm leading-relaxed max-w-[200px]">
+                    Horários de celebrações da semana
+                  </p>
                   <div className="mt-5 flex items-center gap-2 text-parish-gold text-sm font-semibold">
                     <span>Ver horários</span>
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -943,13 +990,20 @@ export default function HomePage() {
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-parish-navy-dark via-parish-navy to-parish-navy-light" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/25 z-10 group-hover:from-black/70 transition-all duration-500" />
-                <div className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-700 ease-out" style={{ backgroundImage: "url('/sacramentos.jpg')" }} />
+                <div
+                  className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-700 ease-out"
+                  style={{ backgroundImage: "url('/sacramentos.jpg')" }}
+                />
                 <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-6 text-center">
                   <div className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-parish-gold/30 transition-all duration-300">
                     <Sparkles className="w-7 h-7 text-white" />
                   </div>
-                  <h3 className="font-playfair text-2xl font-bold text-white mb-2 leading-tight">Sacramentos</h3>
-                  <p className="text-white/75 text-sm leading-relaxed max-w-[200px]">Batismo, casamento e demais sacramentos</p>
+                  <h3 className="font-playfair text-2xl font-bold text-white mb-2 leading-tight">
+                    Sacramentos
+                  </h3>
+                  <p className="text-white/75 text-sm leading-relaxed max-w-[200px]">
+                    Batismo, casamento e demais sacramentos
+                  </p>
                   <div className="mt-5 flex items-center gap-2 text-parish-gold text-sm font-semibold">
                     <span>Saiba mais</span>
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -964,13 +1018,20 @@ export default function HomePage() {
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-parish-navy-dark via-parish-navy to-parish-navy-light" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/25 z-10 group-hover:from-black/70 transition-all duration-500" />
-                <div className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-700 ease-out" style={{ backgroundImage: "url('/pastorais.jpg')" }} />
+                <div
+                  className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-700 ease-out"
+                  style={{ backgroundImage: "url('/pastorais.jpg')" }}
+                />
                 <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-6 text-center">
                   <div className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-parish-gold/30 transition-all duration-300">
                     <Users className="w-7 h-7 text-white" />
                   </div>
-                  <h3 className="font-playfair text-2xl font-bold text-white mb-2 leading-tight">Pastorais e Movimentos</h3>
-                  <p className="text-white/75 text-sm leading-relaxed max-w-[200px]">Pastorais e movimentos da paróquia</p>
+                  <h3 className="font-playfair text-2xl font-bold text-white mb-2 leading-tight">
+                    Pastorais e Movimentos
+                  </h3>
+                  <p className="text-white/75 text-sm leading-relaxed max-w-[200px]">
+                    Pastorais e movimentos da paróquia
+                  </p>
                   <div className="mt-5 flex items-center gap-2 text-parish-gold text-sm font-semibold">
                     <span>Conheça</span>
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -1099,7 +1160,10 @@ export default function HomePage() {
 
                     {/* Conteúdo */}
                     <div className="flex-1 flex flex-col p-6">
-                      <Link href={`/projetos-sociais/${projeto.slug}`} className="block mb-2">
+                      <Link
+                        href={`/projetos-sociais/${projeto.slug}`}
+                        className="block mb-2"
+                      >
                         <h3 className="font-playfair text-lg font-bold text-parish-navy-dark group-hover:text-parish-gold transition-colors duration-200 line-clamp-2 leading-snug">
                           {projeto.name}
                         </h3>
@@ -1113,7 +1177,9 @@ export default function HomePage() {
                           <div className="w-6 h-6 rounded-md bg-parish-gold/10 flex items-center justify-center flex-shrink-0">
                             <MapPin className="w-3.5 h-3.5 text-parish-gold" />
                           </div>
-                          <span className="line-clamp-1">{projeto.location}</span>
+                          <span className="line-clamp-1">
+                            {projeto.location}
+                          </span>
                         </div>
                       )}
 
