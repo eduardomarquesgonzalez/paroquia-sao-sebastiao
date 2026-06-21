@@ -550,7 +550,7 @@ export default function HomePage() {
 
       {/* ─── DESTAQUES ─── */}
       {destaques.length > 0 && (
-        <section className="destaques-fade-in py-6 md:py-8 bg-parish-background">
+        <section className="destaques-fade-in py-3 md:py-4 bg-parish-background">
           <div className="container mx-auto px-4 lg:px-8">
             <DestaquesCarousel destaques={destaques} />
           </div>
